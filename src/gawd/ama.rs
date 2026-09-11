@@ -35,6 +35,12 @@ impl AmaMasterAgent {
     }
 
     pub fn solve(&self, goal: &str, workspace: &Path, version: &str) -> EaiResult<AmaMissionReport> {
+        let lower_goal = goal.to_lowercase();
+        // 🧪 Autonomous Task Decomposition (Rule 12 Check)
+        if (goal.len() > 150 || lower_goal.contains(" and then ") || lower_goal.contains(" finally ")) && !goal.contains("[STEP ") {
+             return self.solve_planned_mission(goal, workspace, version);
+        }
+
         let mut retry_count = 0;
         let mut current_goal = goal.to_string();
         let mut last_error = String::new();
@@ -88,6 +94,29 @@ impl AmaMasterAgent {
         }
 
         Err(crate::error::EaiError::Governance(format!("Recursive reasoning failed after 3 attempts. Last violation: {}", last_error)))
+    }
+
+    fn solve_planned_mission(&self, goal: &str, workspace: &Path, version: &str) -> EaiResult<AmaMissionReport> {
+        let plan = crate::gemi::engine::MissionPlanner::plan_mission(goal, workspace)?;
+        let mut all_interactions = Vec::new();
+        let mut all_agents = Vec::new();
+        let mut final_responses = Vec::new();
+
+        for (i, sub_goal) in plan.goals.iter().enumerate() {
+            let tagged_goal = format!("[STEP {}/{}]: {}", i + 1, plan.goals.len(), sub_goal);
+            let report = self.solve(&tagged_goal, workspace, version)?;
+            all_interactions.extend(report.interactions);
+            all_agents.extend(report.agents);
+            final_responses.push(report.final_answer);
+        }
+
+        Ok(AmaMissionReport {
+            goal: goal.to_string(),
+            status: "COMPLETE".to_string(),
+            agents: all_agents,
+            interactions: all_interactions,
+            final_answer: format!("PLANNED_MISSION_COMPLETE:\n\n{}", final_responses.join("\n\n---\n\n")),
+        })
     }
 
     pub fn generate_self_awareness_report(&self, workspace: &Path) -> EaiResult<String> {

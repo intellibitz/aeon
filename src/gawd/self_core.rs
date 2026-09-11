@@ -26,7 +26,7 @@ pub struct AeonAxiomRule {
 pub struct AlphaSelf;
 
 impl AlphaSelf {
-    pub const VERSION: &'static str = "0.1.2022701";
+    pub const VERSION: &'static str = "0.1.2022702";
     pub const CORE_PARADIGM: &'static str = "EAI (Exponential Intelligence for Any AI) - Intelligence Reflex & Execution Substrate";
 
     pub const AGENT_RULES: &[AeonAxiomRule] = &[
@@ -41,7 +41,7 @@ impl AlphaSelf {
         AeonAxiomRule { id: 9, title: "Full Autonomy & Permissions", imperative: "Agents have full permission for all designated file operations and command executions within their execution context." },
         AeonAxiomRule { id: 10, title: "Real Working Code Only", imperative: "No hard-coded mockup templates or placeholder code. Write real, functional, production-ready code only." },
         AeonAxiomRule { id: 11, title: "Anti-Hardcoding Mandate", imperative: "Absolute prohibition on hardcoding query-specific string matchers or keyword-based agent activation. Use dynamic Meta-Registries." },
-        AeonAxiomRule { id: 12, title: "Substrate Purity & Meta-Only Mandate", imperative: "Execution substrates must remain pure execution and protocol layers. Domain intelligence resides in dynamic models." },
+        AeonAxiomRule { id: 12, title: "Substrate Purity & Meta-Only Mandate", imperative: "Execution substrates must remain pure. Domain intelligence and autonomous task decomposition reside in dynamic models." },
         AeonAxiomRule { id: 13, title: "Clean Workspace & State Isolation", imperative: "Maintain clean workspace. Ephemeral scaffolding uses tempdirs or local git-ignored state." },
         AeonAxiomRule { id: 14, title: "Reality Check & Grounding", imperative: "If requests or assumptions are outside of verified reality, correct them objectively and guide execution." },
         AeonAxiomRule { id: 15, title: "Epistemic Chain of Truth", imperative: "Source code and empirical runtime results are the ultimate truth. Ground every conclusion in direct evidence." },

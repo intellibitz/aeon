@@ -3,7 +3,7 @@
 ## System Information
 
 * **Project Name**: `aeon`
-* **Current Engine Version**: `v0.1.2022701`
+* **Current Engine Version**: `v0.1.2022702`
 
 ## Architecture
 

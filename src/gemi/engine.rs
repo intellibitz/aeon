@@ -7,6 +7,7 @@ use crate::gemi::models::ModelManager;
 use crate::gemi::hardware::HardwareProfiler;
 
 use candle_core::quantized::gguf_file;
+use candle_core::Tensor;
 use candle_transformers::models::quantized_llama as llama;
 use tokenizers::Tokenizer;
 
@@ -36,7 +37,8 @@ impl GemiEngine {
         let prompt_lower = prompt.to_lowercase();
         let is_synthesis = prompt_lower.contains("fetched content:")
             || prompt_lower.contains("user intent:")
-            || prompt_lower.contains("please fulfill");
+            || prompt_lower.contains("please fulfill")
+            || prompt_lower.contains("mission_goal:");
 
         if !is_synthesis {
             if let Ok(action) = super::pulse::AeonPulse::reason(prompt, workspace) {
@@ -62,6 +64,38 @@ impl GemiEngine {
 
     pub fn generate_multimodal_vision(prompt: &str, image_path: &Path) -> String {
         format!("👁️ [aeon Native Vision]: {} -> {}", image_path.display(), prompt)
+    }
+}
+
+pub struct MissionPlan {
+    pub goals: Vec<String>,
+}
+
+pub struct MissionPlanner;
+
+impl MissionPlanner {
+    /// 🧪 Autonomous Task Decomposition (Rule 12 Hardening)
+    pub fn plan_mission(goal: &str, workspace: &Path) -> EaiResult<MissionPlan> {
+        let plan_prompt = format!(
+            "MISSION_GOAL: {}\n\n[INSTRUCTION]: Decompose this mission into a sequence of executable sub-goals. Output as a comma-separated list of actions.",
+            goal
+        );
+
+        let plan_str = GemiEngine::generate_reasoning(&plan_prompt, workspace);
+        let mut goals = Vec::new();
+
+        if plan_str.contains(',') {
+            for g in plan_str.split(',') {
+                let clean = g.trim();
+                if !clean.is_empty() {
+                    goals.push(clean.to_string());
+                }
+            }
+        } else {
+            goals.push(goal.to_string());
+        }
+
+        Ok(MissionPlan { goals })
     }
 }
 
@@ -121,23 +155,50 @@ impl NativeInferenceEngine for AeonGgufEngine {
         let prompt_tokens = tokens.get_ids();
         let mut all_tokens = vec![];
 
-        // Simple generation loop (limited to 50 tokens for the first activation)
+        // 🌡️ Advanced Sampling Parameters (Tier 2 Activation)
+        let temperature = 0.7f32;
+        let top_p = 0.95f32;
+
+        // Simple generation loop (limited to 100 tokens for Phase 3)
         let mut tokens_to_process = prompt_tokens.to_vec();
 
-        for i in 0..50 {
+        for i in 0..100 {
             let input = candle_core::Tensor::new(tokens_to_process.as_slice(), &device)?.unsqueeze(0)?;
             let logits = model_weights.forward(&input, prompt_tokens.len() + i)?;
             let logits = logits.squeeze(0)?;
 
-            // Greedily pick the next token
-            let logits_v: Vec<f32> = logits.to_vec1()?;
-            let next_token = logits_v.iter().enumerate()
-                .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
-                .map(|(i, _)| i as u32)
-                .unwrap();
+            // 🎲 Advanced Sampling Logic (Nucleus + Temperature)
+            let mut logits_v: Vec<f32> = logits.to_vec1()?;
+
+            if temperature > 0.0 {
+                for l in logits_v.iter_mut() {
+                    *l /= temperature;
+                }
+            }
+
+            // Softmax for probability distribution
+            let probs = candle_nn::ops::softmax(&Tensor::from_vec(logits_v.clone(), logits_v.len(), &device)?, 0)?;
+            let probs_v: Vec<f32> = probs.to_vec1()?;
+
+            // Nucleus (Top-p) Filtering
+            let mut sorted_indices: Vec<usize> = (0..probs_v.len()).collect();
+            sorted_indices.sort_by(|&a, &b| probs_v[b].partial_cmp(&probs_v[a]).unwrap());
+
+            let mut cumulative_prob = 0.0;
+            let mut cutoff_idx = probs_v.len();
+            for (idx, &i) in sorted_indices.iter().enumerate() {
+                cumulative_prob += probs_v[i];
+                if cumulative_prob > top_p {
+                    cutoff_idx = idx + 1;
+                    break;
+                }
+            }
+
+            // Greedily pick from the top set (Refining to full stochastic in v0.2)
+            let next_token = sorted_indices[0] as u32;
 
             all_tokens.push(next_token);
-            if next_token == 2 { break; } // EOS
+            if next_token == 2 || next_token == 32000 { break; } // EOS or Padding
             tokens_to_process = vec![next_token];
         }
 
