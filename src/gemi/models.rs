@@ -209,6 +209,29 @@ impl ModelManager {
         None
     }
 
+    /// Identifies the best suited model from the progressive ladder based on available RAM
+    pub fn identify_best_ladder_step() -> super::hardware::ModelLadderStep {
+        let ladder = HardwareProfiler::get_progressive_model_ladder();
+        ladder.last().cloned().expect("Progressive model ladder is empty")
+    }
+
+    /// Ensures that at least one reasoning model exists locally, matched to host hardware.
+    pub fn ensure_hardware_optimal_models(workspace: &Path) -> EaiResult<String> {
+        let existing = Self::list_models(workspace);
+        if existing.iter().any(|m| m.is_local && m.registry.contains("GGUF")) {
+            return Ok("Local reasoning models verified.".into());
+        }
+
+        eprintln!("🧠 [AEON] No local reasoning models detected. Provisioning optimal substrate for your hardware...");
+        let best_step = Self::identify_best_ladder_step();
+        eprintln!("🚀 [PROVISION] Selected: {} ({})", best_step.label, best_step.hf_repo);
+
+        let res = Self::install_model(best_step.hf_repo);
+        let _ = Self::set_selected_model(best_step.hf_repo);
+
+        Ok(format!("🤖 [Autonomous Model Provisioning]: {}", res))
+    }
+
     pub fn get_selected_model() -> Option<String> {
         let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
         let override_file = home.join(".aeon/selected_model_override.txt");
@@ -737,7 +760,8 @@ impl ModelManager {
         if target.starts_with("http://") || target.starts_with("https://") {
             let file_name = target.split('/').next_back().unwrap_or("model.gguf");
             let dest_path = models_dir.join(file_name);
-            match ureq::get(target).set("User-Agent", "AEON-Native-Engine/0.1").timeout(std::time::Duration::from_secs(300)).call() {
+            eprintln!("⬇️ [DOWNLOAD] Fetching model from {}...", target);
+            match ureq::get(target).set("User-Agent", "AEON-Native-Engine/0.1").timeout(std::time::Duration::from_secs(600)).call() {
                 Ok(resp) => {
                     if let Ok(mut file) = fs::File::create(&dest_path) {
                         let mut reader = resp.into_reader();
@@ -772,7 +796,8 @@ impl ModelManager {
             let mut success_url = String::new();
 
             for mirror_url in candidate_urls {
-                if let Ok(resp) = ureq::get(&mirror_url).set("User-Agent", "AEON-Native-Engine/0.1").timeout(std::time::Duration::from_secs(300)).call() {
+                eprintln!("📡 [MIRROR] Attempting {}...", mirror_url);
+                if let Ok(resp) = ureq::get(&mirror_url).set("User-Agent", "AEON-Native-Engine/0.1").timeout(std::time::Duration::from_secs(600)).call() {
                     if let Ok(mut file) = fs::File::create(&dest_path) {
                         let mut reader = resp.into_reader();
                         if let Ok(len) = std::io::copy(&mut reader, &mut file) {
@@ -797,29 +822,6 @@ impl ModelManager {
                 "Model download failed across all mirrors (AEON CDN, ModelScope, HuggingFace). Usage: 'aeon install_model <model_name_or_url>'".to_string()
             }
         }
-    }
-
-    #[allow(dead_code)]
-    pub fn auto_provision_model_for_intent(goal: &str, workspace: &Path) -> Option<String> {
-        let existing = Self::list_models(workspace);
-        if existing.iter().any(|m| m.is_local && m.registry.contains("GGUF")) {
-            return None;
-        }
-
-        let lower = goal.to_lowercase();
-        if lower.contains("download model") || lower.contains("pull model") || lower.contains("offline model") || lower.contains("install model") {
-            let target_model = if lower.contains("code") || lower.contains("rust") || lower.contains("bug") || lower.contains("python") {
-                "aeon-alpha/aeon-alpha-1.5b-instruct-v0.1-GGUF"
-            } else {
-                "aeon-alpha/aeon-alpha-1.5b-instruct-v0.1-GGUF"
-            };
-
-            let res = Self::install_model(target_model);
-            let _ = Self::set_selected_model(target_model);
-            return Some(format!("🤖 [Autonomous Model Provisioning]: {}", res));
-        }
-
-        None
     }
 
     pub fn spawn_background_hardware_model_provisioner(workspace: &Path) {

@@ -2,10 +2,8 @@
 // 100% Rust implementation for autonomous model governance under GAWD
 
 use std::path::Path;
-use std::fs;
-use crate::error::{EaiError, EaiResult};
+use crate::error::EaiResult;
 use crate::gemi::models::ModelManager;
-use crate::gemi::hardware::HardwareProfiler;
 
 pub struct ModelSupervisor;
 
@@ -57,30 +55,8 @@ impl ModelSupervisor {
         if !cloud_available && !valid_local_found {
             report.push_str(" [WARN] No active cloud models and no verified local models found. Triggering hardware profile inspection for autonomous model bootstrapping...\\n");
 
-            let hw = HardwareProfiler::get_profile();
-            report.push_str(&format!(" [HARDWARE] RAM: {}GB | VRAM: {}GB | Accel Active: {}\\n", hw.ram_gb, hw.gpu_vram_gb, hw.acceleration_active));
-
-            // Determine optimal model tier based on RAM/VRAM
-            let target_model_name = if hw.ram_gb >= 16 || hw.gpu_vram_gb >= 8 {
-                "aeon-alpha-7b-instruct.safetensors"
-            } else {
-                "aeon-alpha-1b-reflex.safetensors"
-            };
-
-            let home = std::env::var("HOME").or_else(|_| std::env::var("USERPROFILE")).unwrap_or_else(|_| ".".to_string());
-            let models_dir = std::path::PathBuf::from(home).join(".aeon").join("models");
-            let _ = fs::create_dir_all(&models_dir);
-            let target_path = models_dir.join(target_model_name);
-
-            if !target_path.is_file() {
-                report.push_str(&format!(" [PROVISION] Bootstrapping native base tensor weights to {:?}...\\n", target_path));
-                // Synthesize/bootstrap lightweight initial tensor weights for air-gapped operation
-                let baseline_weights = b"GGUF_AUTONOMOUS_REFLEX_SUBSTRATE_WEIGHTS_V1_0";
-                if fs::write(&target_path, baseline_weights).is_err() {
-                    return Err(EaiError::Governance(format!("Failed to bootstrap autonomous model weights at {:?}", target_path)));
-                }
-            }
-            report.push_str(&format!(" [SUCCESS] Autonomous model provisioned and verified at {:?}\\n", target_path));
+            let res = ModelManager::ensure_hardware_optimal_models(workspace)?;
+            report.push_str(&format!(" [SUCCESS] {}\\n", res));
         } else {
             report.push_str(" [SUCCESS] Model governance audit passed successfully.\\n");
         }
