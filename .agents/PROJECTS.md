@@ -3,7 +3,7 @@
 ## System Information
 
 * **Project Name**: `aeon`
-* **Current Engine Version**: `v0.1.2022687`
+* **Current Engine Version**: `v0.1.2022688`
 
 ## Architecture
 
@@ -48,6 +48,13 @@
 * **Pre-Execution Governance**: Inspects tool execution signatures prior to execution, blocking destructive commands (`rm -rf /`, raw disk formatting) and credential/secret leaks (`AEON_API_KEY`, `OPENAI_API_KEY`, `AWS_SECRET_ACCESS_KEY`, private keys).
 * **Audit Logging**: Logs every intent, governance check result, and tool invocation into `.aeon/audit.log`.
 * **State Verification**: Verifies that claimed action artifacts (written files, build status) actually exist and match technical specifications before completing tasks.
+
+## Substrate Evolution & Creator Protocols
+
+21. **Native Intent Meta-Execution Protocol**: When provided with a user request or intent, the agent delegates execution to the native `aeon` binary within the target workspace. If `aeon` encounters a failure or capability gap, the agent reports the pathological gap but NEVER triggers the Motion Rule. User intents must never modify the `aeon` substrate.
+22. **Creator Aspiration Rule**: When provided with a creator directive or architectural goal, the agent focuses on future `aeon` capabilities and long-term vision. Only creator aspirations trigger the **Motion Rule**, advancing `aeon` evolution one step forward upon successful compilation, audit, and deployment.
+23. **Motion Rule**: Triggered exclusively by Creator aspiration or directive: (1) Detect capability gap or architectural expansion requirement; (2) Synthesize production-ready native Rust code directly into the `aeon` core (`./src/`); (3) Compile and validate tests via `cargo test`; (4) Deploy via automated version increment and push.
+24. **Creator Agent Mandate**: Creator agents strictly build and improve the `aeon` substrate. They must never perform the final work or simulate execution themselves. Their only objective is to architect a smarter `aeon` engine capable of fulfilling the intent autonomously.
 
 ## Project Mechanics & Deployment Workflow
 
