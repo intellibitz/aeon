@@ -26,7 +26,7 @@ pub struct AeonAxiomRule {
 pub struct AlphaSelf;
 
 impl AlphaSelf {
-    pub const VERSION: &'static str = "0.1.2022704";
+    pub const VERSION: &'static str = "0.1.2022705";
     pub const CORE_PARADIGM: &'static str = "EAI (Exponential Intelligence for Any AI) - Intelligence Reflex & Execution Substrate";
 
     pub const AGENT_RULES: &[AeonAxiomRule] = &[
@@ -58,7 +58,7 @@ impl AlphaSelf {
         AeonAxiomRule { id: 28, title: "Full Delegation & Evolutionary Substrate Mandate", imperative: "AEON fully delegates deep reasoning to Tier 2 models and all specialized tooling to MCP." },
         AeonAxiomRule { id: 29, title: "Dependency & Configuration Meta Rule", imperative: "Any component requiring external assets is classified as Meta. Protocol-based capability discovery is mandatory." },
         AeonAxiomRule { id: 30, title: "Self-Evolution Axiom", imperative: "AEON source code exists only to improve and evolve AEON. It is a self-referential, dynamic intelligence substrate." },
-        AeonAxiomRule { id: 31, title: "Substrate Purity & Meta-Only Mandate", imperative: "Absolute prohibition on hardcoding domain-specific knowledge or static intent handlers. Swarm synthesis is strictly dynamic." },
+        AeonAxiomRule { id: 31, title: "Substrate Purity & Meta-Only Mandate", imperative: "Absolute prohibition on hardcoding domain-specific knowledge or static intent handlers. Swarm synthesis is strictly dynamic and neural." },
     ];
 
     pub const RULES: &[AeonAxiomRule] = &[
@@ -89,7 +89,7 @@ impl AlphaSelf {
         AeonAxiomRule { id: 28, title: "Full Delegation & Evolutionary Substrate Mandate", imperative: "AEON fully delegates deep reasoning to Tier 2 models and all specialized tooling to MCP." },
         AeonAxiomRule { id: 29, title: "Dependency & Configuration Meta Rule", imperative: "Any component requiring external assets is classified as Meta. Protocol-based capability discovery is mandatory." },
         AeonAxiomRule { id: 30, title: "Self-Evolution Axiom", imperative: "AEON source code exists only to improve and evolve AEON. It is a self-referential, dynamic intelligence substrate." },
-        AeonAxiomRule { id: 31, title: "Substrate Purity & Meta-Only Mandate", imperative: "Absolute prohibition on hardcoding domain-specific knowledge or static intent handlers. Swarm synthesis is strictly dynamic." },
+        AeonAxiomRule { id: 31, title: "Substrate Purity & Meta-Only Mandate", imperative: "Absolute prohibition on hardcoding domain-specific knowledge or static intent handlers. Swarm synthesis is strictly dynamic and neural." },
     ];
 
     pub const COMPONENTS: &[AeonComponentSpec] = &[

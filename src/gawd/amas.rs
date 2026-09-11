@@ -123,7 +123,8 @@ impl AmaSupervisor {
         let fleet_info: Vec<GawdAgentInfo> = agents.iter().map(|a| GawdAgentInfo {
             name: a.name(),
             provider: "AEON Local".into(),
-            url: "native://substrate".into()
+            url: "native://substrate".into(),
+            rank: a.rank()
         }).collect();
 
         // 🚀 3. Cluster Consensus Protocol: Broadcast blackboard to high-tier peers
@@ -147,12 +148,20 @@ impl AmaSupervisor {
             });
         }
 
-        // 5. Final Swarm Consensus Pass
+        // 🚀 5. Weighted Swarm Consensus Pass (Rule 31 Hardening)
         let final_state = blackboard.lock().unwrap();
         if !final_state.is_empty() {
+            // Aggregate agent outputs weighted by rank and node trust
+            let mut weighted_wisdom = String::new();
+            for (agent_name, output) in final_state.iter() {
+                if let Some(info) = fleet_info.iter().find(|i| &i.name == agent_name) {
+                    weighted_wisdom.push_str(&format!("[AGENT: {} (Rank: {:.2})] {}\n", agent_name, info.rank, output));
+                }
+            }
+
             let consensus_prompt = format!(
-                "MISSION_GOAL: {}\n\n[BLACKBOARD_STATE]:\n{:?}\n\n[INSTRUCTION]: Resolve conflicts and synthesize a unified high-fidelity mission answer.",
-                goal, *final_state
+                "MISSION_GOAL: {}\n\n[WEIGHTED_WISDOM]:\n{}\n\n[INSTRUCTION]: Resolve conflicts using rank-weighted priority and synthesize a unified high-fidelity mission answer.",
+                goal, weighted_wisdom
             );
 
             if let Ok(synthesized) = crate::gemi::pulse::AeonPulse::reason(&consensus_prompt, workspace) {
@@ -167,7 +176,7 @@ impl AmaSupervisor {
                     sender: "Blackboard".into(),
                     recipient: "AMA-Master".into(),
                     action: "STATE_CONVERGENCE".into(),
-                    payload: format!("Converged knowledge from {} agents.", final_state.len()),
+                    payload: format!("Converged knowledge from {} agents (Unweighted).", final_state.len()),
                 });
             }
         }

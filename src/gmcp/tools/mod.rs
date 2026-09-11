@@ -179,6 +179,7 @@ impl ToolRegistry {
                 name: parts[0].to_string(),
                 description: parts[1].to_string(),
                 categories: parts[2].split(',').map(|s| s.trim().to_string()).collect(),
+                base_rank: 0.8, // Default rank for dynamic registration
             };
 
             crate::gawd::agents::AgentMetaRegistry::global().register_agent(profile);
@@ -210,6 +211,16 @@ impl ToolRegistry {
                 if r.name.contains("agent") || r.name.contains("swarm") {
                     report.push_str(&format!("- [REMOTE] {}: {}\\n", r.name, r.description));
                 }
+            }
+            Ok(report)
+        });
+
+        Self::register_meta_tool(&mut tools, "meta_rank_agents", "Report current agent expertise hierarchy", MetaCategory::IntelligenceBridge, |_arg, _ws| {
+            let registry = crate::gawd::agents::AgentMetaRegistry::global();
+            let agents = registry.list_agents();
+            let mut report = "AEON Expertise Hierarchy:\\n\\n".to_string();
+            for a in agents {
+                report.push_str(&format!("- [MASTER] {} (Base Rank: {:.2}): {}\\n", a.name, a.base_rank, a.description));
             }
             Ok(report)
         });
