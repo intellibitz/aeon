@@ -112,7 +112,7 @@ impl ModelManager {
             return None;
         }
 
-        let ram_budget_gb = (hw.ram_gb as f32 - 2.0).max(1.0);
+        let ram_budget_gb = (hw.available_ram_gb as f32 - 1.0).max(0.5);
         let vram_budget_gb = hw.gpu_vram_gb as f32;
 
         let mut scored_models: Vec<(f32, ModelInfo)> = Vec::new();

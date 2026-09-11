@@ -9,6 +9,7 @@ pub struct HardwareProfile {
     pub cpu_brand: String,
     pub gpu_info: String,
     pub ram_gb: usize,
+    pub available_ram_gb: usize,
     pub gpu_vram_gb: usize,
     pub acceleration_active: bool,
     pub native_acceleration: String,
@@ -27,6 +28,7 @@ impl HardwareProfiler {
     pub fn get_profile() -> HardwareProfile {
         let (cpus, _) = Self::profile();
         let ram_gb = Self::determine_total_ram_gb();
+        let available_ram_gb = Self::determine_available_ram_gb();
         let gpu_vram_gb = Self::determine_gpu_vram_gb();
 
         // 1. Direct Interrogation via Candle Substrate
@@ -46,6 +48,7 @@ impl HardwareProfiler {
             cpu_brand: Self::get_cpu_brand(),
             gpu_info: gpu_display,
             ram_gb,
+            available_ram_gb,
             gpu_vram_gb,
             acceleration_active,
             native_acceleration: native_accel,
@@ -208,6 +211,23 @@ impl HardwareProfiler {
             return 16; // Windows Meta Interrogation Required
         }
         8
+    }
+
+    pub fn determine_available_ram_gb() -> usize {
+        if cfg!(target_os = "linux") {
+            if let Ok(content) = std::fs::read_to_string("/proc/meminfo") {
+                for line in content.lines() {
+                    if line.starts_with("MemAvailable:") {
+                        let parts: Vec<&str> = line.split_whitespace().collect();
+                        if let Some(kb_str) = parts.get(1)
+                            && let Ok(kb) = kb_str.parse::<usize>() {
+                            return kb / (1024 * 1024);
+                        }
+                    }
+                }
+            }
+        }
+        Self::determine_total_ram_gb() // Fallback
     }
 
     pub fn get_progressive_model_ladder() -> Vec<ModelLadderStep> {

@@ -136,4 +136,24 @@ impl ProtocolKnowledgeBase {
 
         Ok(distilled_path)
     }
+
+    /// Stages a reasoning pair for autonomous distillation into local reflexes
+    pub fn stage_distillation_pair(intent: &str, action: &str, workspace: &Path) -> EaiResult<()> {
+        let aeon_dir = workspace.join(".aeon");
+        if !aeon_dir.exists() {
+            let _ = std::fs::create_dir_all(&aeon_dir);
+        }
+        let distillation_file = aeon_dir.join("distillation_staged.jsonl");
+        let entry = serde_json::json!({
+            "intent": intent,
+            "action": action,
+            "timestamp": std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0),
+        });
+
+        if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(distillation_file) {
+            use std::io::Write;
+            let _ = writeln!(f, "{}", entry);
+        }
+        Ok(())
+    }
 }

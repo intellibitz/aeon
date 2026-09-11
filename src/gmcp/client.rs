@@ -178,9 +178,18 @@ impl GmcpClient {
         let _ = reader.read_line(&mut line);
 
         // 🔋 Dynamic Tool Call Execution
-        let params = match serde_json::from_str::<serde_json::Value>(args_json) {
+        let mut context_aware_args = args_json.to_string();
+        if tool_name == "reason" {
+            let context = Self::gather_workspace_context();
+            context_aware_args = json!({
+                "intent": args_json,
+                "workspace_context": context
+            }).to_string();
+        }
+
+        let params = match serde_json::from_str::<serde_json::Value>(&context_aware_args) {
             Ok(v) => v,
-            Err(_) => json!({ "input": args_json })
+            Err(_) => json!({ "input": &context_aware_args })
         };
 
         let call_req = json!({
@@ -233,9 +242,18 @@ impl GmcpClient {
         }
 
         // 2. Call Tool via POST
-        let params = match serde_json::from_str::<serde_json::Value>(args_json) {
+        let mut context_aware_args = args_json.to_string();
+        if tool_name == "reason" {
+            let context = Self::gather_workspace_context();
+            context_aware_args = json!({
+                "intent": args_json,
+                "workspace_context": context
+            }).to_string();
+        }
+
+        let params = match serde_json::from_str::<serde_json::Value>(&context_aware_args) {
             Ok(v) => v,
-            Err(_) => json!({ "input": args_json })
+            Err(_) => json!({ "input": &context_aware_args })
         };
 
         let call_req = json!({
@@ -262,20 +280,37 @@ impl GmcpClient {
 
     pub fn scout_reasoning_remotes() -> Vec<String> {
         let mut remotes = Vec::new();
+        let registry = Self::fetch_global_registry();
         let config_path = Self::get_config_path();
+
         if let Ok(content) = fs::read_to_string(&config_path) {
             if let Ok(config) = serde_json::from_str::<McpConfig>(&content) {
-                for (name, srv) in config.mcp_servers {
-                    // 🚀 Intelligence Scout: Look for servers that explicitly offer high-tier reasoning
-                    // Priority 1: Cloud-bridged servers
-                    if srv.command.contains("cloud") || srv.command.contains("openai") || srv.command.contains("google") || srv.command.contains("anthropic") {
-                        remotes.insert(0, name);
-                    } else {
-                        remotes.push(name);
+                for (name, _srv) in config.mcp_servers {
+                    // 🚀 Protocol-Based Scouting: Check registry for intelligence classification
+                    if let Some(entry) = registry.iter().find(|e| e.name == name) {
+                        if entry.category == "intelligence" || entry.category == "reasoning" {
+                            remotes.insert(0, name);
+                            continue;
+                        }
                     }
+                    remotes.push(name);
                 }
             }
         }
         remotes
+    }
+
+    fn gather_workspace_context() -> serde_json::Value {
+        let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+        let src_count = std::fs::read_dir(cwd.join("src")).map(|d| d.count()).unwrap_or(0);
+        let hardware = crate::gemi::hardware::HardwareProfiler::get_profile();
+
+        json!({
+            "working_directory": cwd.display().to_string(),
+            "source_file_count": src_count,
+            "engine_version": crate::AEON_VERSION,
+            "available_ram_gb": hardware.available_ram_gb,
+            "gpu_acceleration": hardware.acceleration_active
+        })
     }
 }

@@ -99,8 +99,12 @@ impl AmaMasterAgent {
         // 3. Memory persistence (Rule 13)
         crate::sandbox::manager::AeonMemory::save_interaction(workspace, goal, &res.final_answer);
 
-        // 4. Success check for Substrate Evolution (Rule 16)
+        // 4. Autonomous Distillation (Rule 21): Capture learned wisdom from Power-Tier remotes
         for msg in &res.interactions {
+            if msg.action.contains("power_reason") && !msg.payload.contains("[FAIL]") {
+                let _ = super::pkb::ProtocolKnowledgeBase::stage_distillation_pair(goal, &res.final_answer, workspace);
+            }
+
             if msg.sender == "AeonUniversalSubstrateAgent" {
                 if msg.payload.contains("VIOLATION") || msg.payload.contains("FAILURE") {
                      crate::sandbox::manager::AeonAuditLogger::log_event(workspace, "TOOL_FAILURE", &msg.payload);
