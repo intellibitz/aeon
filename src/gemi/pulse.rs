@@ -14,10 +14,29 @@ static REFLEX_CACHE: Lazy<Arc<Mutex<HashMap<String, String>>>> = Lazy::new(|| {
     Arc::new(Mutex::new(HashMap::new()))
 });
 
+static CURRENT_FINGERPRINT: Lazy<Arc<Mutex<String>>> = Lazy::new(|| {
+    Arc::new(Mutex::new(String::new()))
+});
+
 impl AeonPulse {
     /// Pure Neural Intent Resolution
     pub fn reason(prompt: &str, workspace: &Path) -> Result<String> {
         let prompt_trimmed = prompt.trim();
+
+        let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
+        let global_dir = home.join(".aeon");
+
+        // 🧠 Neural Synchronization (Cache Invalidation)
+        {
+            let fingerprint = AeonAlphaModel::get_model_fingerprint(&global_dir);
+            let mut current = CURRENT_FINGERPRINT.lock().unwrap();
+            if *current != fingerprint {
+                eprintln!("🧠 [Tier 0 Reflex] Neural substrate evolved. Invalidating cache...");
+                *current = fingerprint;
+                let mut cache = REFLEX_CACHE.lock().unwrap();
+                cache.clear();
+            }
+        }
 
         // ⚡ Sub-100μs Reflex Cache
         {

@@ -26,7 +26,7 @@ impl AeonAlphaModel {
     pub fn load(global_dir: &Path) -> Result<Self> {
         let weights_path = global_dir.join("models/aeon-alpha.safetensors");
         if !weights_path.exists() {
-            return Err(anyhow!("AEON-Alpha weights not found at {}", weights_path.display()));
+            return Err(anyhow!("AEON-Alpha weights not found"));
         }
 
         let device = crate::gemi::hardware::HardwareProfiler::get_candle_device();
@@ -128,10 +128,21 @@ impl AeonAlphaModel {
             }
         }
 
+        // 🚀 Atomic Model Save (Rule 13 Hardening)
         let weights_path = global_dir.join("models/aeon-alpha.safetensors");
-        varmap.save(weights_path)?;
+        let tmp_path = weights_path.with_extension("tmp");
+        varmap.save(&tmp_path)?;
+        std::fs::rename(tmp_path, weights_path)?;
 
         Ok(format!("Autonomous Distillation Complete. Retrained on {} samples with Dynamic Intent Surface.", samples.len()))
+    }
+
+    pub fn get_model_fingerprint(global_dir: &Path) -> String {
+        let weights_path = global_dir.join("models/aeon-alpha.safetensors");
+        if let Ok(meta) = std::fs::metadata(weights_path) {
+            return format!("{:?}", meta.modified().unwrap());
+        }
+        "missing".to_string()
     }
 
     pub fn predict_intent(&self, prompt: &str) -> Result<String> {
@@ -200,6 +211,19 @@ impl AeonAlphaModel {
 
     fn get_semantic_anchor(word: &str) -> Vec<f32> {
         let mut anchor = vec![0.0f32; Self::DIM];
+
+        // 🚀 Adaptive Semantic Anchors: Query registry for domain specialist keywords
+        let registry = crate::gawd::agents::AgentMetaRegistry::global();
+        let agents = registry.list_agents();
+        for agent in agents {
+            if agent.semantic_anchors.iter().any(|a| a == word) {
+                 // Map to agent-specific segment (starting from DIM 80+)
+                 let offset = 80 + (agent.name.len() % 40);
+                 anchor[offset] = 1.0;
+                 return anchor;
+            }
+        }
+
         let category = match word {
             "status" | "health" | "state" | "check" | "hardware" | "system" | "report" => 0,
             "version" | "ver" | "build" | "engine" | "revision" => 1,

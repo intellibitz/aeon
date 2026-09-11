@@ -179,6 +179,7 @@ impl ToolRegistry {
                 name: parts[0].to_string(),
                 description: parts[1].to_string(),
                 categories: parts[2].split(',').map(|s| s.trim().to_string()).collect(),
+                semantic_anchors: Vec::new(),
                 base_rank: 0.8, // Default rank for dynamic registration
             };
 

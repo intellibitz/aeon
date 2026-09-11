@@ -29,6 +29,7 @@ pub struct AgentProfile {
     pub name: String,
     pub description: String,
     pub categories: Vec<String>,
+    pub semantic_anchors: Vec<String>,
     pub base_rank: f32,
 }
 
@@ -112,12 +113,14 @@ impl AgentMetaRegistry {
             name: "DevOpsAgent".into(),
             description: "Software engineering, systems architecture, and repository management.".into(),
             categories: vec!["code".into(), "rust".into(), "git".into(), "system".into()],
+            semantic_anchors: vec!["build".into(), "test".into(), "deploy".into(), "compile".into()],
             base_rank: 0.9,
         });
         agents.push(AgentProfile {
             name: "AgriTechAgent".into(),
             description: "Precision agriculture, soil science, and crop nutrient management.".into(),
             categories: vec!["soil".into(), "crop".into(), "nutrient".into(), "agri".into()],
+            semantic_anchors: vec!["irrigation".into(), "fertilizer".into(), "harvest".into()],
             base_rank: 0.85,
         });
     }
@@ -265,5 +268,19 @@ mod tests {
             data.insert("TestAgent".into(), "Converged".into());
         }
         assert!(data.contains_key("TestAgent"));
+    }
+
+    #[test]
+    fn test_semantic_anchors() {
+        let registry = AgentMetaRegistry::global();
+        registry.register_agent(AgentProfile {
+            name: "AnchorAgent".into(),
+            description: "Test".into(),
+            categories: Vec::new(),
+            semantic_anchors: vec!["quantum".into()],
+            base_rank: 0.5,
+        });
+        let agents = registry.list_agents();
+        assert!(agents.iter().any(|a| a.semantic_anchors.contains(&"quantum".to_string())));
     }
 }
