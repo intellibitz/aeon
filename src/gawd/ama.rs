@@ -97,17 +97,33 @@ impl AmaMasterAgent {
     }
 
     fn solve_planned_mission(&self, goal: &str, workspace: &Path, version: &str) -> EaiResult<AmaMissionReport> {
-        let plan = crate::gemi::engine::MissionPlanner::plan_mission(goal, workspace)?;
+        let mut plan = crate::gemi::engine::MissionPlanner::plan_mission(goal, workspace)?;
         let mut all_interactions = Vec::new();
         let mut all_agents = Vec::new();
         let mut final_responses = Vec::new();
 
-        for (i, sub_goal) in plan.goals.iter().enumerate() {
-            let tagged_goal = format!("[STEP {}/{}]: {}", i + 1, plan.goals.len(), sub_goal);
+        let mut current_step = 0;
+        while current_step < plan.goals.len() {
+            let sub_goal = &plan.goals[current_step];
+            let tagged_goal = format!("[STEP {}/{}]: {}", current_step + 1, plan.goals.len(), sub_goal);
             let report = self.solve(&tagged_goal, workspace, version)?;
-            all_interactions.extend(report.interactions);
-            all_agents.extend(report.agents);
-            final_responses.push(report.final_answer);
+
+            all_interactions.extend(report.interactions.clone());
+            all_agents.extend(report.agents.clone());
+            final_responses.push(report.final_answer.clone());
+
+            // 🧪 Dynamic Plan Mutation: Check for failure or gap in the last step
+            if report.final_answer.contains("FAILURE") || report.final_answer.contains("GAP") {
+                crate::sandbox::manager::AeonAuditLogger::log_event(workspace, "PLAN_MUTATION", &format!("Refining plan due to step {} failure.", current_step + 1));
+
+                let blackboard_state = format!("LATEST_OUTCOME: {}", report.final_answer);
+                if let Ok(new_plan) = crate::gemi::engine::MissionPlanner::refine_plan(goal, &blackboard_state, workspace) {
+                    plan = new_plan;
+                    // Reset or adjust steps based on new plan (for now we just continue from next)
+                }
+            }
+
+            current_step += 1;
         }
 
         Ok(AmaMissionReport {

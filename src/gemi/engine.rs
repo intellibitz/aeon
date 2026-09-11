@@ -97,6 +97,15 @@ impl MissionPlanner {
 
         Ok(MissionPlan { goals })
     }
+
+    /// 🔄 Dynamic Plan Mutation (Tier 2 Hardening)
+    pub fn refine_plan(original_goal: &str, blackboard_state: &str, workspace: &Path) -> EaiResult<MissionPlan> {
+        let refine_prompt = format!(
+            "ORIGINAL_GOAL: {}\nCURRENT_STATE: {}\n\n[INSTRUCTION]: A mid-mission change has occurred. Re-synthesize the remaining steps to achieve the goal efficiently.",
+            original_goal, blackboard_state
+        );
+        Self::plan_mission(&refine_prompt, workspace)
+    }
 }
 
 #[cfg(test)]
@@ -159,10 +168,10 @@ impl NativeInferenceEngine for AeonGgufEngine {
         let temperature = 0.7f32;
         let top_p = 0.95f32;
 
-        // Simple generation loop (limited to 100 tokens for Phase 3)
+        // Simple generation loop (limited to 512 tokens for Phase 4)
         let mut tokens_to_process = prompt_tokens.to_vec();
 
-        for i in 0..100 {
+        for i in 0..512 {
             let input = candle_core::Tensor::new(tokens_to_process.as_slice(), &device)?.unsqueeze(0)?;
             let logits = model_weights.forward(&input, prompt_tokens.len() + i)?;
             let logits = logits.squeeze(0)?;
