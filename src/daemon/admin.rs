@@ -101,10 +101,8 @@ impl AeonAdmin {
         if readme_path.exists() {
             let readme_content = fs::read_to_string(&readme_path)?;
             let mut updated = Vec::new();
-            let badge_pattern = "https://img.shields.io/badge/version-v";
             for line in readme_content.lines() {
-                if line.contains(badge_pattern) {
-                    // Reconstruct the badge line
+                if line.contains("https://img.shields.io/badge/version-v") {
                     let updated_line = format!("![AEON Version](https://img.shields.io/badge/version-v{}-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)", version);
                     updated.push(updated_line);
                 } else {
@@ -132,9 +130,38 @@ impl AeonAdmin {
         Ok(version.to_string())
     }
 
-    /// Version Synchronization (Rule 1) - Deprecated in favor of enforce_version_consistency
-    pub fn sync_version(workspace: &Path) -> EaiResult<String> {
-        Self::enforce_version_consistency(workspace)
+    /// Checks if all files are in sync with the current Cargo.toml version.
+    /// Does not modify files; returns an error if a mismatch is detected.
+    pub fn verify_version_alignment(workspace: &Path) -> EaiResult<()> {
+        let cargo_toml_path = workspace.join("Cargo.toml");
+        let content = fs::read_to_string(&cargo_toml_path)?;
+
+        let version = content.lines()
+            .find(|l| l.trim().starts_with("version = \""))
+            .and_then(|l| l.split('"').nth(1))
+            .ok_or_else(|| EaiError::Config("Could not find version in Cargo.toml".into()))?;
+
+        // Check README
+        let readme_path = workspace.join("README.md");
+        if readme_path.exists() {
+            let readme_content = fs::read_to_string(&readme_path)?;
+            let expected_badge = format!("version-v{}-blue.svg", version);
+            if !readme_content.contains(&expected_badge) {
+                return Err(EaiError::Config(format!("README.md version badge is out of sync with Cargo.toml (v{}). Run 'aeon admin sync'.", version)));
+            }
+        }
+
+        // Check PROJECTS.md
+        let projects_path = workspace.join(".agents/PROJECTS.md");
+        if projects_path.exists() {
+            let projects_content = fs::read_to_string(&projects_path)?;
+            let expected_line = format!("* **Current Engine Version**: `v{}`", version);
+            if !projects_content.contains(&expected_line) {
+                return Err(EaiError::Config(format!("PROJECTS.md version is out of sync with Cargo.toml (v{}). Run 'aeon admin sync'.", version)));
+            }
+        }
+
+        Ok(())
     }
 
     pub fn execute_release(workspace: &Path) -> EaiResult<String> {
@@ -156,5 +183,18 @@ impl AeonAdmin {
         let res = crate::daemon::evolution::EvolutionManager::evolve_substrate(workspace)?;
         let _ = Self::execute_release(workspace)?;
         Ok(res)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_version_alignment_enforcement() {
+        let workspace = Path::new(".");
+        // This test ensures that the build fails if developer forgot to run 'aeon admin sync'
+        let result = AeonAdmin::verify_version_alignment(workspace);
+        assert!(result.is_ok(), "Version mismatch detected between Cargo.toml and documentation. Run 'cargo run -- admin sync' to fix.");
     }
 }
