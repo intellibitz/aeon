@@ -1,6 +1,6 @@
 # aeon
 
-![AEON Version](https://img.shields.io/badge/version-v0.1.2022684-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
+![AEON Version](https://img.shields.io/badge/version-v0.1.2022715-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
 
 **aeon** is a Rust-based local-first AI execution engine. It provides a sub-2ms CLI launcher that proxies commands to a persistent background daemon for zero-latency tool execution and agent orchestration.
 
