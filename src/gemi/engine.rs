@@ -39,7 +39,15 @@ impl GemiEngine {
             }
         }
 
-        // 3. Tier 2: Native Reasoning via Candle Tensors
+        // 3. Tier 2 Meta-Intelligence Check: Delegate if complex and Power-Tier MCP configured
+        if prompt_lower.len() > 200 || prompt_lower.contains("complex") || prompt_lower.contains("refactor") {
+             let power_res = crate::gmcp::tools::ToolRegistry::execute_tool("power_reason", prompt, workspace);
+             if !power_res.contains("[FAIL]") && !power_res.contains("[CAPABILITY_GAP]") {
+                 return power_res;
+             }
+        }
+
+        // 4. Tier 2: Native Reasoning via Candle Tensors
         let engine = AeonCandleEngine;
         match engine.run_inference(prompt) {
             Ok(res) => res,

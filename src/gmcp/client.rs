@@ -259,4 +259,23 @@ impl GmcpClient {
             Err(e) => format!("[FAIL] MCP Web Error: POST {} failed: {}", endpoint, e),
         }
     }
+
+    pub fn scout_reasoning_remotes() -> Vec<String> {
+        let mut remotes = Vec::new();
+        let config_path = Self::get_config_path();
+        if let Ok(content) = fs::read_to_string(&config_path) {
+            if let Ok(config) = serde_json::from_str::<McpConfig>(&content) {
+                for (name, srv) in config.mcp_servers {
+                    // 🚀 Intelligence Scout: Look for servers that explicitly offer high-tier reasoning
+                    // Priority 1: Cloud-bridged servers
+                    if srv.command.contains("cloud") || srv.command.contains("openai") || srv.command.contains("google") || srv.command.contains("anthropic") {
+                        remotes.insert(0, name);
+                    } else {
+                        remotes.push(name);
+                    }
+                }
+            }
+        }
+        remotes
+    }
 }

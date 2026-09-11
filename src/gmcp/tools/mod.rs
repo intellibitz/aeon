@@ -33,6 +33,7 @@ pub enum MetaCategory {
     WorkspaceIo,
     McpProxy,
     WasmReflex,
+    IntelligenceBridge,
 }
 
 /// Generic Meta-Tool Struct
@@ -162,6 +163,24 @@ impl ToolRegistry {
             let package = parts.get(1).unwrap_or(&name);
             let res = GmcpClient::auto_configure_server(name, package);
             Ok(format!("MCP Server '{}' configuration status: {}", name, res))
+        });
+
+        // 5. Meta-Intelligence Bridge Primitives
+        Self::register_meta_tool(&mut tools, "power_reason", "Delegate complex reasoning to Power-Tier MCP remotes", MetaCategory::IntelligenceBridge, |arg, _ws| {
+            if arg.trim().is_empty() {
+                return Err(EaiError::Protocol("Usage: power_reason <complex_intent>".into()));
+            }
+
+            // 🔍 Meta-Scout: Identify a reasoning-capable MCP server
+            let remotes = GmcpClient::scout_reasoning_remotes();
+            if let Some(best_remote) = remotes.first() {
+                let res = GmcpClient::execute_external_tool(best_remote, "reason", arg);
+                if !res.contains("[FAIL]") {
+                    return Ok(res);
+                }
+            }
+
+            Err(EaiError::Protocol("No Power-Tier reasoning remotes configured or available. AEON local reasoning active.".into()))
         });
 
         // 🚢 DYNAMIC DISCOVERY: Synthesized Native Reflexes (Rule 11)
