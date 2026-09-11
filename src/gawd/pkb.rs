@@ -73,7 +73,7 @@ impl ProtocolKnowledgeBase {
         let agents = super::agents::GawdAgentFleet::synthesize_fleet(intent);
         for agent in agents {
             if agent.name() == "SafetyAgent" || agent.name() == "ContextAgent" {
-                let bb = std::sync::Arc::new(std::sync::Mutex::new(std::collections::HashMap::new()));
+                let bb = std::sync::Arc::new(std::sync::Mutex::new(super::agents::HighDensityContextStore::new(10)));
                 let res = agent.execute(intent, workspace, &bb)?;
                 pair.push_str(&format!("REFLEX_GUARD ({}): {}\n", agent.name(), res));
             }

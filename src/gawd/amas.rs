@@ -126,8 +126,8 @@ impl AmaSupervisor {
     }
 
     pub fn supervise_mission(goal: &str, workspace: &Path) -> (Vec<A2AMessage>, Vec<GawdAgentInfo>) {
-        // 1. Initialize Mission Blackboard
-        let blackboard: MissionBlackboard = Arc::new(Mutex::new(HashMap::new()));
+        // 1. Initialize Mission Blackboard (High-Density Context Store with 1024 entry lease cap)
+        let blackboard: MissionBlackboard = Arc::new(Mutex::new(super::agents::HighDensityContextStore::new(1024)));
 
         // 2. Dynamic Fleet Synthesis
         let agents = GawdAgentFleet::synthesize_fleet(goal);
