@@ -141,6 +141,10 @@ impl GmcpClient {
     }
 
     fn proxy_call(srv: &McpServerConfig, tool_name: &str, args_json: &str) -> String {
+        if srv.command.starts_with("http") {
+            return Self::proxy_web_call(srv, tool_name, args_json);
+        }
+
         let mut child = match Command::new(&srv.command)
             .args(&srv.args)
             .stdin(Stdio::piped())
@@ -200,5 +204,59 @@ impl GmcpClient {
         }
 
         "[FAIL] MCP Error: No response from server substrate.".to_string()
+    }
+
+    fn proxy_web_call(srv: &McpServerConfig, tool_name: &str, args_json: &str) -> String {
+        let base_url = srv.command.trim_end_matches('/');
+
+        // 1. Establish SSE Connection to get the message endpoint
+        let sse_url = format!("{}/sse", base_url);
+        let resp = match ureq::get(&sse_url).call() {
+            Ok(r) => r,
+            Err(e) => return format!("[FAIL] MCP Web Error: Failed to connect to {}: {}", sse_url, e),
+        };
+
+        let mut reader = BufReader::new(resp.into_reader());
+        let mut endpoint = format!("{}/messages", base_url);
+
+        let mut line = String::new();
+        while let Ok(len) = reader.read_line(&mut line) {
+            if len == 0 { break; }
+            if line.starts_with("event: endpoint") {
+                line.clear();
+                if reader.read_line(&mut line).is_ok() && line.starts_with("data: ") {
+                    endpoint = format!("{}{}", base_url, line.trim_start_matches("data: ").trim());
+                    break;
+                }
+            }
+            line.clear();
+        }
+
+        // 2. Call Tool via POST
+        let params = match serde_json::from_str::<serde_json::Value>(args_json) {
+            Ok(v) => v,
+            Err(_) => json!({ "input": args_json })
+        };
+
+        let call_req = json!({
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "tools/call",
+            "params": {
+                "name": tool_name,
+                "arguments": params
+            }
+        });
+
+        match ureq::post(&endpoint).send_json(call_req) {
+            Ok(resp) => {
+                let v: serde_json::Value = resp.into_json().unwrap_or(json!({}));
+                if let Some(content) = v.get("result").and_then(|r| r.get("content")).and_then(|c| c.get(0)).and_then(|i| i.get("text")).and_then(|t| t.as_str()) {
+                    return content.to_string();
+                }
+                format!("🔌 [MCP Web Response]: {:?}", v)
+            },
+            Err(e) => format!("[FAIL] MCP Web Error: POST {} failed: {}", endpoint, e),
+        }
     }
 }

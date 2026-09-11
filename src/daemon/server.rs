@@ -103,8 +103,15 @@ impl AmaDaemon {
             GmcpServer::start_tcp_server(workspace_gmcp, gmcp_port, crate::AEON_VERSION.to_string());
         });
 
+        let workspace_gmcp_http = workspace.clone();
+        let gmcp_http_port = cfg.gmcp_http_port;
+        // 3. Spawn GMCP HTTP/SSE Server Thread (Port 9093 / Dynamic)
+        thread::spawn(move || {
+            GmcpServer::start_http_server(workspace_gmcp_http, gmcp_http_port);
+        });
+
         let udp_port = cfg.udp_discovery_port;
-        // 3. Spawn A2A Cluster UDP Discovery Listener Thread (Port 9092 / Dynamic)
+        // 4. Spawn A2A Cluster UDP Discovery Listener Thread (Port 9092 / Dynamic)
         thread::spawn(move || {
             Self::start_udp_discovery_server(udp_port, gmcp_port);
         });

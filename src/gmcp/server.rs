@@ -54,6 +54,75 @@ impl GmcpServer {
             });
         }
     }
+
+    pub fn start_http_server(workspace: PathBuf, port: u16) {
+        let addr = format!("0.0.0.0:{}", port);
+        let listener = TcpListener::bind(&addr).expect("Failed to bind GMCP HTTP server");
+        eprintln!("🔌 [GMCP HTTP/SSE] Substrate active on {}", addr);
+
+        for stream in listener.incoming() {
+            let mut stream = stream.expect("GMCP HTTP Error");
+            let workspace = workspace.clone();
+            let server = GmcpProtocolHandler;
+
+            thread::spawn(move || {
+                let mut reader = BufReader::new(&mut stream);
+                let mut first_line = String::new();
+                if reader.read_line(&mut first_line).is_err() { return; }
+
+                let parts: Vec<&str> = first_line.split_whitespace().collect();
+                if parts.len() < 2 { return; }
+                let method = parts[0];
+                let path = parts[1];
+
+                if method == "GET" && path == "/sse" {
+                    // MCP SSE Transport: Establish event stream
+                    let mut writer = stream;
+                    let response_headers = "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nCache-Control: no-cache\r\nConnection: keep-alive\r\nAccess-Control-Allow-Origin: *\r\n\r\n";
+                    let _ = writer.write_all(response_headers.as_bytes());
+
+                    // Send the endpoint event as per MCP spec
+                    let endpoint_event = format!("event: endpoint\ndata: /messages?session={}\n\n", "default-session");
+                    let _ = writer.write_all(endpoint_event.as_bytes());
+                    let _ = writer.flush();
+
+                    // In a production engine, we would keep this open and push tool execution events.
+                    // For now, we maintain the connection.
+                    loop {
+                        thread::sleep(std::time::Duration::from_secs(30));
+                        if writer.write_all(b": keep-alive\n\n").is_err() { break; }
+                    }
+                } else if method == "POST" && path.starts_with("/messages") {
+                    let mut content_length = 0;
+                    loop {
+                        let mut line = String::new();
+                        let _ = reader.read_line(&mut line);
+                        if line == "\r\n" || line.is_empty() { break; }
+                        if line.to_lowercase().starts_with("content-length:") {
+                            content_length = line.split(':').nth(1).unwrap_or("0").trim().parse::<usize>().unwrap_or(0);
+                        }
+                    }
+
+                    if content_length > 0 {
+                        let mut buffer = vec![0u8; content_length];
+                        let _ = std::io::Read::read_exact(&mut reader, &mut buffer);
+                        let body = String::from_utf8_lossy(&buffer).to_string();
+
+                        let response = server.handle_request(&body, &workspace);
+
+                        let mut writer = stream;
+                        let resp = format!(
+                            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\nContent-Length: {}\r\n\r\n{}",
+                            response.len(),
+                            response
+                        );
+                        let _ = writer.write_all(resp.as_bytes());
+                        let _ = writer.flush();
+                    }
+                }
+            });
+        }
+    }
 }
 
 /// 🔋 GMCP Protocol Handler: Decoupled JSON-RPC implementation for the Substrate.

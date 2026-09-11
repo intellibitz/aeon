@@ -53,6 +53,7 @@ pub struct GovernancePatterns {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AeonConfig {
     pub gmcp_port: u16,
+    pub gmcp_http_port: u16,
     pub gemi_port: u16,
     pub udp_discovery_port: u16,
     pub default_engine: String,
@@ -71,6 +72,7 @@ impl Default for AeonConfig {
     fn default() -> Self {
         AeonConfig {
             gmcp_port: 9090,
+            gmcp_http_port: 9093,
             gemi_port: 9091,
             udp_discovery_port: 9092,
             default_engine: "aeon-offline".to_string(),
