@@ -27,7 +27,6 @@ iwr -useb https://raw.githubusercontent.com/intellibitz/aeon/main/install.ps1 | 
 
 `aeon` is designed to be zero-config, but you can customize its behavior via environment variables or a local `.env` file in `~/.aeon/env`.
 
-* **AEON_API_KEY**: Set this key for cloud inference fallback when local models are unavailable or insufficient.
 * **AEON_REPO**: Custom GitHub repository for binary updates (defaults to `intellibitz/aeon`).
 
 ## Usage

@@ -64,25 +64,9 @@ pub struct ModelManager;
 
 impl ModelManager {
     pub fn list_models(workspace: &Path) -> Vec<ModelInfo> {
-        let mut list = Vec::new();
-        let home = std::env::var("HOME").or_else(|_| std::env::var("USERPROFILE")).unwrap_or_else(|_| ".".to_string());
-        let global_dir = PathBuf::from(home).join(".aeon");
-        let cfg = crate::sandbox::manager::AeonConfig::load(&global_dir);
+        let mut list: Vec<ModelInfo> = Vec::new();
 
-        // 1. Load Cloud Models from Dynamic Configuration (Disabled by Default - Rule 21)
-        if cfg.enable_cloud_models {
-            for model in cfg.cloud_models {
-                if let Some(env_key) = &model.env_key {
-                    if std::env::var(env_key).is_ok() {
-                        list.push(model);
-                    }
-                } else {
-                    list.push(model);
-                }
-            }
-        }
-
-        // 2. System-Wide AI Model Scanner (LM Studio, HuggingFace Cache, GPT4All, AEON Vaults)
+        // 1. System-Wide AI Model Scanner (LM Studio, HuggingFace Cache, GPT4All, AEON Vaults)
         let system_models = Self::scan_system_for_local_models(workspace);
         for sys_model in system_models {
             if !list.iter().any(|m| m.model_id == sys_model.model_id) {
@@ -102,8 +86,6 @@ impl ModelManager {
                 tier: ModelTier::Reflex,
                 latency_ms: Some(0),
                 provider: ProviderType::LocalGGUF,
-                api_base: None,
-                env_key: None,
             });
         }
 
@@ -543,8 +525,6 @@ impl ModelManager {
                                 tier: ModelTier::Reflex,
                                 latency_ms: None,
                                 provider: ProviderType::LocalGGUF,
-                                api_base: None,
-                                env_key: None,
                             });
                         }
                     }

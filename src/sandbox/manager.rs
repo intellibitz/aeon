@@ -16,9 +16,6 @@ pub enum ModelTier {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum ProviderType {
-    StandardOpenAi,
-    StandardGoogle,
-    StandardAnthropic,
     NativeCandle,
     LocalVault,
     LocalGGUF,
@@ -34,8 +31,6 @@ pub struct ModelInfo {
     pub tier: ModelTier,
     pub latency_ms: Option<u128>,
     pub provider: ProviderType,
-    pub api_base: Option<String>,
-    pub env_key: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -65,12 +60,10 @@ pub struct AeonConfig {
     pub auto_download_models: bool,
     pub aeon_repo: String,
     pub mcp_registry_url: String,
-    pub cloud_models: Vec<ModelInfo>,
     pub bootstrap_mcp_servers: Vec<GlobalMcpEntry>,
     pub cloud_scout_timeout_secs: u64,
     pub beacon_interval_secs: u64,
     pub local_scan_paths: Vec<String>,
-    pub enable_cloud_models: bool,
     pub governance: GovernancePatterns,
 }
 
@@ -85,45 +78,6 @@ impl Default for AeonConfig {
             auto_download_models: true,
             aeon_repo: "intellibitz/aeon".to_string(),
             mcp_registry_url: "https://raw.githubusercontent.com/intellibitz/aeon/main/registry.json".to_string(),
-            enable_cloud_models: false,
-            cloud_models: vec![
-                ModelInfo {
-                    name: "Meta Model Substrate - Alpha".to_string(),
-                    registry: "AEON Tier 2 Registry".to_string(),
-                    model_id: "meta/model-alpha".to_string(),
-                    description: "High-throughput cloud reasoning substrate".to_string(),
-                    is_local: false,
-                    tier: ModelTier::Premier,
-                    latency_ms: None,
-                    provider: ProviderType::StandardGoogle,
-                    api_base: Some("https://api.meta-substrate.ai/v1".to_string()),
-                    env_key: Some("AEON_API_KEY".to_string()),
-                },
-                ModelInfo {
-                    name: "Meta Model Substrate - Beta".to_string(),
-                    registry: "AEON Tier 2 Registry".to_string(),
-                    model_id: "meta/model-beta".to_string(),
-                    description: "Standard reasoning & tool-use substrate".to_string(),
-                    is_local: false,
-                    tier: ModelTier::Premier,
-                    latency_ms: None,
-                    provider: ProviderType::StandardOpenAi,
-                    api_base: Some("https://api.meta-substrate.ai/v1".to_string()),
-                    env_key: Some("AEON_API_KEY".to_string()),
-                },
-                ModelInfo {
-                    name: "Meta Model Substrate - Gamma".to_string(),
-                    registry: "AEON Tier 2 Registry".to_string(),
-                    model_id: "meta/model-gamma".to_string(),
-                    description: "Specialist reasoning substrate".to_string(),
-                    is_local: false,
-                    tier: ModelTier::Premier,
-                    latency_ms: None,
-                    provider: ProviderType::StandardAnthropic,
-                    api_base: Some("https://api.meta-substrate.ai/v1".to_string()),
-                    env_key: Some("AEON_API_KEY".to_string()),
-                },
-            ],
             bootstrap_mcp_servers: vec![
                 GlobalMcpEntry { name: "database".to_string(), description: "Standard Protocol SQL Database Server".to_string(), package: "mcp-server-postgres".to_string(), category: "database".to_string() },
                 GlobalMcpEntry { name: "search".to_string(), description: "Standard Protocol Web Search Server".to_string(), package: "mcp-server-search".to_string(), category: "search".to_string() },
