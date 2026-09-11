@@ -157,6 +157,26 @@ impl ProtocolDispatcher for GmcpProtocolHandler {
                     }
                 }).to_string()
             }
+            Some("prompts/list") => {
+                let external = crate::gmcp::client::GmcpClient::list_external_prompts();
+                json!({
+                    "jsonrpc": "2.0",
+                    "id": id,
+                    "result": {
+                        "prompts": external
+                    }
+                }).to_string()
+            }
+            Some("resources/list") => {
+                let external = crate::gmcp::client::GmcpClient::list_external_resources();
+                json!({
+                    "jsonrpc": "2.0",
+                    "id": id,
+                    "result": {
+                        "resources": external
+                    }
+                }).to_string()
+            }
             Some("tools/call") => {
                 let tool_name = extract_tool_name(line).unwrap_or_default();
                 let tool_arg = extract_tool_arg(line).unwrap_or_default();

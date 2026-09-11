@@ -126,7 +126,15 @@ impl AmaSupervisor {
             url: "native://substrate".into()
         }).collect();
 
-        // 3. Exponential Swarm Execution (Converging on Blackboard)
+        // 🚀 3. Cluster Consensus Protocol: Broadcast blackboard to high-tier peers
+        let nodes = Self::rank_reasoning_peers();
+        for node in nodes.iter().take(2) {
+            if node.node_id != "aeon-local-master" {
+                let _ = Self::dispatch_peer_task(&node.address, "init_blackboard", goal);
+            }
+        }
+
+        // 4. Exponential Swarm Execution (Converging on Blackboard)
         let swarm_logs = GawdAgentFleet::dispatch_explosive_swarm(goal.to_string(), workspace.to_path_buf(), Arc::clone(&blackboard));
 
         let mut a2a_logs = Vec::new();
@@ -139,7 +147,7 @@ impl AmaSupervisor {
             });
         }
 
-        // 4. Final State Convergence Check
+        // 5. Final State Convergence Check
         let final_state = blackboard.lock().unwrap();
         if !final_state.is_empty() {
             a2a_logs.push(A2AMessage {
@@ -151,6 +159,19 @@ impl AmaSupervisor {
         }
 
         (a2a_logs, fleet_info)
+    }
+
+    /// 🏆 Reasoning Auction: Ranks peer nodes based on weighted hardware and trust scores.
+    pub fn rank_reasoning_peers() -> Vec<ClusterPeerNode> {
+        let mut nodes = Self::list_cluster_nodes();
+
+        nodes.sort_by(|a, b| {
+            let a_score = (a.trust_score * 0.4) + (a.latency_ms as f32 * -0.2);
+            let b_score = (b.trust_score * 0.4) + (b.latency_ms as f32 * -0.2);
+            b_score.partial_cmp(&a_score).unwrap_or(std::cmp::Ordering::Equal)
+        });
+
+        nodes
     }
 
     pub fn dispatch_peer_task(addr: &str, tool_name: &str, arg: &str) -> String {
