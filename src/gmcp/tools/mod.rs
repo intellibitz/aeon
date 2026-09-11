@@ -4,7 +4,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use std::sync::{Arc, RwLock, OnceLock};
+use std::sync::{Arc, Mutex, RwLock, OnceLock};
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
@@ -54,6 +54,7 @@ impl AeonTool for MetaTool {
 
 pub struct ToolRegistry {
     tools: RwLock<HashMap<String, Arc<dyn AeonTool>>>,
+    locks: Arc<Mutex<HashMap<String, u64>>>,
 }
 
 impl ToolRegistry {
@@ -62,6 +63,7 @@ impl ToolRegistry {
         REGISTRY.get_or_init(|| {
             let registry = ToolRegistry {
                 tools: RwLock::new(HashMap::new()),
+                locks: Arc::new(Mutex::new(HashMap::new())),
             };
             registry.bootstrap();
             registry
@@ -305,7 +307,37 @@ impl ToolRegistry {
                 Err(e) => format!("{}", e),
             }
         } else {
+            // 🚑 Self-Healing Protocol (Rule 21): Attempt autonomous resolution
+            if let Ok(provisioned_res) = Self::resolve_capability_gap(name) {
+                if provisioned_res == "SUCCESS_CONFIGURED" {
+                     return format!("[SELF_HEALING] Capability '{}' was missing and autonomously provisioned. Please retry the mission.", name);
+                }
+            }
             format!("[CAPABILITY_GAP] Tool '{}' missing from Meta-Substrate. Report to Creator for native substrate hardening.", name)
         }
+    }
+
+    /// 🚑 Autonomous Capability Resolution (Rule 21)
+    pub fn resolve_capability_gap(name: &str) -> EaiResult<String> {
+        let server_name = name.split(':').next().unwrap_or(name);
+        let res = GmcpClient::provision_tool_package(server_name);
+        Ok(res)
+    }
+
+    pub fn acquire_meta_lock(resource_id: &str) -> bool {
+        let registry = Self::global();
+        let mut locks = registry.locks.lock().unwrap();
+        if locks.contains_key(resource_id) {
+            return false;
+        }
+        let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs();
+        locks.insert(resource_id.to_string(), now);
+        true
+    }
+
+    pub fn release_meta_lock(resource_id: &str) {
+        let registry = Self::global();
+        let mut locks = registry.locks.lock().unwrap();
+        locks.remove(resource_id);
     }
 }

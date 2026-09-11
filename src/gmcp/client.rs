@@ -152,6 +152,15 @@ impl GmcpClient {
         "ERROR_FAILED".to_string()
     }
 
+    /// Dynamically provisions an MCP tool package from the global registry
+    pub fn provision_tool_package(name: &str) -> String {
+        let registry = Self::fetch_global_registry();
+        if let Some(entry) = registry.iter().find(|e| e.name == name) {
+            return Self::auto_configure_server(&entry.name, &entry.package);
+        }
+        "NOT_FOUND_IN_REGISTRY".to_string()
+    }
+
     pub fn execute_external_tool(server_name: &str, tool_name: &str, args: &str) -> String {
         let config_path = Self::get_config_path();
         let config_content = match fs::read_to_string(&config_path) {
