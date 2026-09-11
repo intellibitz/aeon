@@ -112,6 +112,10 @@ impl ToolRegistry {
             Ok(res)
         });
 
+        Self::register_meta_tool(&mut tools, "train_reflexes", "Manually trigger native neural reflex distillation", MetaCategory::SystemPrimitive, |_arg, workspace| {
+            crate::gawd::reflex_trainer::ReflexTrainer::force_train(workspace).map(|r| r)
+        });
+
         Self::register_meta_tool(&mut tools, "read_file", "Read file content in workspace", MetaCategory::WorkspaceIo, |arg, workspace| {
             let clean = arg.trim().trim_matches('"').trim_matches('\'');
             if clean.is_empty() { return Err(EaiError::Protocol("Usage: read_file <file_path>".into())); }

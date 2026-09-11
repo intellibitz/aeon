@@ -1,6 +1,6 @@
 [package]
 name = "aeon-engine"
-version = "0.1.2022699"
+version = "0.1.2022700"
 edition = "2024"
 authors = ["IntelliBitz", "Muthu Ramadoss", "AEON EAI Core"]
 description = "aeon-engine: EAI: Exponential Intelligence for Any AI. - GAWD, GEMI & GMCP Multi-Agent Engine"

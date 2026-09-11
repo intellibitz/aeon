@@ -158,6 +158,9 @@ impl AmaSupervisor {
             });
         }
 
+        // 6. Autonomous Substrate Distillation (Rule 23)
+        let _ = super::reflex_trainer::ReflexTrainer::audit_distillation_state(workspace);
+
         (a2a_logs, fleet_info)
     }
 

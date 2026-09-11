@@ -26,7 +26,7 @@ pub struct AeonAxiomRule {
 pub struct AlphaSelf;
 
 impl AlphaSelf {
-    pub const VERSION: &'static str = "0.1.2022699";
+    pub const VERSION: &'static str = "0.1.2022700";
     pub const CORE_PARADIGM: &'static str = "EAI (Exponential Intelligence for Any AI) - Intelligence Reflex & Execution Substrate";
 
     pub const AGENT_RULES: &[AeonAxiomRule] = &[
@@ -50,7 +50,7 @@ impl AlphaSelf {
     pub const ENGINE_AXIOMS: &[AeonAxiomRule] = &[
         AeonAxiomRule { id: 21, title: "Native Intent Meta-Execution Protocol", imperative: "User intents use the meta-substrate. Failure triggers mandatory self-healing via dynamic tools but NEVER triggers the Motion Rule." },
         AeonAxiomRule { id: 22, title: "Creator Aspiration Rule", imperative: "Only creator directives or architectural goals trigger the Motion Rule to advance substrate evolution." },
-        AeonAxiomRule { id: 23, title: "Motion Rule Protocol", imperative: "Triggered exclusively by Creator: Detect gap, synthesize native Rust code, compile/test, and auto-deploy." },
+        AeonAxiomRule { id: 23, title: "Motion Rule Protocol", imperative: "Triggered by Creator or Autonomous Distillation: Detect gap, synthesize native Rust code or retrain neural reflexes, compile/test, and auto-deploy." },
         AeonAxiomRule { id: 24, title: "Creator Agent Mandate", imperative: "Creator agents strictly build and improve the substrate. Their only objective is a smarter autonomous engine." },
         AeonAxiomRule { id: 25, title: "Source Code Is AEON Memory", imperative: "AEON source code is AEON memory. AEON knows only about AEON." },
         AeonAxiomRule { id: 26, title: "Dynamic Meta Codebase Paradigm", imperative: "AEON source code provides pure execution, governance, and protocol primitives without static domain rules." },
@@ -81,7 +81,7 @@ impl AlphaSelf {
         // ENGINE_AXIOMS (21-30)
         AeonAxiomRule { id: 21, title: "Native Intent Meta-Execution Protocol", imperative: "User intents use the meta-substrate. Failure triggers mandatory self-healing via dynamic tools but NEVER triggers the Motion Rule." },
         AeonAxiomRule { id: 22, title: "Creator Aspiration Rule", imperative: "Only creator directives or architectural goals trigger the Motion Rule to advance substrate evolution." },
-        AeonAxiomRule { id: 23, title: "Motion Rule Protocol", imperative: "Triggered exclusively by Creator: Detect gap, synthesize native Rust code, compile/test, and auto-deploy." },
+        AeonAxiomRule { id: 23, title: "Motion Rule Protocol", imperative: "Triggered by Creator or Autonomous Distillation: Detect gap, synthesize native Rust code or retrain neural reflexes, compile/test, and auto-deploy." },
         AeonAxiomRule { id: 24, title: "Creator Agent Mandate", imperative: "Creator agents strictly build and improve the substrate. Their only objective is a smarter autonomous engine." },
         AeonAxiomRule { id: 25, title: "Source Code Is AEON Memory", imperative: "AEON source code is AEON memory. AEON knows only about AEON." },
         AeonAxiomRule { id: 26, title: "Dynamic Meta Codebase Paradigm", imperative: "AEON source code provides pure execution, governance, and protocol primitives without static domain rules." },
