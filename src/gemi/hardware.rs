@@ -12,6 +12,8 @@ pub struct HardwareProfile {
     pub ram_gb: usize,
     pub available_ram_gb: usize,
     pub gpu_vram_gb: usize,
+    pub swap_gb: usize,
+    pub nvme_active: bool,
     pub acceleration_active: bool,
     pub native_acceleration: String,
     pub os_info: String,
@@ -31,6 +33,8 @@ impl HardwareProfiler {
         let ram_gb = Self::determine_total_ram_gb();
         let available_ram_gb = Self::determine_available_ram_gb();
         let gpu_vram_gb = Self::determine_gpu_vram_gb();
+        let swap_gb = Self::determine_swap_gb();
+        let nvme_active = Self::is_nvme_active();
 
         // 1. Direct Interrogation via Candle Substrate
         let (native_accel, gpu_name) = Self::interrogate_native_acceleration();
@@ -51,6 +55,8 @@ impl HardwareProfiler {
             ram_gb,
             available_ram_gb,
             gpu_vram_gb,
+            swap_gb,
+            nvme_active,
             acceleration_active,
             native_acceleration: native_accel,
             os_info: Self::get_os_info(),
@@ -195,6 +201,37 @@ impl HardwareProfiler {
 
     fn determine_gpu_vram_gb() -> usize {
         0
+    }
+
+    fn determine_swap_gb() -> usize {
+        if cfg!(target_os = "linux") {
+            if let Ok(content) = std::fs::read_to_string("/proc/meminfo") {
+                for line in content.lines() {
+                    if line.starts_with("SwapTotal:") {
+                        let parts: Vec<&str> = line.split_whitespace().collect();
+                        if let Some(kb_str) = parts.get(1) {
+                            if let Ok(kb) = kb_str.parse::<usize>() {
+                                return kb / (1024 * 1024);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        0
+    }
+
+    fn is_nvme_active() -> bool {
+        if cfg!(target_os = "linux") {
+            if let Ok(entries) = std::fs::read_dir("/sys/block/") {
+                for entry in entries.flatten() {
+                    if entry.file_name().to_string_lossy().starts_with("nvme") {
+                        return true;
+                    }
+                }
+            }
+        }
+        false
     }
 
     pub fn profile() -> (usize, String) {
