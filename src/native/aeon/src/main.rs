@@ -4,7 +4,7 @@ use std::process::Command;
 use std::env;
 use std::path::PathBuf;
 
-const AEON_VERSION: &str = "0.1.2022716";
+const AEON_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
