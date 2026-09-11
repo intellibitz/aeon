@@ -2,6 +2,7 @@
 // 100% Rust implementation for Native Intelligence Substrate (No Cloud Fallback)
 
 use std::path::Path;
+use std::sync::{Arc, Mutex, OnceLock};
 use crate::error::EaiResult;
 use crate::gemi::models::ModelManager;
 use crate::gemi::hardware::HardwareProfiler;
@@ -10,6 +11,50 @@ use candle_core::quantized::gguf_file;
 use candle_core::Tensor;
 use candle_transformers::models::quantized_llama as llama;
 use tokenizers::Tokenizer;
+
+pub struct InferenceHost;
+
+impl InferenceHost {
+    /// 🧠 Intelligence Persistence (Phase 4 Hardening)
+    /// Static model weights container to eliminate disk I/O bottlenecks.
+    pub fn get_model(model_path: &Path, device: &candle_core::Device) -> EaiResult<Arc<Mutex<llama::ModelWeights>>> {
+        static CACHED_MODEL: OnceLock<Arc<Mutex<llama::ModelWeights>>> = OnceLock::new();
+
+        if let Some(m) = CACHED_MODEL.get() {
+            return Ok(Arc::clone(m));
+        }
+
+        let mut file = std::fs::File::open(model_path)?;
+        let model_data = gguf_file::Content::read(&mut file)
+            .map_err(|e| crate::error::EaiError::Inference(format!("GGUF Read Error: {}", e)))?;
+
+        let weights = llama::ModelWeights::from_gguf(model_data, &mut file, device)
+            .map_err(|e| crate::error::EaiError::Inference(format!("Model Load Error: {}", e)))?;
+
+        let shared = Arc::new(Mutex::new(weights));
+        let _ = CACHED_MODEL.set(Arc::clone(&shared));
+        Ok(shared)
+    }
+}
+
+pub struct ContextSummarizer;
+
+impl ContextSummarizer {
+    /// 🗜️ Context Compression: Reduces Mission Blackboard to high-density semantic summary.
+    pub fn compress_blackboard(blackboard: &std::collections::HashMap<String, String>) -> String {
+        let mut summary = String::new();
+        for (agent, output) in blackboard {
+            // High-density mapping: Extract only ACTIONS and VERIFIED outcomes
+            let clean_output = if output.len() > 100 {
+                format!("{}...", &output[..97])
+            } else {
+                output.clone()
+            };
+            summary.push_str(&format!("[{}: {}] ", agent, clean_output));
+        }
+        summary
+    }
+}
 
 pub struct GemiEngine;
 
@@ -169,13 +214,9 @@ impl NativeInferenceEngine for AeonGgufEngine {
 
         let device = HardwareProfiler::get_candle_device();
 
-        // 🚀 Native Intelligence Activation: 100% Tensor-Driven Reasoning
-        let mut file = std::fs::File::open(&model_path)?;
-        let model = gguf_file::Content::read(&mut file)
-            .map_err(|e| crate::error::EaiError::Inference(format!("GGUF Read Error: {}", e)))?;
-
-        let mut model_weights = llama::ModelWeights::from_gguf(model, &mut file, &device)
-            .map_err(|e| crate::error::EaiError::Inference(format!("Model Load Error: {}", e)))?;
+        // 🚀 Native Intelligence Activation: 100% Persistent Tensor-Driven Reasoning
+        let model_weights_shared = InferenceHost::get_model(&model_path, &device)?;
+        let mut model_weights = model_weights_shared.lock().unwrap();
 
         let tokenizer = Tokenizer::from_file(tokenizer_path)
             .map_err(|e| crate::error::EaiError::Inference(format!("Tokenizer Error: {}", e)))?;

@@ -54,19 +54,26 @@ impl AmaMasterAgent {
             // 2. Swarm Supervision (Tier 1 AOA Dispatch)
             let (interactions, agents) = AmaSupervisor::supervise_mission(&current_goal, workspace);
 
-            // 3. Reflex Result Distillation (Tier 0 -> Tier 2 Bridge)
+            // 🚀 3. Context Compression & Reflex Result Distillation (Tier 2 Hardening)
             let model_name = crate::gemi::models::ModelManager::get_selected_model()
                 .unwrap_or_else(|| "aeon-alpha.safetensors".to_string());
 
+            // Check Mission Blackboard for stateful summary
+            let blackboard_summary = if let Some(cp) = crate::sandbox::manager::SandboxManager::check_interrupted_checkpoint(workspace) {
+                crate::gemi::engine::ContextSummarizer::compress_blackboard(&cp.blackboard)
+            } else {
+                "NO_PREVIOUS_CONTEXT".to_string()
+            };
+
             let final_answer = if interactions.is_empty() {
-                format!("AMA-Reflex ({}): No active agents responded to '{}'.", version, current_goal)
+                format!("AMA-Reflex ({}): No active agents responded to '{}'. Context: {}", version, current_goal, blackboard_summary)
             } else {
                 let last_payload = &interactions.last().unwrap().payload;
                 if last_payload.len() > 10 {
                     last_payload.clone()
                 } else {
-                    format!("AMA-Synthesis ({} via {}):\n\nProcessed goal '{}' across {} active agents.",
-                        version, model_name, current_goal, agents.len())
+                    format!("AMA-Synthesis ({} via {}):\n\nProcessed goal '{}' across {} active agents. Context: {}",
+                        version, model_name, current_goal, agents.len(), blackboard_summary)
                 }
             };
 
