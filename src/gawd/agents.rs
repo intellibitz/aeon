@@ -125,6 +125,22 @@ impl AgentMetaRegistry {
     pub fn register_agent(&self, profile: AgentProfile) {
         let mut agents = self.agents.lock().unwrap();
         agents.push(profile);
+        let _ = self.save();
+    }
+
+    pub fn update_rank(&self, name: &str, delta: f32) {
+        let mut agents = self.agents.lock().unwrap();
+        if let Some(agent) = agents.iter_mut().find(|a| a.name == name) {
+            agent.base_rank = (agent.base_rank + delta).clamp(0.1, 1.0);
+            let _ = self.save();
+        }
+    }
+
+    fn save(&self) {
+        let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
+        let registry_path = home.join(".aeon/agent_registry.json");
+        let agents = self.agents.lock().unwrap();
+        let _ = std::fs::write(&registry_path, serde_json::to_string_pretty(&*agents).unwrap_or_default());
     }
 
     pub fn list_agents(&self) -> Vec<AgentProfile> {

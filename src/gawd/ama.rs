@@ -166,7 +166,12 @@ impl AmaMasterAgent {
         // 4. Autonomous Distillation (Rule 21): Capture learned wisdom from Power-Tier remotes
         for msg in &res.interactions {
             if msg.action.contains("power_reason") && !msg.payload.contains("[FAIL]") {
-                let _ = super::pkb::ProtocolKnowledgeBase::stage_distillation_pair(goal, &res.final_answer, workspace);
+                let metadata = serde_json::json!({
+                    "agents": res.agents.iter().map(|a| a.name.clone()).collect::<Vec<String>>(),
+                    "interactions_count": res.interactions.len(),
+                    "final_status": res.status
+                });
+                let _ = super::pkb::ProtocolKnowledgeBase::stage_distillation_pair(goal, &res.final_answer, workspace, Some(metadata));
             }
 
             if msg.sender == "AeonUniversalSubstrateAgent" {

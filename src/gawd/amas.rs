@@ -139,13 +139,30 @@ impl AmaSupervisor {
         let swarm_logs = GawdAgentFleet::dispatch_explosive_swarm(goal.to_string(), workspace.to_path_buf(), Arc::clone(&blackboard));
 
         let mut a2a_logs = Vec::new();
+        let mut has_gap = false;
         for (name, output) in swarm_logs {
+            if output.contains("[CAPABILITY_GAP]") { has_gap = true; }
             a2a_logs.push(A2AMessage {
                 sender: name,
                 recipient: "AMA-Master".to_string(),
                 action: "MISSION_FLUX".to_string(),
                 payload: output,
             });
+        }
+
+        // 🚀 4.1 Reactive Swarm Reinforcement (Tier 1 Hardening)
+        if has_gap {
+            eprintln!("🚑 [Swarm Supervisor] Capability gap detected. Dispatching Reinforcement Wave...");
+            let reinforcement_goal = format!("REINFORCE_MISSION: {}\n[PREVIOUS_FAILURES]: {:?}", goal, a2a_logs);
+            let extra_swarm = GawdAgentFleet::dispatch_explosive_swarm(reinforcement_goal, workspace.to_path_buf(), Arc::clone(&blackboard));
+            for (name, output) in extra_swarm {
+                a2a_logs.push(A2AMessage {
+                    sender: format!("{}_Reinforcement", name),
+                    recipient: "AMA-Master".to_string(),
+                    action: "REINFORCEMENT_FLUX".to_string(),
+                    payload: output,
+                });
+            }
         }
 
         // 🚀 5. Weighted Swarm Consensus Pass (Rule 31 Hardening)
@@ -156,6 +173,11 @@ impl AmaSupervisor {
             for (agent_name, output) in final_state.iter() {
                 if let Some(info) = fleet_info.iter().find(|i| &i.name == agent_name) {
                     weighted_wisdom.push_str(&format!("[AGENT: {} (Rank: {:.2})] {}\n", agent_name, info.rank, output));
+
+                    // 🚀 Reward successful agents (Empirical Expertise Ranking)
+                    if !output.contains("FAILURE") && !output.contains("GAP") {
+                        crate::gawd::agents::AgentMetaRegistry::global().update_rank(agent_name, 0.01);
+                    }
                 }
             }
 
