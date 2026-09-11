@@ -27,7 +27,6 @@ pub trait AeonTool: Send + Sync {
 }
 
 /// Enum representing Meta-Tool Category in AEON Substrate
-#[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MetaCategory {
     SystemPrimitive,
@@ -37,7 +36,6 @@ pub enum MetaCategory {
 }
 
 /// Generic Meta-Tool Struct
-#[allow(dead_code)]
 pub struct MetaTool {
     pub tool_name: String,
     pub tool_desc: String,
@@ -72,7 +70,8 @@ impl ToolRegistry {
     fn bootstrap(&self) {
         let mut tools = self.tools.write().unwrap();
 
-        // 1. System Meta Primitives
+        // 🛡️ INTERNAL META-CAPABILITIES (Tier 0 & 1 Primitives)
+
         Self::register_meta_tool(&mut tools, "status", "AEON Substrate status report", MetaCategory::SystemPrimitive, |_arg, _ws| {
             let hardware = HardwareProfiler::get_profile();
             let mut out = format!("AEON Engine Version: {}\\n", crate::AEON_VERSION);
@@ -95,10 +94,6 @@ impl ToolRegistry {
             Ok(report)
         });
 
-        Self::register_meta_tool(&mut tools, "version", "Get engine version", MetaCategory::SystemPrimitive, |_arg, _ws| {
-            Ok(format!("aeon v{}", crate::AEON_VERSION))
-        });
-
         Self::register_meta_tool(&mut tools, "list_models", "List available model substrates", MetaCategory::SystemPrimitive, |_arg, workspace| {
             let models = ModelManager::list_models(workspace);
             let mut out = format!("Active Model Substrates (Count: {})\\n\\n", models.len());
@@ -116,7 +111,6 @@ impl ToolRegistry {
             Ok(res)
         });
 
-        // 2. Workspace Meta Primitives
         Self::register_meta_tool(&mut tools, "read_file", "Read file content in workspace", MetaCategory::WorkspaceIo, |arg, workspace| {
             let clean = arg.trim().trim_matches('"').trim_matches('\'');
             if clean.is_empty() { return Err(EaiError::Protocol("Usage: read_file <file_path>".into())); }
@@ -139,20 +133,6 @@ impl ToolRegistry {
             Ok(format!("Wrote to {}", parts[0].trim()))
         });
 
-        Self::register_meta_tool(&mut tools, "list_directory", "List workspace directory files", MetaCategory::WorkspaceIo, |arg, workspace| {
-            let target = if arg.trim().is_empty() { workspace } else { Path::new(arg.trim()) };
-            let entries = fs::read_dir(target).map_err(|e| EaiError::Sandbox(e.to_string()))?;
-            let mut list = Vec::new();
-            for entry in entries.flatten() {
-                if let Ok(meta) = entry.metadata() {
-                    let name = entry.file_name().to_string_lossy().to_string();
-                    let kind = if meta.is_dir() { "DIR" } else { "FILE" };
-                    list.push(format!("- [{}] {} ({} bytes)", kind, name, meta.len()));
-                }
-            }
-            Ok(list.join("\\n"))
-        });
-
         Self::register_meta_tool(&mut tools, "exec_command", "Execute command in workspace", MetaCategory::WorkspaceIo, |arg, workspace| {
             let clean = arg.trim();
             if clean.is_empty() { return Err(EaiError::Protocol("Usage: exec_command <cmd>".into())); }
@@ -166,56 +146,6 @@ impl ToolRegistry {
             }
         });
 
-        // 3. Generic Network Fetch Primitive (No hardcoded search vendors or user agents)
-        Self::register_meta_tool(&mut tools, "web_fetch", "Fetch text content from a target URL", MetaCategory::WorkspaceIo, |arg, workspace| {
-            let clean_url = arg.trim();
-            if clean_url.is_empty() || !clean_url.starts_with("http") {
-                return Err(EaiError::Protocol("Usage: web_fetch <url>".into()));
-            }
-            let save_path = workspace.join("download_content.txt");
-
-            let mut extracted_text = String::new();
-            if let Ok(resp) = ureq::get(clean_url)
-                .set("User-Agent", "AEON-Substrate/0.1")
-                .timeout(std::time::Duration::from_secs(15))
-                .call()
-            {
-                if let Ok(raw_html) = resp.into_string() {
-                    extracted_text = strip_html_tags(&raw_html);
-                }
-            }
-
-            if extracted_text.trim().is_empty() {
-                extracted_text = format!("No content retrieved from '{}'.", clean_url);
-            }
-
-            let _ = fs::write(&save_path, &extracted_text);
-            let preview: String = extracted_text.lines().take(15).collect::<Vec<_>>().join("\\n");
-            Ok(format!("Saved fetched content from [{}] to [{}]:\\n\\n{}", clean_url, save_path.display(), preview))
-        });
-
-        // Alias web_search_download to web_fetch for backwards compatibility
-        Self::register_meta_tool(&mut tools, "web_search_download", "Fetch text content from target URL", MetaCategory::WorkspaceIo, |arg, workspace| {
-            let clean_url = arg.trim();
-            if clean_url.is_empty() || !clean_url.starts_with("http") {
-                return Err(EaiError::Protocol("web_search_download requires a valid URL (e.g. http:// or https://)".into()));
-            }
-            let save_path = workspace.join("download_content.txt");
-            let mut text = String::new();
-            if let Ok(resp) = ureq::get(clean_url).set("User-Agent", "AEON-Substrate/0.1").timeout(std::time::Duration::from_secs(15)).call() {
-                if let Ok(raw) = resp.into_string() {
-                    text = strip_html_tags(&raw);
-                }
-            }
-            if text.trim().is_empty() {
-                text = format!("No content retrieved from '{}'.", clean_url);
-            }
-            let _ = fs::write(&save_path, &text);
-            let preview: String = text.lines().take(15).collect::<Vec<_>>().join("\\n");
-            Ok(format!("Saved fetched content from [{}] to [{}]:\\n\\n{}", clean_url, save_path.display(), preview))
-        });
-
-        // 4. Meta MCP Management Primitives
         Self::register_meta_tool(&mut tools, "mcp_registry", "List global MCP registry entries", MetaCategory::McpProxy, |_arg, _ws| {
             let entries = GmcpClient::fetch_global_registry();
             let mut out = format!("Global MCP Server Registry (Count: {})\\n\\n", entries.len());
@@ -233,6 +163,9 @@ impl ToolRegistry {
             let res = GmcpClient::auto_configure_server(name, package);
             Ok(format!("MCP Server '{}' configuration status: {}", name, res))
         });
+
+        // 🚢 DYNAMIC DISCOVERY: Synthesized Native Reflexes (Rule 11)
+        crate::gmcp::reflexes::register_synthesized_reflexes(&mut tools);
     }
 
     fn register_meta_tool<F>(
@@ -260,10 +193,8 @@ impl ToolRegistry {
             .map(|t| McpTool { name: t.name(), description: t.description() })
             .collect();
 
-        // Include Dynamic Meta MCP Tools from connected servers
         tools.extend(GmcpClient::list_external_tools());
 
-        // Include Dynamic Executable Plugins & Reflexes
         if let Some(home) = std::env::var_os("HOME").map(PathBuf::from) {
             let reflex_dir = home.join(".aeon/reflexes");
             if let Ok(entries) = fs::read_dir(&reflex_dir) {
@@ -273,7 +204,7 @@ impl ToolRegistry {
                         if let Ok(name) = entry.file_name().into_string() {
                             tools.push(McpTool {
                                 name: format!("reflex_{}", name.replace(".wasm", "")),
-                                description: "Distilled Wasm neural reflex tool".to_string(),
+                                description: "Dynamic Wasm neural reflex tool".to_string(),
                             });
                         }
                     }
@@ -281,7 +212,6 @@ impl ToolRegistry {
             }
         }
 
-        // Unique by name
         tools.sort_by(|a, b| a.name.cmp(&b.name));
         tools.dedup_by(|a, b| a.name == b.name);
         tools
@@ -301,28 +231,11 @@ impl ToolRegistry {
     }
 
     pub fn execute_tool(name: &str, arg: &str, workspace: &Path) -> String {
-        // Meta MCP Proxy Dispatch (mcp:<server>:<tool> or <server>:<tool>)
         if name.contains(':') && !name.starts_with("ext_") {
             let parts: Vec<&str> = name.splitn(2, ':').collect();
             return GmcpClient::execute_external_tool(parts[0], parts[1], arg);
         }
 
-        // External Script Execution
-        if name.starts_with("ext_") {
-            let script_name = name.trim_start_matches("ext_");
-            if let Some(home) = std::env::var_os("HOME").map(PathBuf::from) {
-                let script_path = home.join(".aeon/tools").join(script_name);
-                if script_path.exists() {
-                    let out = Command::new(&script_path).arg(arg).current_dir(workspace).output();
-                    return match out {
-                        Ok(o) => String::from_utf8_lossy(&o.stdout).trim().to_string(),
-                        Err(e) => format!("External tool execution error: {}", e),
-                    };
-                }
-            }
-        }
-
-        // Wasm Reflex Execution
         if name.starts_with("reflex_") {
             let wasm_name = format!("{}.wasm", name.trim_start_matches("reflex_"));
             if let Some(home) = std::env::var_os("HOME").map(PathBuf::from) {
@@ -344,50 +257,7 @@ impl ToolRegistry {
                 Err(e) => format!("{}", e),
             }
         } else {
-            format!("[FAIL] Meta Tool '{}' not found in AEON Registry.", name)
+            format!("[CAPABILITY_GAP] Tool '{}' missing from Meta-Substrate. Synthesizing reflex.", name)
         }
     }
-}
-
-fn strip_html_tags(html: &str) -> String {
-    let mut result = String::new();
-    let mut in_skip_block = false;
-    let mut tag_buffer = String::new();
-
-    for c in html.chars() {
-        if c == '<' {
-            in_skip_block = true;
-            tag_buffer.clear();
-        } else if c == '>' {
-            in_skip_block = false;
-            let tag_lower = tag_buffer.to_lowercase();
-            if tag_lower == "br" || tag_lower == "p" || tag_lower == "/p" || tag_lower == "div" || tag_lower == "/tr" || tag_lower == "li" {
-                result.push('\n');
-            }
-        } else if !in_skip_block {
-            result.push(c);
-        }
-    }
-
-    let decoded = result.replace("&quot;", "\"")
-        .replace("&apos;", "'")
-        .replace("&#039;", "'")
-        .replace("&#39;", "'")
-        .replace("&amp;", "&")
-        .replace("&lt;", "<")
-        .replace("&gt;", ">")
-        .replace("&nbsp;", " ")
-        .replace("&#x27;", "'")
-        .replace("&#x2F;", "/")
-        .replace("&ndash;", "-")
-        .replace("&mdash;", "—");
-
-    let mut clean_lines = Vec::new();
-    for line in decoded.lines() {
-        let trimmed = line.trim();
-        if !trimmed.is_empty() && !trimmed.starts_with("<!--") {
-            clean_lines.push(trimmed);
-        }
-    }
-    clean_lines.join("\n")
 }

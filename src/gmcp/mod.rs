@@ -5,6 +5,7 @@ pub mod reflexes;
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::path::Path;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GlobalMcpEntry {
@@ -24,4 +25,23 @@ pub struct McpServerConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct McpConfig {
     pub mcp_servers: HashMap<String, McpServerConfig>,
+}
+
+/// 🔋 GMCP Host: The unified execution entry point for the Meta-Intelligence Substrate.
+pub struct GmcpHost;
+
+impl GmcpHost {
+    pub fn dispatch(name: &str, arg: &str, workspace: &Path) -> String {
+        self::tools::ToolRegistry::execute_tool(name, arg, workspace)
+    }
+}
+
+/// 🔌 Protocol Dispatcher: Trait for handling cross-protocol JSON-RPC requests.
+pub trait ProtocolDispatcher: Send + Sync {
+    fn handle_request(&self, line: &str, workspace: &Path) -> String;
+}
+
+/// 🔍 Capability Resolver: Trait for dynamic discovery and resolution of tool capabilities.
+pub trait CapabilityResolver: Send + Sync {
+    fn resolve(&self, name: &str) -> Option<String>;
 }

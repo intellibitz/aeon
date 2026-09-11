@@ -19,7 +19,7 @@ use gemi::GemiServer;
 use gmcp::server::GmcpServer;
 use sandbox::SandboxManager;
 
-pub const AEON_VERSION: &str = "0.1.2022684";
+pub const AEON_VERSION: &str = "0.1.2022685";
 
 fn get_home_dir() -> PathBuf {
     env::var_os("HOME")
@@ -135,9 +135,9 @@ fn main() {
 
             let ama = AmaMasterAgent::new();
 
-            // Unified GAWD & ToolRegistry Dispatch for all commands and intents
+            // 🔋 Unified Meta-Substrate Dispatch (Host -> ToolRegistry)
             if ToolRegistry::exists(cmd_name) {
-                let res = ToolRegistry::execute_tool(cmd_name, &cmd_arg, &cwd);
+                let res = crate::gmcp::GmcpHost::dispatch(cmd_name, &cmd_arg, &cwd);
                 if !io::stdout().is_terminal() {
                     print!("{}", res);
                 } else {

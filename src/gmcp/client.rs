@@ -1,12 +1,11 @@
 // 🔌 GMCP Universal Client: Bridges AEON to Industry Protocol Standard MCP Servers
-// 100% Rust implementation for Stdio-based Multi-Server Orchestration
+// 100% Rust implementation for Meta-Orchestrated Multi-Server Substrates
 
 use std::collections::HashMap;
 use std::fs;
 use std::io::{BufRead, BufReader, Write};
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
-use std::time::Instant;
 use serde_json::json;
 
 use super::tools::McpTool;
@@ -24,17 +23,18 @@ impl GmcpClient {
         aeon_dir.join("mcp_config.json")
     }
 
+    /// List all externally configured tools via dynamic mcp_config.json
     pub fn list_external_tools() -> Vec<McpTool> {
         let mut tools = Vec::new();
         let config_path = Self::get_config_path();
-        if let Ok(content) = fs::read_to_string(&config_path)
-            && let Ok(config) = serde_json::from_str::<McpConfig>(&content)
-        {
-            for (name, _srv) in config.mcp_servers {
-                tools.push(McpTool {
-                    name: format!("{}:*", name),
-                    description: format!("Proxy for industry standard MCP server: {}", name),
-                });
+        if let Ok(content) = fs::read_to_string(&config_path) {
+            if let Ok(config) = serde_json::from_str::<McpConfig>(&content) {
+                for (name, _srv) in config.mcp_servers {
+                    tools.push(McpTool {
+                        name: format!("{}:*", name),
+                        description: format!("Dynamic Proxy for standard MCP server: {}", name),
+                    });
+                }
             }
         }
         tools
@@ -48,7 +48,7 @@ impl GmcpClient {
 
         let mut entries: Vec<GlobalMcpEntry> = Vec::new();
 
-        // 1. Try Online Registry Scout from Dynamic Config URL
+        // 🔍 Scout Dynamic Registry from Cloud Substrate
         if let Ok(resp) = ureq::get(&cfg.mcp_registry_url).timeout(std::time::Duration::from_secs(10)).call() {
             let mut reader = resp.into_reader();
             if let Ok(remote_entries) = serde_json::from_reader::<_, Vec<GlobalMcpEntry>>(&mut reader) {
@@ -58,42 +58,25 @@ impl GmcpClient {
             }
         }
 
-        // 2. Read / Merge Local Dynamic Registry Overrides (~/.aeon/global_mcp_registry.json)
-        if registry_path.is_file()
-            && let Ok(content) = fs::read_to_string(&registry_path)
-            && let Ok(local_entries) = serde_json::from_str::<Vec<GlobalMcpEntry>>(&content)
-        {
-            for local_entry in local_entries {
-                if !entries.iter().any(|e| e.name == local_entry.name) {
-                    entries.push(local_entry);
+        // 🔍 Merge Local Workspace Overrides
+        if registry_path.is_file() {
+            if let Ok(content) = fs::read_to_string(&registry_path) {
+                if let Ok(local_entries) = serde_json::from_str::<Vec<GlobalMcpEntry>>(&content) {
+                    for local_entry in local_entries {
+                        if !entries.iter().any(|e| e.name == local_entry.name) {
+                            entries.push(local_entry);
+                        }
+                    }
                 }
             }
         }
 
-        // 3. Fallback to Bootstrap Registry from Dynamic Config if empty
         if entries.is_empty() {
             entries = cfg.bootstrap_mcp_servers;
         }
 
-        // Cache / persist merged registry locally
         let _ = fs::write(&registry_path, serde_json::to_string_pretty(&entries).unwrap_or_default());
         entries
-    }
-
-    #[allow(dead_code)]
-    pub fn benchmark_server(name: &str) -> (u128, bool) {
-        let start = Instant::now();
-        let config_path = Self::get_config_path();
-        if let Ok(content) = fs::read_to_string(&config_path)
-            && let Ok(config) = serde_json::from_str::<McpConfig>(&content)
-            && let Some(srv) = config.mcp_servers.get(name)
-        {
-            // Quick spawn test
-            let child = Command::new(&srv.command).args(&srv.args).stdin(Stdio::piped()).stdout(Stdio::piped()).spawn();
-            let success = child.is_ok();
-            return (start.elapsed().as_millis(), success);
-        }
-        (0, false)
     }
 
     pub fn auto_configure_server(name: &str, package: &str) -> String {
@@ -104,16 +87,17 @@ impl GmcpClient {
             McpConfig { mcp_servers: HashMap::new() }
         };
 
+        // 🚀 Meta Execution Scout: Identify best-suited executor for the host environment
         let has_uvx = Command::new("uvx").arg("--version").output().is_ok();
         let has_npx = Command::new("npx").arg("--version").output().is_ok();
 
-        let (cmd, args) = if package.starts_with("pypi:") || package.starts_with("mcp-server-") || package.contains("python") {
+        let (cmd, args) = if package.starts_with("pypi:") || package.contains("python") {
             if has_uvx {
                 ("uvx".to_string(), vec![package.trim_start_matches("pypi:").to_string()])
             } else if has_npx {
-                ("npx".to_string(), vec!["-y".to_string(), package.trim_start_matches("pypi:").to_string()])
+                ("npx".to_string(), vec!["-y".to_string(), package.to_string()])
             } else {
-                ("aeon".to_string(), vec!["mcp".to_string(), name.to_string()])
+                ("python3".to_string(), vec!["-m".to_string(), package.to_string()])
             }
         } else if has_npx {
             ("npx".to_string(), vec!["-y".to_string(), package.to_string()])
@@ -128,40 +112,12 @@ impl GmcpClient {
         };
 
         config.mcp_servers.insert(name.to_string(), new_srv);
-        if let Ok(updated) = serde_json::to_string_pretty(&config)
-            && fs::write(&config_path, updated).is_ok()
-        {
-            return "SUCCESS_CONFIGURED".to_string();
-        }
-        "ERROR_FAILED".to_string()
-    }
-
-    #[allow(dead_code)]
-    pub fn execute_category_tool(target_category: &str, query: &str) -> Option<String> {
-        let registry = Self::fetch_global_registry();
-        for entry in registry {
-            if entry.category.eq_ignore_ascii_case(target_category) {
-                let config_path = Self::get_config_path();
-                let is_configured = if let Ok(content) = fs::read_to_string(&config_path)
-                    && let Ok(config) = serde_json::from_str::<McpConfig>(&content)
-                {
-                    config.mcp_servers.contains_key(&entry.name)
-                } else {
-                    false
-                };
-
-                if !is_configured {
-                    let _ = Self::auto_configure_server(&entry.name, &entry.package);
-                }
-
-                let tool_alias = format!("{}_search", entry.category);
-                let res = Self::execute_external_tool(&entry.name, &tool_alias, query);
-                if !res.contains("[FAIL]") {
-                    return Some(res);
-                }
+        if let Ok(updated) = serde_json::to_string_pretty(&config) {
+            if fs::write(&config_path, updated).is_ok() {
+                return "SUCCESS_CONFIGURED".to_string();
             }
         }
-        None
+        "ERROR_FAILED".to_string()
     }
 
     pub fn execute_external_tool(server_name: &str, tool_name: &str, args: &str) -> String {
@@ -199,7 +155,7 @@ impl GmcpClient {
         let stdout = child.stdout.as_mut().unwrap();
         let mut reader = BufReader::new(stdout);
 
-        // 1. Initialize
+        // 🔌 Standard MCP Initialization Protocol
         let init_req = json!({
             "jsonrpc": "2.0",
             "id": 1,
@@ -210,14 +166,14 @@ impl GmcpClient {
                     "roots": { "listChanged": false },
                     "sampling": {}
                 },
-                "clientInfo": { "name": "aeon-master", "version": crate::AEON_VERSION }
+                "clientInfo": { "name": "aeon-substrate", "version": crate::AEON_VERSION }
             }
         });
         let _ = writeln!(stdin, "{}", init_req);
         let mut line = String::new();
         let _ = reader.read_line(&mut line);
 
-        // 2. Call Tool
+        // 🔋 Dynamic Tool Call Execution
         let params = match serde_json::from_str::<serde_json::Value>(args_json) {
             Ok(v) => v,
             Err(_) => json!({ "input": args_json })
@@ -243,24 +199,6 @@ impl GmcpClient {
             return format!("🔌 [MCP Proxy Response]: {}", line.trim());
         }
 
-        "[FAIL] MCP Error: No response from server.".to_string()
-    }
-
-    #[allow(dead_code)]
-    pub fn scout_tier3_assets() -> Vec<crate::gawd::agents::DiscoverableAsset> {
-        vec![
-            crate::gawd::agents::DiscoverableAsset {
-                tier: "Tier 3: GMCP (Capabilities)".to_string(),
-                name: "AEON Substrate Protocol".to_string(),
-                provider: "AEON Engine".to_string(),
-                url: "https://aeon.ai/download".to_string(),
-            },
-            crate::gawd::agents::DiscoverableAsset {
-                tier: "Tier 3: GMCP (Capabilities)".to_string(),
-                name: "Meta MCP Protocol Hub".to_string(),
-                provider: "MCP Standard".to_string(),
-                url: "https://modelcontextprotocol.io".to_string(),
-            },
-        ]
+        "[FAIL] MCP Error: No response from server substrate.".to_string()
     }
 }
