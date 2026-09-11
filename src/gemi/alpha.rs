@@ -18,7 +18,6 @@ pub struct DistillationStaged {
 pub struct AeonAlphaModel {
     fc1: Linear,
     fc2: Linear,
-    intents: Vec<String>,
 }
 
 impl AeonAlphaModel {
@@ -37,14 +36,36 @@ impl AeonAlphaModel {
         let fc2 = candle_nn::linear(Self::DIM, Self::DIM, vb.pp("reflex_out"))
             .unwrap_or(candle_nn::linear(Self::DIM, Self::DIM, vb.pp("reflex"))?);
 
-        // Standard Intent Mapping for v0.1
-        let intents = vec![
+        Ok(Self { fc1, fc2 })
+    }
+
+    /// 🧪 Dynamic Intent Surface Discovery (Rule 31 Hardening)
+    pub fn list_dynamic_intents() -> Vec<String> {
+        let mut intents = vec![
             "status".into(), "version".into(), "self_heal_build".into(),
             "run_test_harness".into(), "write_file".into(), "read_file".into(),
             "list_directory".into(), "scout".into(), "reason".into()
         ];
 
-        Ok(Self { fc1, fc2, intents })
+        // 🚀 Add Registered Agents
+        let registry = crate::gawd::agents::AgentMetaRegistry::global();
+        for agent in registry.list_agents() {
+            if !intents.contains(&agent.name) {
+                intents.push(agent.name);
+            }
+        }
+
+        // 🚀 Add Installed Tools
+        let tools = crate::gmcp::tools::ToolRegistry::list_tools();
+        for tool in tools {
+            if !intents.contains(&tool.name) {
+                intents.push(tool.name);
+            }
+        }
+
+        intents.sort();
+        intents.truncate(Self::DIM); // Cap at output dimension
+        intents
     }
 
     pub fn train_on_staged_data(global_dir: &Path) -> Result<String> {
@@ -62,15 +83,12 @@ impl AeonAlphaModel {
 
         let mut opt = AdamW::new(varmap.all_vars(), ParamsAdamW::default())?;
 
-        // Load and Parse Data
+        // Load Data and Map to Dynamic Surface
         let content = std::fs::read_to_string(&staged_file)?;
         let mut samples = Vec::new();
         let mut labels = Vec::new();
 
-        let intents = vec![
-            "status", "version", "self_heal_build", "run_test_harness",
-            "write_file", "read_file", "list_directory", "scout", "reason"
-        ];
+        let dynamic_intents = Self::list_dynamic_intents();
 
         for line in content.lines() {
             if let Ok(entry) = serde_json::from_str::<DistillationStaged>(line) {
@@ -78,9 +96,18 @@ impl AeonAlphaModel {
                 samples.push(Tensor::from_vec(vec, (1, Self::DIM), &device)?);
 
                 let action_clean = entry.action.to_lowercase();
-                let label_idx = intents.iter().position(|&i| action_clean.contains(i)).unwrap_or(8) as u32;
+                let label_idx = dynamic_intents.iter()
+                    .position(|i| action_clean.contains(&i.to_lowercase()))
+                    .unwrap_or(dynamic_intents.len() - 1) as u32;
                 labels.push(label_idx);
             }
+        }
+
+        // 🚀 Neural Seeding (Synthetic Priming): Ensure new tools have at least one sample
+        for (idx, intent) in dynamic_intents.iter().enumerate() {
+            let vec = Self::semantic_centroid_projection(intent)?;
+            samples.push(Tensor::from_vec(vec, (1, Self::DIM), &device)?);
+            labels.push(idx as u32);
         }
 
         if samples.is_empty() { return Err(anyhow!("Empty distillation dataset.")); }
@@ -104,7 +131,7 @@ impl AeonAlphaModel {
         let weights_path = global_dir.join("models/aeon-alpha.safetensors");
         varmap.save(weights_path)?;
 
-        Ok(format!("Autonomous Distillation Complete. Retrained on {} samples with Semantic Projections.", samples.len()))
+        Ok(format!("Autonomous Distillation Complete. Retrained on {} samples with Dynamic Intent Surface.", samples.len()))
     }
 
     pub fn predict_intent(&self, prompt: &str) -> Result<String> {
@@ -136,15 +163,15 @@ impl AeonAlphaModel {
             }
         }
 
-        if let Some(intent) = self.intents.get(max_idx) {
+        let dynamic_intents = Self::list_dynamic_intents();
+        if let Some(intent) = dynamic_intents.get(max_idx) {
             return Ok((format!("ACTION: {}", intent), max_val));
         }
 
         Err(anyhow!("Low confidence in neural reflex."))
     }
 
-    /// 🧪 Deterministic Semantic Embedding Substrate (Phase 4 Evolution)
-    /// Replaces brittle hash-based vectorization with AEON-specific semantic centroids.
+    /// 🧪 Deterministic Semantic Embedding Substrate
     fn semantic_centroid_projection(prompt: &str) -> Result<Vec<f32>> {
         let mut vec = vec![0.0f32; Self::DIM];
         let prompt_lower = prompt.to_lowercase();
@@ -155,13 +182,11 @@ impl AeonAlphaModel {
         for (i, word) in words.iter().enumerate() {
             let word_vec = Self::get_semantic_anchor(word);
             for (j, &val) in word_vec.iter().enumerate() {
-                // Centroid pooling: Average of anchors weighted by position
                 let weight = 1.0 / (i as f32 + 1.0);
                 vec[j] += val * weight;
             }
         }
 
-        // L2 Normalization to stabilize the projection
         let sum_sq = vec.iter().map(|x| x * x).sum::<f32>();
         if sum_sq > 0.0 {
             let norm = sum_sq.sqrt();
@@ -173,12 +198,8 @@ impl AeonAlphaModel {
         Ok(vec)
     }
 
-    /// ⚓ Semantic Anchor Dictionary
-    /// Tiny pre-baked dictionary for core AEON primitives.
     fn get_semantic_anchor(word: &str) -> Vec<f32> {
         let mut anchor = vec![0.0f32; Self::DIM];
-
-        // 🧪 Zero-Config Semantic Mapping
         let category = match word {
             "status" | "health" | "state" | "check" | "hardware" | "system" | "report" => 0,
             "version" | "ver" | "build" | "engine" | "revision" => 1,
@@ -188,22 +209,17 @@ impl AeonAlphaModel {
             "scout" | "search" | "find" | "look" | "discover" | "mcp" => 5,
             "reason" | "think" | "solve" | "complex" | "calculate" => 6,
             "fix" | "heal" | "repair" | "audit" | "compliance" => 7,
-            _ => 99, // Unknown / Noise
+            _ => 99,
         };
 
         if category < 10 {
-            // Project into category-specific DIM segments
             let start = category * 10;
-            for j in start..start+10 {
-                anchor[j] = 1.0;
-            }
+            for j in start..start+10 { anchor[j] = 1.0; }
         } else {
-            // Deterministic Noise (Fall back to hash for unknown words)
             let mut h = 0u32;
             for b in word.as_bytes() { h = h.wrapping_add(*b as u32); }
             anchor[(h as usize) % Self::DIM] = 0.5;
         }
-
         anchor
     }
 }

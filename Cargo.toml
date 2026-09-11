@@ -1,6 +1,6 @@
 [package]
 name = "aeon-engine"
-version = "0.1.2022707"
+version = "0.1.2022708"
 edition = "2024"
 authors = ["IntelliBitz", "Muthu Ramadoss", "AEON EAI Core"]
 description = "aeon-engine: EAI: Exponential Intelligence for Any AI. - GAWD, GEMI & GMCP Multi-Agent Engine"
@@ -20,6 +20,7 @@ rustyline = "15.0"
 wasmer = { version = "3.1", features = ["cranelift", "sys"] }
 wasmer-wasi = "3.1"
 base64 = "0.22"
+once_cell = "1.19"
 
 [features]
 default = []

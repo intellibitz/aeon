@@ -3,36 +3,55 @@
 
 use anyhow::{Result, anyhow};
 use std::path::{Path, PathBuf};
+use std::sync::{Arc, Mutex};
+use std::collections::HashMap;
+use once_cell::sync::Lazy;
 use super::alpha::AeonAlphaModel;
 
 pub struct AeonPulse;
 
+static REFLEX_CACHE: Lazy<Arc<Mutex<HashMap<String, String>>>> = Lazy::new(|| {
+    Arc::new(Mutex::new(HashMap::new()))
+});
+
 impl AeonPulse {
     /// Pure Neural Intent Resolution
-    /// Eliminates Rule 11 violations by delegating all reasoning to trained semantic tensors.
     pub fn reason(prompt: &str, workspace: &Path) -> Result<String> {
+        let prompt_trimmed = prompt.trim();
+
+        // ⚡ Sub-100μs Reflex Cache
+        {
+            let cache = REFLEX_CACHE.lock().unwrap();
+            if let Some(cached_action) = cache.get(prompt_trimmed) {
+                return Ok(cached_action.clone());
+            }
+        }
+
         let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
         let global_dir = home.join(".aeon");
 
         // 🧠 Neural Reflex Attempt
         if let Ok(model) = AeonAlphaModel::load(&global_dir) {
-            match model.predict_intent(prompt) {
+            match model.predict_intent(prompt_trimmed) {
                 Ok(neural_action) => {
-                    // If it's a directory action, we still need to ground the path
-                    if neural_action.contains("list_directory") {
-                        return Ok(format!("ACTION: list_directory {}", workspace.display()));
+                    let mut final_action = neural_action;
+                    if final_action.contains("list_directory") {
+                        final_action = format!("ACTION: list_directory {}", workspace.display());
                     }
-                    return Ok(neural_action);
+
+                    // Populate Cache
+                    let mut cache = REFLEX_CACHE.lock().unwrap();
+                    cache.insert(prompt_trimmed.to_string(), final_action.clone());
+
+                    return Ok(final_action);
                 },
                 Err(e) => {
-                    // 🚀 Deterministic Escalation: If confidence is low, escalate to Tier 2
                     eprintln!("🧠 [Tier 0 Reflex] Escalating due to: {}", e);
                     return Err(anyhow!("Low confidence reflex. Escalating to Tier 2 Deep Reasoning..."));
                 }
             }
         }
 
-        // 🚀 Evolutionary Transition: If reflex weights missing, escalate
         Err(anyhow!("Pulse Brain: Neural substrate missing. Transitioning to Tier 2..."))
     }
 }
