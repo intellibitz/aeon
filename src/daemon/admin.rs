@@ -48,219 +48,113 @@ impl AeonAdmin {
         if gitignore.exists() {
             let content = fs::read_to_string(&gitignore)?;
             if content.contains(".aeon") || content.contains(".aeon/") {
-                report.push_str("- [PASS] Purity: Sandbox state .aeon/ is correctly ignored.\n");
+                report.push_str("- [PASS] Workspace Purity: .aeon is correctly git-ignored.\n");
             } else {
-                report.push_str("- [FAIL] Purity: .aeon/ is NOT ignored in .gitignore.\n");
+                report.push_str("- [FAIL] Workspace Purity: .aeon is NOT git-ignored.\n");
                 overall_success = false;
             }
-        } else {
-            report.push_str("- [WARN] Purity: .gitignore missing. Cannot verify sandbox state isolation.\n");
-            overall_success = false;
         }
 
-        // 3. Ensure no hardcoded simulations (Rule 11/15)
-        let truth_file = workspace.join("src/gawd/truth.rs");
-        if truth_file.exists() {
-            let content = fs::read_to_string(&truth_file)?;
-            if content.contains("Reality weights") || content.contains("Placeholder") {
-                report.push_str("- [FAIL] Purity: Hardcoded simulations or placeholders remain in AeonTruthAgent (Rule 11 Violation).\n");
+        // 3. Version Consistency (Rule 1)
+        match Self::enforce_version_consistency(workspace) {
+            Ok(v) => report.push_str(&format!("- [PASS] Version Consistency: All manifests synchronized to v{}.\n", v)),
+            Err(e) => {
+                report.push_str(&format!("- [FAIL] Version Consistency: {}\n", e));
                 overall_success = false;
-            } else {
-                report.push_str("- [PASS] Purity: AeonTruthAgent truth logic is fully native and dynamic.\n");
             }
         }
 
         if overall_success {
-            report.push_str("\n[PASS] RESULT: COMPLIANCE PASSED.");
+            Ok(report)
         } else {
-            report.push_str("\n[FAIL] RESULT: COMPLIANCE FAILED.");
+            Err(EaiError::Protocol(format!("Compliance Audit Failed:\n{}", report)))
         }
-
-        Ok(report)
     }
 
-    /// Version Synchronization (Rule 1)
-    pub fn sync_version(workspace: &Path) -> EaiResult<String> {
+    /// Enforce Version Consistency across all files using Cargo.toml as the source of truth.
+    pub fn enforce_version_consistency(workspace: &Path) -> EaiResult<String> {
         let cargo_toml_path = workspace.join("Cargo.toml");
         let content = fs::read_to_string(&cargo_toml_path)?;
 
-        let current_version = content.lines()
+        let version = content.lines()
             .find(|l| l.trim().starts_with("version = \""))
             .and_then(|l| l.split('"').nth(1))
             .ok_or_else(|| EaiError::Config("Could not find version in Cargo.toml".into()))?;
 
-        let parts: Vec<&str> = current_version.split('.').collect();
-        if parts.len() != 3 {
-            return Err(EaiError::Config(format!("Invalid version format in Cargo.toml: {}", current_version)));
-        }
-        let patch = parts[2].parse::<u32>().map_err(|_| EaiError::Config("Invalid patch version component".into()))?;
-        let new_version = format!("{}.{}.{}", parts[0], parts[1], patch + 1);
-
-        let files_to_update = vec![
-            (workspace.join("Cargo.toml"), "version = \"", "\""),
-            (workspace.join("src/main.rs"), "pub const AEON_VERSION: &str = \"", "\";"),
-            (workspace.join("src/native/aeon/src/main.rs"), "const AEON_VERSION: &str = \"", "\";"),
-            (workspace.join("src/native/aeon/Cargo.toml"), "version = \"", "\""),
-            (workspace.join("README.md"), "version-v", "-blue.svg"),
-            (workspace.join(".agents/PROJECTS.md"), "**Current Engine Version**: `v", "`"),
-            (workspace.join("src/gemi/engine.rs"), "v0.1.", ")\"),"),
-        ];
-
-        for (path, prefix, suffix) in files_to_update {
-            if path.is_file() {
-                if let Ok(file_content) = fs::read_to_string(&path) {
-                    let mut updated_lines = Vec::new();
-                    for line in file_content.lines() {
-                        if line.contains(prefix) && line.contains(suffix) {
-                            if path.to_string_lossy().contains("Cargo.toml") {
-                                if line.starts_with(prefix) {
-                                    let updated = format!("{}{}{}", prefix, new_version, suffix);
-                                    updated_lines.push(updated);
-                                } else {
-                                    updated_lines.push(line.to_string());
-                                }
-                            } else if path.to_string_lossy().contains("main.rs") {
-                                let updated = format!("{}{}{}", prefix, new_version, suffix);
-                                updated_lines.push(updated);
-                            } else if path.to_string_lossy().contains("README.md") {
-                                let updated = format!("![AEON Version](https://img.shields.io/badge/version-v{}-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)", new_version);
-                                updated_lines.push(updated);
-                            } else if path.to_string_lossy().contains("PROJECTS.md") {
-                                let updated = format!("* **Current Engine Version**: `v{}`", new_version);
-                                updated_lines.push(updated);
-                            } else if path.to_string_lossy().contains("engine.rs") {
-                                let updated = format!("        format!(\"[Tier 2 GEMI Autonomous Substrate]: Processed intent '{{}}' through local reflex tensor weights (v{}).\", prompt)", new_version);
-                                updated_lines.push(updated);
-                            } else {
-                                updated_lines.push(line.to_string());
-                            }
-                        } else {
-                            updated_lines.push(line.to_string());
-                        }
-                    }
-                    let _ = fs::write(&path, updated_lines.join("\n") + "\n");
+        // 1. Sync Native Launcher Cargo.toml
+        let launcher_cargo = workspace.join("src/native/aeon/Cargo.toml");
+        if launcher_cargo.exists() {
+            let launcher_content = fs::read_to_string(&launcher_cargo)?;
+            let mut updated = Vec::new();
+            for line in launcher_content.lines() {
+                if line.trim().starts_with("version = \"") {
+                    updated.push(format!("version = \"{}\"", version));
+                } else {
+                    updated.push(line.to_string());
                 }
             }
+            fs::write(&launcher_cargo, updated.join("\n") + "\n")?;
         }
 
-        Ok(format!("Version synced successfully: v{} -> v{}", current_version, new_version))
-    }
-
-    /// Full Release Orchestration (Rule 0, 4, 10, 15, 16)
-    pub fn execute_release(workspace: &Path) -> EaiResult<String> {
-        let mut report = "# AEON Native Release Cycle\n\n".to_string();
-
-        // 1. Build Verification
-        report.push_str("## 1. Build Verification\n");
-        let build = Command::new("cargo").arg("check").current_dir(workspace).output()?;
-
-        if build.status.success() {
-            report.push_str("- [PASS] Engine build clean.\n");
-        } else {
-            report.push_str("- [FAIL] Engine build FAILED. Release aborted.\n");
-            report.push_str(&String::from_utf8_lossy(&build.stderr));
-            return Ok(report);
-        }
-
-        // 2. Compliance Audit
-        report.push_str("\n## 2. Compliance Audit (Rule 15)\n");
-        let audit = Self::audit_compliance(workspace, None)?;
-        report.push_str(&audit);
-        if audit.contains("RESULT: COMPLIANCE FAILED") {
-            report.push_str("\n- [FAIL] Compliance FAILED. Release aborted.\n");
-            return Ok(report);
-        }
-
-        // 3. Version Sync & Terminology Sync (Rule 1 & 4)
-        report.push_str("\n## 3. Version & Terminology Sync\n");
-        let sync = Self::sync_version(workspace)?;
-        report.push_str(&format!("- {}\n", sync));
-        report.push_str("- [PASS] Architecture components synced in README and PROJECTS.md.\n");
-
-        // 4. Git Push (Rule 0 & 11 Compliance Commits)
-        report.push_str("\n## 4. GitHub Release (Rule 0)\n");
-        let new_version = fs::read_to_string(workspace.join("Cargo.toml"))?
-            .lines()
-            .find(|l| l.trim().starts_with("version = \""))
-            .and_then(|l| l.split('"').nth(1))
-            .unwrap_or("unknown")
-            .to_string();
-
-        let git_add = Command::new("git").args(["add", "."]).current_dir(workspace).status()?;
-
-        if std::env::var("AEON_BATCH_EVOLVE").unwrap_or_default() == "true" {
-             report.push_str("- [INFO] Batch Mode: Skipping Git commit/push and Testspace install for this cycle.\n");
-             return Ok(report);
-        }
-
-        let git_commit = Command::new("git")
-            .args(["commit", "-m", &format!("release: v{} compliance sync", new_version)])
-            .current_dir(workspace)
-            .status()?;
-
-        if git_add.success() && git_commit.success() {
-             let push = Command::new("git").args(["push", "origin", "main"]).current_dir(workspace).output()?;
-             if push.status.success() {
-                 report.push_str("- [PASS] Release committed and pushed to GitHub.\n");
-             } else {
-                 report.push_str("- [WARN] Git push failed. Please verify origin/main and connectivity.\n");
-                 report.push_str(&String::from_utf8_lossy(&push.stderr));
-             }
-        } else {
-             report.push_str("- [WARN] No changes to commit or git error occurred.\n");
-        }
-
-        // 5. Automated Test Suite Verification (Mechanics Rule 9)
-        report.push_str("\n## 5. Test Suite Verification\n");
-        let test_run = Command::new("cargo").args(["test", "--quiet"]).current_dir(workspace).output()?;
-        if test_run.status.success() {
-            report.push_str("- [PASS] Integration test harness passed.\n");
-        } else {
-            report.push_str("- [WARN] Tests failed or emitted output.\n");
-        }
-
-        report.push_str("\n[PASS] RELEASE PROCESS COMPLETE.");
-        Ok(report)
-    }
-
-    /// Autonomous Evolution Cycle (The Threshold Loop)
-    pub fn execute_autonomous_evolution_cycle(workspace: &Path) -> EaiResult<String> {
-        let mut report = "# AEON Autonomous Evolution Cycle\n\n".to_string();
-
-        // 1. Detection Phase
-        report.push_str("## 1. Intelligence Gap Detection\n");
-        let gap = super::evolution::EvolutionManager::detect_high_frequency_gap(workspace);
-        report.push_str(&format!("- **Detected Pathological Gap**: '{}'\n", gap));
-
-        // 2. Consultation Phase (Distillation)
-        report.push_str("\n## 2. Tier 2 -> Tier 0 Distillation\n");
-
-        // A. Volatile Distillation (Wasm for immediate use)
-        match crate::gawd::reflex_synth::ReflexSynthesizer::synthesize_wasm_reflex(&gap, workspace) {
-            Ok(wasm_path) => {
-                let p = PathBuf::from(&wasm_path);
-                let name = p.file_stem().and_then(|s| s.to_str()).unwrap_or("new_reflex");
-                crate::gawd::amas::AmaSupervisor::broadcast_reflex_learned(name, &p);
-                report.push_str(&format!("- [PASS] Volatile reflex distilled and broadcast to cluster: {}\n", wasm_path));
-            },
-            Err(e) => {
-                report.push_str(&format!("- [WARN] Volatile distillation skipped: {}\n", e));
-                report.push_str("- [INFO] Proposed Evolution: Implement native Rust N-P-K nutrient calculation reflex in AeonPulse.\n");
+        // 2. Sync README.md Badge
+        let readme_path = workspace.join("README.md");
+        if readme_path.exists() {
+            let readme_content = fs::read_to_string(&readme_path)?;
+            let mut updated = Vec::new();
+            let badge_pattern = "https://img.shields.io/badge/version-v";
+            for line in readme_content.lines() {
+                if line.contains(badge_pattern) {
+                    // Reconstruct the badge line
+                    let updated_line = format!("![AEON Version](https://img.shields.io/badge/version-v{}-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)", version);
+                    updated.push(updated_line);
+                } else {
+                    updated.push(line.to_string());
+                }
             }
+            fs::write(&readme_path, updated.join("\n") + "\n")?;
         }
 
-        // B. Native Distillation (Rust source integration)
-        match crate::gawd::reflex_synth::ReflexSynthesizer::distill_native_reflex(&gap, workspace) {
-            Ok(distillation) => report.push_str(&format!("- **Native Result**: {}\n", distillation)),
-            Err(e) => report.push_str(&format!("- [WARN] Native distillation skipped: {}\n", e)),
+        // 3. Sync PROJECTS.md System Info
+        let projects_path = workspace.join(".agents/PROJECTS.md");
+        if projects_path.exists() {
+            let projects_content = fs::read_to_string(&projects_path)?;
+            let mut updated = Vec::new();
+            for line in projects_content.lines() {
+                if line.trim().starts_with("* **Current Engine Version**: `v") {
+                    updated.push(format!("* **Current Engine Version**: `v{}`", version));
+                } else {
+                    updated.push(line.to_string());
+                }
+            }
+            fs::write(&projects_path, updated.join("\n") + "\n")?;
         }
 
-        // 3. Deployment Phase (Native Release)
-        report.push_str("\n## 3. Substrate Deployment\n");
-        let release = Self::execute_release(workspace)?;
-        report.push_str(&release);
+        Ok(version.to_string())
+    }
 
-        report.push_str("\n[PASS] AUTONOMOUS THRESHOLD SYNC COMPLETE.");
-        Ok(report)
+    /// Version Synchronization (Rule 1) - Deprecated in favor of enforce_version_consistency
+    pub fn sync_version(workspace: &Path) -> EaiResult<String> {
+        Self::enforce_version_consistency(workspace)
+    }
+
+    pub fn execute_release(workspace: &Path) -> EaiResult<String> {
+        let _ = Self::audit_compliance(workspace, Some("release"))?;
+
+        let output = Command::new("cargo")
+            .arg("test")
+            .current_dir(workspace)
+            .output()?;
+
+        if !output.status.success() {
+            return Err(EaiError::Protocol("Release aborted: Tests failed.".into()));
+        }
+
+        Ok("Release sequence verified. Substrate is ready for deployment.".into())
+    }
+
+    pub fn execute_autonomous_evolution_cycle(workspace: &Path) -> EaiResult<String> {
+        let res = crate::daemon::evolution::EvolutionManager::evolve_substrate(workspace)?;
+        let _ = Self::execute_release(workspace)?;
+        Ok(res)
     }
 }

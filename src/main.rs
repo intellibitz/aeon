@@ -114,6 +114,36 @@ fn main() {
             let cfg = crate::sandbox::manager::AeonConfig::load(&global_dir);
             GemiServer::start_http_server(cwd.clone(), cfg.gemi_port);
         }
+        "audit" => {
+            match crate::daemon::admin::AeonAdmin::audit_compliance(&cwd, None) {
+                Ok(report) => println!("{}", report),
+                Err(e) => {
+                    eprintln!("{}", e);
+                    std::process::exit(1);
+                }
+            }
+        }
+        "admin" => {
+            let sub_cmd = args.get(1).map(|s| s.as_str()).unwrap_or("help");
+            match sub_cmd {
+                "sync" => {
+                    match crate::daemon::admin::AeonAdmin::enforce_version_consistency(&cwd) {
+                        Ok(v) => println!("Version synchronization complete: v{}", v),
+                        Err(e) => eprintln!("Sync failed: {}", e),
+                    }
+                }
+                "audit" => {
+                    match crate::daemon::admin::AeonAdmin::audit_compliance(&cwd, None) {
+                        Ok(report) => println!("{}", report),
+                        Err(e) => {
+                            eprintln!("{}", e);
+                            std::process::exit(1);
+                        }
+                    }
+                }
+                _ => println!("Admin commands: sync, audit"),
+            }
+        }
         "clean" => {
             let _ = std::fs::remove_dir_all(cwd.join("target"));
             println!("Workspace build artifacts cleaned.");
