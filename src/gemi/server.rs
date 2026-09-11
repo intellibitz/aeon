@@ -126,13 +126,9 @@ impl GemiServer {
 
                     let content = if ToolRegistry::exists(&tool_name) {
                         ToolRegistry::execute_tool(&tool_name, tool_arg, &workspace)
-                    } else if tool_name == "domain" || tool_name == "domains" {
-                        "Intelligence Substrates for World Missions:\n  Agronomy\n  Clinical Medical\n  Legal & Compliance\n  Education & Science\n  Renewable Energy\n  Skilled Trades & Building Codes\n  Creative & Media\n  Home & Family\n  Public Safety\n  Enterprise & Operations\n  Software & Systems Engineering\n  Universal Substrate".to_string()
                     } else {
                         let ama = AmaMasterAgent::new();
-                        let (badge, badge_desc) = crate::gawd::agents::AeonUserAgent::detect_domain_badge(trimmed_prompt);
-                        let clean_ans = ama.solve_clean(trimmed_prompt, &workspace, crate::AEON_VERSION);
-                        let final_resp = format!("Substrate Mode: {} ({})\n\n{}", badge, badge_desc, clean_ans);
+                        let final_resp = ama.solve_clean(trimmed_prompt, &workspace, crate::AEON_VERSION);
                         crate::sandbox::manager::AeonMemory::save_interaction(&workspace, trimmed_prompt, &final_resp);
                         final_resp
                     };

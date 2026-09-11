@@ -39,7 +39,7 @@ impl WasiSandbox {
     pub fn execute_hardened_command(cmd: &str, workspace: &Path) -> EaiResult<String> {
         // In a real production system, this would translate 'sh' commands to a restricted WASI shell.
         // For bootstrap, we perform enhanced pre-execution auditing.
-        crate::gawd::security::SecurityDetector::audit_action("exec_command", cmd)?;
+        crate::gawd::security::SecurityDetector::audit_action("exec_command", cmd, workspace)?;
 
         let out = std::process::Command::new("sh")
             .arg("-c")

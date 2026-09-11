@@ -48,6 +48,14 @@ pub struct NeuralCheckpoint {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GovernancePatterns {
+    pub destructive_commands: Vec<String>,
+    pub critical_system_paths: Vec<String>,
+    pub secret_tokens: Vec<String>,
+    pub exfiltration_vectors: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AeonConfig {
     pub gmcp_port: u16,
     pub gemi_port: u16,
@@ -62,6 +70,7 @@ pub struct AeonConfig {
     pub cloud_scout_timeout_secs: u64,
     pub beacon_interval_secs: u64,
     pub local_scan_paths: Vec<String>,
+    pub governance: GovernancePatterns,
 }
 
 impl Default for AeonConfig {
@@ -121,6 +130,45 @@ impl Default for AeonConfig {
             cloud_scout_timeout_secs: 8,
             beacon_interval_secs: 30,
             local_scan_paths: Vec::new(),
+            governance: GovernancePatterns {
+                destructive_commands: vec![
+                    "rm -rf /".to_string(),
+                    "rm -rf $HOME".to_string(),
+                    "rm -rf ~".to_string(),
+                    "mkfs".to_string(),
+                    "dd if=".to_string(),
+                    "> /dev/sda".to_string(),
+                    ":(){ :|:& };:".to_string(),
+                    "chmod -R 777 /".to_string(),
+                    "chown -R".to_string(),
+                    "shred".to_string(),
+                ],
+                critical_system_paths: vec![
+                    "/etc/passwd".to_string(),
+                    "/etc/shadow".to_string(),
+                    "/boot".to_string(),
+                    "/proc".to_string(),
+                    "/sys".to_string(),
+                    "/dev".to_string(),
+                ],
+                secret_tokens: vec![
+                    "sk-".to_string(),
+                    "ghp_".to_string(),
+                    "AIza".to_string(),
+                    "xoxb-".to_string(),
+                    "AWS_ACCESS_KEY_ID".to_string(),
+                    "AWS_SECRET_ACCESS_KEY".to_string(),
+                    "-----BEGIN RSA PRIVATE KEY-----".to_string(),
+                ],
+                exfiltration_vectors: vec![
+                    "curl -x post".to_string(),
+                    "wget --post-data".to_string(),
+                    "netcat".to_string(),
+                    "nc -e".to_string(),
+                    "/dev/tcp/".to_string(),
+                    "base64 | curl".to_string(),
+                ],
+            },
         }
     }
 }

@@ -36,8 +36,8 @@ impl AmaMasterAgent {
 
     pub fn solve(&self, goal: &str, workspace: &Path, version: &str) -> EaiResult<AmaMissionReport> {
         // 1. Pre-Execution Governance Audit
-        super::safety::SafetyDetector::audit_action("AMA_SOLVE", goal)?;
-        super::security::SecurityDetector::audit_action("AMA_SOLVE", goal)?;
+        super::safety::SafetyDetector::audit_action("AMA_SOLVE", goal, workspace)?;
+        super::security::SecurityDetector::audit_action("AMA_SOLVE", goal, workspace)?;
         super::model_supervisor::ModelSupervisor::audit_and_prepare_models(workspace)?;
 
         // 2. Swarm Supervision (Tier 1 AOA Dispatch)
@@ -116,8 +116,8 @@ impl AmaMasterAgent {
 
         // Step 1: Governance
         let _ = feedback_tx.send("[AMA] Auditing safety and security protocols...".to_string());
-        super::safety::SafetyDetector::audit_action("AMA_SOLVE", goal)?;
-        super::security::SecurityDetector::audit_action("AMA_SOLVE", goal)?;
+        super::safety::SafetyDetector::audit_action("AMA_SOLVE", goal, workspace)?;
+        super::security::SecurityDetector::audit_action("AMA_SOLVE", goal, workspace)?;
 
         // Step 2: Model Readiness
         let _ = feedback_tx.send("[AMA] Verifying neural substrate readiness...".to_string());
@@ -165,14 +165,14 @@ impl AmaMasterAgent {
                 Ok(report.final_answer)
             }
             Err(e) => {
-                // FAILURE Triggers the Motion Rule (Rule 16)
+                // FAILURE: Report gap (Rule 14)
                 crate::sandbox::manager::AeonAuditLogger::log_event(workspace, "INTELLIGENCE_GAP", &format!("Goal '{}' failed: {}", goal, e));
 
                 if e.to_string().contains("not found") || e.to_string().contains("no models") {
-                    crate::sandbox::manager::AeonAuditLogger::log_event(workspace, "INTELLIGENCE_GAP", "No models found. Evolution required.");
+                    crate::sandbox::manager::AeonAuditLogger::log_event(workspace, "INTELLIGENCE_GAP", "No models found. Substrate expansion required by Creator.");
                 }
 
-                // If in evolution mode, return specific protocol failure that triggers sub-agent hardening
+                // Report gap; user intent does NOT trigger Motion Rule
                 Err(e)
             }
         }

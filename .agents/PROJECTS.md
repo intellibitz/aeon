@@ -3,7 +3,7 @@
 ## System Information
 
 * **Project Name**: `aeon`
-* **Current Engine Version**: `v0.1.2022685`
+* **Current Engine Version**: `v0.1.2022686`
 
 ## Architecture
 
@@ -65,4 +65,4 @@
 11. **Dynamic Configuration Enforcement**: Zero hardcoded static configurations in code. All engine, server, port, model, and network parameters must be dynamic and loaded from configuration files (`~/.aeon/config.json`, `~/.aeon/env`, `~/.aeon/mcp_config.json`, `~/.aeon/global_mcp_registry.json`) with automated dynamic defaults.
 12. **Workspace Purity Enforcement**: The main workspace must remain free of temporary artifacts and test pollutants. All runtime tests must use isolated ephemeral directories or `.aeon/`.
 13. **Full Compliance Enforcement on Push**: Before every GitHub push, the agent MUST apply all Agent Instructions and AEON Execution Rules to the entire codebase. This includes verifying version synchronization, auditing security patterns, enforcing workspace purity, and ensuring that no hardcoded simulations remain.
-14. **Intent & Creator Auto-Push**: As a result of fulfilling an intent or executing a creator directive through the Motion Rule, when the `aeon` codebase changes, the agent MUST automatically push the changes to GitHub following a successful clean build and version increment.
+14. **Intent & Creator Evolution Rule**: User intents never modify the substrate. Fulfilling a creator directive or architectural goal through the Motion Rule triggers automated version increment and push to GitHub after clean build.

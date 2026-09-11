@@ -1,6 +1,6 @@
 // GAWD Agent Fleet: Universal Multi-Agent Swarm Logic
 // RULE 11: Agents must add functionality directly to the aeon engine.
-// RULE 20: Creator agents strictly build and improve the aeon substrate.
+// RULE 31: Substrate Purity & Meta-Only Mandate
 
 use std::sync::Arc;
 use std::path::{Path, PathBuf};
@@ -94,18 +94,6 @@ impl GawdAgent for AeonUserAgent {
     }
 }
 
-impl AeonUserAgent {
-    pub fn detect_domain_badge(query: &str) -> (String, String) {
-        if query.contains("crop") || query.contains("soil") {
-            ("AgriTech".into(), "Agriculture Intelligence Active".into())
-        } else if query.contains("git") || query.contains("code") {
-            ("DevOps".into(), "Software Engineering Active".into())
-        } else {
-            ("General".into(), "Universal Multi-Agent Engine".into())
-        }
-    }
-}
-
 struct AeonContextAgent;
 impl GawdAgent for AeonContextAgent {
     fn name(&self) -> String { "AeonContextAgent".to_string() }
@@ -130,11 +118,10 @@ impl GawdAgent for AeonUniversalSubstrateAgent {
 struct AeonSafetyAgent;
 impl GawdAgent for AeonSafetyAgent {
     fn name(&self) -> String { "AeonSafetyAgent".to_string() }
-    fn execute(&self, goal: &str, _workspace: &Path) -> EaiResult<String> {
-        if goal.contains("rm -rf /") {
-            Ok("VIOLATION: Destructive command detected. Execution blocked by AeonSafetyAgent.".to_string())
-        } else {
-            Ok("SAFETY_AUDIT: Passed.".to_string())
+    fn execute(&self, goal: &str, workspace: &Path) -> EaiResult<String> {
+        match super::safety::SafetyDetector::audit_action("AMA_SOLVE", goal, workspace) {
+            Ok(_) => Ok("SAFETY_AUDIT: Passed.".to_string()),
+            Err(e) => Ok(format!("VIOLATION: {}", e)),
         }
     }
 }
@@ -143,11 +130,6 @@ struct AeonTruthAgent;
 impl GawdAgent for AeonTruthAgent {
     fn name(&self) -> String { "AeonTruthAgent".to_string() }
     fn execute(&self, goal: &str, workspace: &Path) -> EaiResult<String> {
-        let aeon_dir = workspace.join(".aeon");
-        if !aeon_dir.exists() {
-            let _ = std::fs::create_dir_all(&aeon_dir);
-        }
-
         let prompt = format!("REALITY_CHECK: {}\n\n[INSTRUCTION]: Verify the truth and factual grounding of the goal.", goal);
         let ws = workspace.to_path_buf();
         if let Ok(res) = crate::gemi::pulse::AeonPulse::reason(&prompt, &ws) {
@@ -168,12 +150,5 @@ mod tests {
         assert!(!fleet.is_empty());
         assert!(fleet.iter().any(|a| a.name == "AeonUniversalSubstrateAgent"));
         assert_eq!(fleet[0].provider, "AEON Hub");
-    }
-
-    #[test]
-    fn test_domain_badge() {
-        let (badge, desc) = AeonUserAgent::detect_domain_badge("crop soil pH");
-        assert_eq!(badge, "AgriTech");
-        assert!(desc.contains("Agriculture"));
     }
 }

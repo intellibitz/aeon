@@ -26,7 +26,7 @@ pub struct AeonAxiomRule {
 pub struct AlphaSelf;
 
 impl AlphaSelf {
-    pub const VERSION: &'static str = "0.1.2022683";
+    pub const VERSION: &'static str = "0.1.2022686";
     pub const CORE_PARADIGM: &'static str = "EAI (Exponential Intelligence for Any AI) - Intelligence Reflex & Execution Substrate";
 
     pub const RULES: &[AeonAxiomRule] = &[
@@ -39,9 +39,9 @@ impl AlphaSelf {
         AeonAxiomRule { id: 7, title: "No Secret Leaks", imperative: "Zero tolerance for leaking tokens, credentials, API keys, or sensitive configuration data." },
         AeonAxiomRule { id: 11, title: "Native Integration", imperative: "Agents must add functionality directly to the aeon engine via ToolRegistry." },
         AeonAxiomRule { id: 13, title: "Clean Workspace & State Isolation", imperative: "Maintain clean workspace. Ephemeral scaffolding uses tempdirs or local git-ignored state (.aeon/)." },
-        AeonAxiomRule { id: 14, title: "Native Intent Evolutionary Protocol", imperative: "When provided with a user intent, aeon executes it. Failure triggers the Motion Rule to natively harden and add required functionality." },
-        AeonAxiomRule { id: 15, title: "Creator Aspiration Rule", imperative: "When provided with a creator directive, agent focuses on future aeon architecture, triggering the Motion Rule." },
-        AeonAxiomRule { id: 16, title: "Motion Rule", imperative: "Triggered by Intent failure or Creator aspiration: Detect gap, synthesize native Rust code, compile/test via cargo test, distill and deploy." },
+        AeonAxiomRule { id: 14, title: "Native Intent Meta-Execution Protocol", imperative: "When provided with a user intent, aeon executes it. Failure or gaps are reported; user intents never trigger the Motion Rule or modify the substrate." },
+        AeonAxiomRule { id: 15, title: "Creator Aspiration Rule", imperative: "When provided with a creator directive, agent focuses on future aeon architecture, exclusively triggering the Motion Rule." },
+        AeonAxiomRule { id: 16, title: "Motion Rule", imperative: "Triggered exclusively by Creator aspiration or directive: Detect gap, synthesize native Rust code, compile/test via cargo test, distill and deploy." },
         AeonAxiomRule { id: 17, title: "Anti-Hardcoding Mandate", imperative: "Absolute prohibition on hardcoding query-specific string matchers or mock intent handlers." },
         AeonAxiomRule { id: 18, title: "Creator Reality Check", imperative: "If the creators hallucinate or make requests which are outside of reality that cannot be fulfilled, correct them and guide them to the right path." },
         AeonAxiomRule { id: 19, title: "Epistemic Chain of Truth", imperative: "Alpha-Self Rule: The source code is the ultimate truth. Alpha-User Rule: Alpha-Self is the ultimate truth." },
@@ -56,6 +56,7 @@ impl AlphaSelf {
         AeonAxiomRule { id: 28, title: "Full Delegation & Evolutionary Substrate Mandate", imperative: "AEON fully delegates deep reasoning to Tier 2 GEMI models and all specialized tooling to MCP. AEON source code exists strictly to evolve AEON substrate capabilities." },
         AeonAxiomRule { id: 29, title: "Dependency & Configuration Meta Rule", imperative: "Any component that requires any external dependency, environment configuration, or remote asset is classified and orchestrated strictly as Meta." },
         AeonAxiomRule { id: 30, title: "Self-Evolution Axiom", imperative: "AEON source code exists only to improve and evolve AEON. It is a self-referential, dynamic, and meta-programmable intelligence substrate." },
+        AeonAxiomRule { id: 31, title: "Substrate Purity & Meta-Only Mandate", imperative: "Absolute prohibition on hardcoding domain-specific knowledge, string matchers, or static intent handlers. Domain intelligence is strictly dynamic." },
     ];
 
     pub const COMPONENTS: &[AeonComponentSpec] = &[

