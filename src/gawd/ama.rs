@@ -70,7 +70,18 @@ impl AmaMasterAgent {
                 }
             };
 
-            // 4. Reality Verification (Rule 15)
+            // 4. Axiomatic Alignment Check (Rule 15 Hardening)
+            let final_answer = match crate::gemi::engine::GemiEngine::verify_axiomatic_alignment(&final_answer, workspace) {
+                Ok(ans) => ans,
+                Err(e) => {
+                    retry_count += 1;
+                    crate::sandbox::manager::AeonAuditLogger::log_event(workspace, "AXIOMATIC_VIOLATION", &e.to_string());
+                    current_goal = format!("{}\n\n[RECURSIVE_CORRECTION]: Your previous response violated substrate axioms: {}\nPlease ensure professional, real code that maintains substrate purity.", goal, e);
+                    continue;
+                }
+            };
+
+            // 5. Reality Verification (Rule 15)
             match super::truth::TruthTransformer::verify_mission_reality(&current_goal, "AMA_SOLVE", &final_answer, workspace) {
                 Ok(verified_answer) => {
                     return Ok(AmaMissionReport {

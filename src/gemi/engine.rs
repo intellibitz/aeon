@@ -65,6 +65,28 @@ impl GemiEngine {
     pub fn generate_multimodal_vision(prompt: &str, image_path: &Path) -> String {
         format!("👁️ [aeon Native Vision]: {} -> {}", image_path.display(), prompt)
     }
+
+    /// ⚖️ Axiomatic Logic Verifier (Rule 15 Hardening)
+    /// Performs a micro-reasoning pass to ensure generated logic aligns with core AlphaSelf axioms.
+    pub fn verify_axiomatic_alignment(reasoning: &str, workspace: &Path) -> EaiResult<String> {
+        let audit_prompt = format!(
+            "REASONING_OUTPUT: {}\n\n[INSTRUCTION]: Audit this reasoning against Rules 5 (Professionalism), 10 (Real Code), and 31 (Substrate Purity). Report ONLY 'PASSED' or a specific list of violations.",
+            reasoning
+        );
+
+        // Tier 0 Reflex check first for high-speed audit
+        let (reflex, _) = super::reflex::ReflexEngine::try_solve(&audit_prompt, workspace);
+        if let super::reflex::ReflexDecision::Solved(action) = reflex {
+            if action.contains("PASSED") { return Ok(reasoning.to_string()); }
+        }
+
+        let audit_res = GemiEngine::generate_reasoning(&audit_prompt, workspace);
+        if audit_res.to_uppercase().contains("PASSED") {
+            Ok(reasoning.to_string())
+        } else {
+            Err(crate::error::EaiError::Governance(format!("Axiomatic Alignment Failed: {}", audit_res)))
+        }
+    }
 }
 
 pub struct MissionPlan {
