@@ -1,5 +1,6 @@
 // 100% Rust implementation for autonomous hardware profiling
 
+use std::sync::{Mutex, OnceLock};
 use serde::{Deserialize, Serialize};
 use candle_core::Device;
 
@@ -130,14 +131,23 @@ impl HardwareProfiler {
     }
 
     pub fn get_candle_device() -> Device {
-        if let Ok(dev) = Device::new_cuda(0) {
-            return dev;
+        // 🚀 Dynamic Device Refresh: Re-scan for acceleration if previously CPU-bound
+        static DEVICE_CACHE: OnceLock<Mutex<Device>> = OnceLock::new();
+        let cache = DEVICE_CACHE.get_or_init(|| Mutex::new(Device::Cpu));
+
+        let mut dev = cache.lock().unwrap();
+        if dev.is_cpu() {
+            if let Ok(cuda_dev) = Device::new_cuda(0) {
+                *dev = cuda_dev.clone();
+                return cuda_dev;
+            }
+            #[cfg(feature = "metal")]
+            if let Ok(metal_dev) = Device::new_metal(0) {
+                *dev = metal_dev.clone();
+                return metal_dev;
+            }
         }
-        #[cfg(feature = "metal")]
-        if let Ok(dev) = Device::new_metal(0) {
-            return dev;
-        }
-        Device::Cpu
+        dev.clone()
     }
 
     fn get_os_info() -> String {

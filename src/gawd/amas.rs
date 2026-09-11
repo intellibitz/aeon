@@ -29,6 +29,7 @@ pub struct ClusterPeerNode {
     pub node_type: String,
     pub is_active: bool,
     pub capabilities: Vec<String>,
+    pub registry_checksum: u64,
     pub latency_ms: u64,
     pub uptime_secs: u64,
     pub trust_score: f32,
@@ -48,6 +49,7 @@ impl AmaSupervisor {
                 node_type: "LOCAL_MASTER".to_string(),
                 is_active: true,
                 capabilities: vec!["CORE".to_string(), "INFERENCE".to_string(), "TOOLING".to_string()],
+                registry_checksum: crate::gawd::agents::AgentMetaRegistry::global().get_checksum(),
                 latency_ms: 0,
                 uptime_secs: 0,
                 trust_score: 1.0,
@@ -83,11 +85,18 @@ impl AmaSupervisor {
                                      vec!["CORE".into()]
                                  };
 
+                                 let checksum = if parts.len() > 2 {
+                                     parts[2].parse::<u64>().unwrap_or(0)
+                                 } else {
+                                     0
+                                 };
+
                                  let mut peers = t_shared.lock().unwrap();
                                  let addr_str = format!("{}:9090", src.ip());
                                  if let Some(p) = peers.iter_mut().find(|p| p.address == addr_str) {
                                      p.trust_score = (p.trust_score + 0.05).min(1.0);
                                      p.is_active = true;
+                                     p.registry_checksum = checksum;
                                  } else {
                                      peers.push(ClusterPeerNode {
                                          node_id: format!("aeon-peer-{}", src.ip()),
@@ -95,6 +104,7 @@ impl AmaSupervisor {
                                          node_type: if caps.contains(&"GPU".to_string()) { "WORKSTATION_NODE".into() } else { "PEER".into() },
                                          is_active: true,
                                          capabilities: caps,
+                                         registry_checksum: checksum,
                                          latency_ms: 0,
                                          uptime_secs: 0,
                                          trust_score: 0.6,
@@ -129,7 +139,7 @@ impl AmaSupervisor {
         }).collect();
 
         // 🚀 3. Cluster Consensus Protocol: Broadcast blackboard to high-tier peers
-        let nodes = Self::rank_reasoning_peers();
+        let nodes = Self::rank_peers_for_goal(goal);
         for node in nodes.iter().take(2) {
             if node.node_id != "aeon-local-master" {
                 let _ = Self::dispatch_peer_task(&node.address, "init_blackboard", goal);
@@ -211,6 +221,23 @@ impl AmaSupervisor {
         nodes.sort_by(|a, b| {
             let a_score = (a.trust_score * 0.4) + (a.latency_ms as f32 * -0.2);
             let b_score = (b.trust_score * 0.4) + (b.latency_ms as f32 * -0.2);
+            b_score.partial_cmp(&a_score).unwrap_or(std::cmp::Ordering::Equal)
+        });
+
+        nodes
+    }
+
+    /// 🚀 Cluster Intent Routing: Prioritizes peers with semantically relevant capabilities.
+    pub fn rank_peers_for_goal(_goal: &str) -> Vec<ClusterPeerNode> {
+        let mut nodes = Self::list_cluster_nodes();
+
+        // For local master, we know the semantic score.
+        // For peers, we currently use trust and hardware as proxies for "Generic Specialist" capability.
+        // In v0.2, we will exchange bloom-filters of peer registries for perfect routing.
+
+        nodes.sort_by(|a, b| {
+            let a_score = (a.trust_score * 0.5) + if a.node_type == "WORKSTATION_NODE" { 0.3 } else { 0.0 };
+            let b_score = (b.trust_score * 0.5) + if b.node_type == "WORKSTATION_NODE" { 0.3 } else { 0.0 };
             b_score.partial_cmp(&a_score).unwrap_or(std::cmp::Ordering::Equal)
         });
 

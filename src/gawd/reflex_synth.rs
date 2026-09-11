@@ -38,7 +38,7 @@ impl ReflexSynthesizer {
     }
 
     /// Synthesizes a volatile WebAssembly reflex (Tier 0 Evolution)
-    pub fn synthesize_wasm_reflex(intent: &str, workspace: &Path) -> EaiResult<String> {
+    pub fn synthesize_wasm_reflex(intent: &str, _workspace: &Path) -> EaiResult<String> {
         let home = std::env::var("HOME").or_else(|_| std::env::var("USERPROFILE")).map(PathBuf::from).unwrap_or_else(|_| PathBuf::from("."));
 
         // 1. Save backup to ~/.aeon/reflexes/
@@ -46,7 +46,7 @@ impl ReflexSynthesizer {
         let _ = fs::create_dir_all(&reflex_dir);
         let wasm_src = reflex_dir.join(format!("{}.rs", intent.replace(' ', "_")));
 
-        let struct_name = intent.split_whitespace().map(|s| s.to_string()).collect::<Vec<String>>().join("");
+        let _struct_name = intent.split_whitespace().map(|s| s.to_string()).collect::<Vec<String>>().join("");
         let code = format!(
             "#[no_mangle]\n\
             pub extern \"C\" fn execute_reflex() -> i32 {{\n\

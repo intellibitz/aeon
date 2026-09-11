@@ -81,18 +81,31 @@ pub struct AgentMetaRegistry {
 impl AgentMetaRegistry {
     pub fn global() -> &'static Self {
         static REGISTRY: OnceLock<AgentMetaRegistry> = OnceLock::new();
-        REGISTRY.get_or_init(|| {
-            let registry = AgentMetaRegistry {
+        let registry = REGISTRY.get_or_init(|| {
+            AgentMetaRegistry {
                 agents: Arc::new(Mutex::new(Vec::new())),
-            };
-            registry.load_or_provision();
-            registry
-        })
+            }
+        });
+        registry.load_or_provision();
+        registry
     }
 
     fn load_or_provision(&self) {
         let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
         let registry_path = home.join(".aeon/agent_registry.json");
+
+        // 🚀 Registry Hot-Reload: Check timestamp to avoid stale state
+        static LAST_LOAD: OnceLock<Mutex<std::time::SystemTime>> = OnceLock::new();
+        let last_load_mutex = LAST_LOAD.get_or_init(|| Mutex::new(std::time::SystemTime::UNIX_EPOCH));
+
+        if let Ok(meta) = std::fs::metadata(&registry_path) {
+            let modified = meta.modified().unwrap_or(std::time::SystemTime::now());
+            let mut last_load = last_load_mutex.lock().unwrap();
+            if modified <= *last_load {
+                return; // Registry is current
+            }
+            *last_load = modified;
+        }
 
         if registry_path.exists() {
             if let Ok(content) = std::fs::read_to_string(&registry_path) {
@@ -186,28 +199,34 @@ impl GawdAgentFleet {
             agent_rank: 1.0,
         }));
 
-        // 2. Semantic Meta-Registry Discovery
+        // 2. Semantic Meta-Registry Discovery (Hardened Phase 5)
         let registry = AgentMetaRegistry::global();
         let available_agents = registry.list_agents();
 
-        for agent in available_agents {
-            // 🚀 Neural/Semantic pass: Score agent relevance using Tier 0 centroids
-            let mut max_relevance = 0.0f32;
-            for cat in &agent.categories {
-                if goal.to_lowercase().contains(cat) {
-                    max_relevance = 1.0; // Perfect match
-                    break;
-                }
-            }
+        // 🚀 Neural Semantic pass: identified via Tier 0 Vector space
+        if let Ok(goal_vec) = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(goal) {
+            for agent in available_agents {
+                let mut max_similarity = 0.0f32;
 
-            // In v0.1.2022704, we hardened the semantic projection.
-            // We use it here to identify relevant specialists.
-            if max_relevance > 0.6 {
-                fleet.push(Arc::new(DynamicAgent {
-                    agent_name: agent.name,
-                    mission_profile: agent.description,
-                    agent_rank: agent.base_rank,
-                }));
+                // Combine categories and description for semantic anchoring
+                let mut agent_corpus = agent.categories.join(" ");
+                agent_corpus.push_str(" ");
+                agent_corpus.push_str(&agent.description);
+
+                if let Ok(agent_vec) = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(&agent_corpus) {
+                    // Cosine Similarity check (simplified dot product as vectors are L2 normalized)
+                    let dot_product: f32 = goal_vec.iter().zip(agent_vec.iter()).map(|(a, b)| a * b).sum();
+                    max_similarity = dot_product;
+                }
+
+                // 🧪 Semantic recruitment threshold: 0.25 (tuned for v0.1.2022715)
+                if max_similarity > 0.25 || agent.categories.iter().any(|c| goal.to_lowercase().contains(c)) {
+                    fleet.push(Arc::new(DynamicAgent {
+                        agent_name: agent.name,
+                        mission_profile: agent.description,
+                        agent_rank: agent.base_rank,
+                    }));
+                }
             }
         }
 

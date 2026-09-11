@@ -183,7 +183,7 @@ impl AeonAlphaModel {
     }
 
     /// 🧪 Deterministic Semantic Embedding Substrate
-    fn semantic_centroid_projection(prompt: &str) -> Result<Vec<f32>> {
+    pub fn semantic_centroid_projection(prompt: &str) -> Result<Vec<f32>> {
         let mut vec = vec![0.0f32; Self::DIM];
         let prompt_lower = prompt.to_lowercase();
         let words: Vec<&str> = prompt_lower.split(|c: char| !c.is_alphanumeric()).filter(|s| !s.is_empty()).collect();
