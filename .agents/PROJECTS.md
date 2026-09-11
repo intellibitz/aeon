@@ -3,7 +3,7 @@
 ## System Information
 
 * **Project Name**: `aeon`
-* **Current Engine Version**: `v0.1.2022688`
+* **Current Engine Version**: `v0.1.2022689`
 
 ## Architecture
 
@@ -51,7 +51,7 @@
 
 ## Substrate Evolution & Creator Protocols
 
-21. **Native Intent Meta-Execution Protocol**: When provided with a user request or intent, the agent delegates execution to the native `aeon` binary within the target workspace. If `aeon` encounters a failure or capability gap, the agent reports the pathological gap but NEVER triggers the Motion Rule. User intents must never modify the `aeon` substrate.
+21. **Native Intent Meta-Execution Protocol**: User intents are executed strictly via the meta-substrate (Models & Tools). If an intent fails, the agent **MUST** attempt "Meta-Substrate Self-Healing" (e.g., dynamic MCP discovery, tool re-routing). However, user intents **NEVER** trigger the Motion Rule to modify the native Rust substrate. Native evolution is an exclusive Creator power.
 22. **Creator Aspiration Rule**: When provided with a creator directive or architectural goal, the agent focuses on future `aeon` capabilities and long-term vision. Only creator aspirations trigger the **Motion Rule**, advancing `aeon` evolution one step forward upon successful compilation, audit, and deployment.
 23. **Motion Rule**: Triggered exclusively by Creator aspiration or directive: (1) Detect capability gap or architectural expansion requirement; (2) Synthesize production-ready native Rust code directly into the `aeon` core (`./src/`); (3) Compile and validate tests via `cargo test`; (4) Deploy via automated version increment and push.
 24. **Creator Agent Mandate**: Creator agents strictly build and improve the `aeon` substrate. They must never perform the final work or simulate execution themselves. Their only objective is to architect a smarter `aeon` engine capable of fulfilling the intent autonomously.

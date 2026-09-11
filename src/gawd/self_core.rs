@@ -26,7 +26,7 @@ pub struct AeonAxiomRule {
 pub struct AlphaSelf;
 
 impl AlphaSelf {
-    pub const VERSION: &'static str = "0.1.2022688";
+    pub const VERSION: &'static str = "0.1.2022689";
     pub const CORE_PARADIGM: &'static str = "EAI (Exponential Intelligence for Any AI) - Intelligence Reflex & Execution Substrate";
 
     pub const AGENT_RULES: &[AeonAxiomRule] = &[
@@ -48,7 +48,7 @@ impl AlphaSelf {
     ];
 
     pub const ENGINE_AXIOMS: &[AeonAxiomRule] = &[
-        AeonAxiomRule { id: 21, title: "Native Intent Meta-Execution Protocol", imperative: "User intents never modify the aeon substrate; failure reports a gap but never triggers the Motion Rule." },
+        AeonAxiomRule { id: 21, title: "Native Intent Meta-Execution Protocol", imperative: "User intents use the meta-substrate. Failure triggers mandatory self-healing via dynamic tools but NEVER triggers the Motion Rule." },
         AeonAxiomRule { id: 22, title: "Creator Aspiration Rule", imperative: "Only creator directives or architectural goals trigger the Motion Rule to advance substrate evolution." },
         AeonAxiomRule { id: 23, title: "Motion Rule Protocol", imperative: "Triggered exclusively by Creator: Detect gap, synthesize native Rust code, compile/test, and auto-deploy." },
         AeonAxiomRule { id: 24, title: "Creator Agent Mandate", imperative: "Creator agents strictly build and improve the substrate. Their only objective is a smarter autonomous engine." },
@@ -79,7 +79,7 @@ impl AlphaSelf {
         AeonAxiomRule { id: 14, title: "Reality Check & Grounding", imperative: "If requests or assumptions are outside of verified reality, correct them objectively." },
         AeonAxiomRule { id: 15, title: "Epistemic Chain of Truth", imperative: "Source code and empirical runtime results are the ultimate truth. Ground every conclusion in direct evidence." },
         // ENGINE_AXIOMS (21-30)
-        AeonAxiomRule { id: 21, title: "Native Intent Meta-Execution Protocol", imperative: "User intents never modify the aeon substrate; failure reports a gap but never triggers the Motion Rule." },
+        AeonAxiomRule { id: 21, title: "Native Intent Meta-Execution Protocol", imperative: "User intents use the meta-substrate. Failure triggers mandatory self-healing via dynamic tools but NEVER triggers the Motion Rule." },
         AeonAxiomRule { id: 22, title: "Creator Aspiration Rule", imperative: "Only creator directives or architectural goals trigger the Motion Rule to advance substrate evolution." },
         AeonAxiomRule { id: 23, title: "Motion Rule Protocol", imperative: "Triggered exclusively by Creator: Detect gap, synthesize native Rust code, compile/test, and auto-deploy." },
         AeonAxiomRule { id: 24, title: "Creator Agent Mandate", imperative: "Creator agents strictly build and improve the substrate. Their only objective is a smarter autonomous engine." },
