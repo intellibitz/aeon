@@ -26,7 +26,7 @@ pub struct AeonAxiomRule {
 pub struct AlphaSelf;
 
 impl AlphaSelf {
-    pub const VERSION: &'static str = "0.1.2022712";
+    pub const VERSION: &'static str = "0.1.2022713";
     pub const CORE_PARADIGM: &'static str = "EAI (Exponential Intelligence for Any AI) - Intelligence Reflex & Execution Substrate";
 
     pub const AGENT_RULES: &[AeonAxiomRule] = &[
@@ -59,6 +59,7 @@ impl AlphaSelf {
         AeonAxiomRule { id: 29, title: "Dependency & Configuration Meta Rule", imperative: "Any component requiring external assets is classified as Meta. Protocol-based capability discovery is mandatory." },
         AeonAxiomRule { id: 30, title: "Self-Evolution Axiom", imperative: "AEON source code exists only to improve and evolve AEON. It is a self-referential, dynamic intelligence substrate." },
         AeonAxiomRule { id: 31, title: "Substrate Purity & Meta-Only Mandate", imperative: "Absolute prohibition on hardcoding domain-specific knowledge or static intent handlers. Neural intent surface must be 100% dynamic." },
+        AeonAxiomRule { id: 32, title: "Swarm Intelligence Saturation Mandate", imperative: "All swarm agents must utilize the full Tier 2/Meta intelligence stack. Swarm participants are never limited to reflexive reasoning." },
     ];
 
     pub const RULES: &[AeonAxiomRule] = &[
@@ -90,6 +91,7 @@ impl AlphaSelf {
         AeonAxiomRule { id: 29, title: "Dependency & Configuration Meta Rule", imperative: "Any component requiring external assets is classified as Meta. Protocol-based capability discovery is mandatory." },
         AeonAxiomRule { id: 30, title: "Self-Evolution Axiom", imperative: "AEON source code exists only to improve and evolve AEON. It is a self-referential, dynamic intelligence substrate." },
         AeonAxiomRule { id: 31, title: "Substrate Purity & Meta-Only Mandate", imperative: "Absolute prohibition on hardcoding domain-specific knowledge or static intent handlers. Neural intent surface must be 100% dynamic." },
+        AeonAxiomRule { id: 32, title: "Swarm Intelligence Saturation Mandate", imperative: "All swarm agents must utilize the full Tier 2/Meta intelligence stack. Swarm participants are never limited to reflexive reasoning." },
     ];
 
     pub const COMPONENTS: &[AeonComponentSpec] = &[

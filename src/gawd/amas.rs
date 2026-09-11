@@ -187,21 +187,15 @@ impl AmaSupervisor {
                 goal, weighted_wisdom
             );
 
-            if let Ok(synthesized) = crate::gemi::pulse::AeonPulse::reason(&consensus_prompt, workspace) {
-                a2a_logs.push(A2AMessage {
-                    sender: "ConsensusMaster".into(),
-                    recipient: "AMA-Master".into(),
-                    action: "STATE_CONVERGENCE".into(),
-                    payload: synthesized,
-                });
-            } else {
-                 a2a_logs.push(A2AMessage {
-                    sender: "Blackboard".into(),
-                    recipient: "AMA-Master".into(),
-                    action: "STATE_CONVERGENCE".into(),
-                    payload: format!("Converged knowledge from {} agents (Unweighted).", final_state.len()),
-                });
-            }
+            // 🚀 Consensus Hardening: Use Tier 2/Meta for final synthesis
+            let synthesized = crate::gemi::engine::GemiEngine::generate_reasoning(&consensus_prompt, workspace);
+
+            a2a_logs.push(A2AMessage {
+                sender: "ConsensusMaster".into(),
+                recipient: "AMA-Master".into(),
+                action: "STATE_CONVERGENCE".into(),
+                payload: synthesized,
+            });
         }
 
         // 6. Autonomous Substrate Distillation (Rule 23)

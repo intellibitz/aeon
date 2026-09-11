@@ -54,19 +54,23 @@ impl GawdAgent for DynamicAgent {
     fn name(&self) -> String { self.agent_name.clone() }
     fn rank(&self) -> f32 { self.agent_rank }
     fn execute(&self, goal: &str, workspace: &Path, blackboard: &MissionBlackboard) -> EaiResult<String> {
+        let bb_state = {
+            let data = blackboard.lock().unwrap();
+            serde_json::to_string(&*data).unwrap_or_else(|_| "{}".into())
+        };
+
         let prompt = format!(
-            "AGENT_ROLE: {}\nMISSION_PROFILE: {}\nGOAL: {}\n\n[INSTRUCTION]: Fulfill your role in the swarm. Use current blackboard state if available.",
-            self.agent_name, self.mission_profile, goal
+            "AGENT_ROLE: {}\nMISSION_PROFILE: {}\nGOAL: {}\n\n[BLACKBOARD_CONTEXT]: {}\n\n[INSTRUCTION]: Fulfill your role in the swarm. Use current blackboard state to coordinate and avoid redundancy. Output verified actions only.",
+            self.agent_name, self.mission_profile, goal, bb_state
         );
 
         let ws = workspace.to_path_buf();
-        if let Ok(res) = crate::gemi::pulse::AeonPulse::reason(&prompt, &ws) {
-            let mut bb = blackboard.lock().unwrap();
-            bb.insert(self.agent_name.clone(), res.clone());
-            Ok(res)
-        } else {
-            Ok(format!("Agent {} active on goal: {}", self.agent_name, goal))
-        }
+        // 🚀 Swarm Intelligence Escalation: Saturate with Tier 2/Meta Reasoning
+        let res = crate::gemi::engine::GemiEngine::generate_reasoning(&prompt, &ws);
+
+        let mut bb = blackboard.lock().unwrap();
+        bb.insert(self.agent_name.clone(), res.clone());
+        Ok(res)
     }
 }
 
