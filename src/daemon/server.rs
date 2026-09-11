@@ -148,3 +148,28 @@ impl AmaDaemon {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_lock_file_path() {
+        let tmp_dir = std::env::temp_dir();
+        let path = AmaDaemon::get_lock_file(&tmp_dir);
+        assert_eq!(path, tmp_dir.join("ama.lock"));
+    }
+
+    #[test]
+    fn test_daemon_status_and_lifecycle_when_not_running() {
+        let tmp_dir = std::env::temp_dir();
+        let lock_file = AmaDaemon::get_lock_file(&tmp_dir);
+        let _ = std::fs::remove_file(&lock_file);
+
+        let status = AmaDaemon::check_status(&tmp_dir);
+        assert!(status.is_none());
+
+        let stopped = AmaDaemon::stop_daemon(&tmp_dir);
+        assert!(!stopped);
+    }
+}

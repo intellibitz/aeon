@@ -270,3 +270,23 @@ fn extract_tool_arg(line: &str) -> Option<String> {
     }
     None
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_extract_tool_name_and_arguments() {
+        let json_line = r#"{"jsonrpc":"2.0","method":"tools/call","params":{"name":"test_tool","arguments":{"command":"ls"}},"id":1}"#;
+        assert_eq!(extract_tool_name(json_line), Some("test_tool".to_string()));
+        assert_eq!(extract_tool_arg(json_line), Some("ls".to_string()));
+    }
+
+    #[test]
+    fn test_gmcp_protocol_handler_malformed_jsonrpc() {
+        let handler = GmcpProtocolHandler;
+        let response = handler.handle_request("not valid json", Path::new("."));
+        let parsed: serde_json::Value = serde_json::from_str(&response).unwrap();
+        assert!(parsed.get("error").is_some());
+    }
+}

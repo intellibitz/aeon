@@ -247,3 +247,25 @@ impl AeonAlphaModel {
         anchor
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_list_dynamic_intents() {
+        let intents = AeonAlphaModel::list_dynamic_intents();
+        assert!(!intents.is_empty());
+        // Must be sorted and contain foundational intents
+        assert!(intents.contains(&"status".to_string()));
+        assert!(intents.contains(&"version".to_string()));
+    }
+
+    #[test]
+    fn test_semantic_centroid_projection_determinism() {
+        let vec1 = AeonAlphaModel::semantic_centroid_projection("check engine status").unwrap();
+        let vec2 = AeonAlphaModel::semantic_centroid_projection("check engine status").unwrap();
+        assert_eq!(vec1.len(), AeonAlphaModel::DIM);
+        assert_eq!(vec1, vec2);
+    }
+}

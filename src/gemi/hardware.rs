@@ -306,3 +306,40 @@ pub struct ModelLadderStep {
     pub hf_repo: &'static str,
     pub hf_file: &'static str,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_hardware_profile_generation() {
+        let profile = HardwareProfiler::get_profile();
+        assert!(profile.cpus > 0);
+        assert!(profile.ram_gb > 0);
+    }
+
+    #[test]
+    fn test_progressive_model_ladder_ordering() {
+        let ladder = HardwareProfiler::get_progressive_model_ladder();
+        assert!(!ladder.is_empty());
+        let mut last_step = 0;
+        for step in ladder {
+            assert!(step.step > last_step);
+            last_step = step.step;
+            assert!(!step.label.is_empty());
+            assert!(!step.hf_repo.is_empty());
+            assert!(!step.hf_file.is_empty());
+        }
+    }
+
+    #[test]
+    fn test_candle_device_retrieval() {
+        let device = HardwareProfiler::get_candle_device();
+        // Simply ensure it doesn't panic and returns a valid variant
+        match device {
+            candle_core::Device::Cpu => {}
+            candle_core::Device::Cuda(_) => {}
+            candle_core::Device::Metal(_) => {}
+        }
+    }
+}
