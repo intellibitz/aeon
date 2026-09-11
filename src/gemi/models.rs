@@ -306,6 +306,25 @@ impl ModelManager {
         None
     }
 
+    /// Resolves the tokenizer path for a given model
+    pub fn get_tokenizer_path(model_id: &str) -> Option<PathBuf> {
+        let model_path = Self::get_model_path(model_id)?;
+        if let Some(parent) = model_path.parent() {
+            let tokenizer_path = parent.join("tokenizer.json");
+            if tokenizer_path.exists() {
+                return Some(tokenizer_path);
+            }
+        }
+
+        let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
+        let default_tokenizer = home.join(".aeon/models/tokenizer.json");
+        if default_tokenizer.exists() {
+            return Some(default_tokenizer);
+        }
+
+        None
+    }
+
     #[allow(dead_code)]
     pub fn scout_and_benchmark(workspace: &Path) -> Vec<ModelInfo> {
         let models = Self::list_models(workspace);

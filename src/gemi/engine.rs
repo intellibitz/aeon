@@ -4,6 +4,11 @@
 use std::path::Path;
 use crate::error::EaiResult;
 use crate::gemi::models::ModelManager;
+use crate::gemi::hardware::HardwareProfiler;
+
+use candle_core::quantized::gguf_file;
+use candle_transformers::models::quantized_llama as llama;
+use tokenizers::Tokenizer;
 
 pub struct GemiEngine;
 
@@ -60,6 +65,22 @@ impl GemiEngine {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    #[test]
+    fn test_native_tokenization() {
+        let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
+        let tokenizer_path = home.join(".aeon/models/tokenizer.json");
+        if tokenizer_path.exists() {
+            let tokenizer = Tokenizer::from_file(tokenizer_path);
+            assert!(tokenizer.is_ok());
+        }
+    }
+}
+
 /// 🔋 Native Inference Engine: Trait for decoupled local model execution
 pub trait NativeInferenceEngine: Send + Sync {
     fn name(&self) -> String;
@@ -78,8 +99,51 @@ impl NativeInferenceEngine for AeonGgufEngine {
         let model_path = ModelManager::get_model_path(&model_id)
             .ok_or_else(|| crate::error::EaiError::Inference(format!("Model file for '{}' not found in substrate.", model_id)))?;
 
-        // 🚀 Native Intelligence Activation:
-        // This confirms the substrate has successfully resolved the physical hardware-best weights.
-        Ok(format!("[Tier 2 Native Reasoning (GGUF)]: Fully active using weights at {}. Processed intent: '{}'", model_path.display(), prompt))
+        let tokenizer_path = ModelManager::get_tokenizer_path(&model_id)
+            .ok_or_else(|| crate::error::EaiError::Inference("Tokenizer not found in substrate.".into()))?;
+
+        let device = HardwareProfiler::get_candle_device();
+
+        // 🚀 Native Intelligence Activation: 100% Tensor-Driven Reasoning
+        let mut file = std::fs::File::open(&model_path)?;
+        let model = gguf_file::Content::read(&mut file)
+            .map_err(|e| crate::error::EaiError::Inference(format!("GGUF Read Error: {}", e)))?;
+
+        let mut model_weights = llama::ModelWeights::from_gguf(model, &mut file, &device)
+            .map_err(|e| crate::error::EaiError::Inference(format!("Model Load Error: {}", e)))?;
+
+        let tokenizer = Tokenizer::from_file(tokenizer_path)
+            .map_err(|e| crate::error::EaiError::Inference(format!("Tokenizer Error: {}", e)))?;
+
+        let tokens = tokenizer.encode(prompt, true)
+            .map_err(|e| crate::error::EaiError::Inference(format!("Tokenization Error: {}", e)))?;
+
+        let prompt_tokens = tokens.get_ids();
+        let mut all_tokens = vec![];
+
+        // Simple generation loop (limited to 50 tokens for the first activation)
+        let mut tokens_to_process = prompt_tokens.to_vec();
+
+        for i in 0..50 {
+            let input = candle_core::Tensor::new(tokens_to_process.as_slice(), &device)?.unsqueeze(0)?;
+            let logits = model_weights.forward(&input, prompt_tokens.len() + i)?;
+            let logits = logits.squeeze(0)?;
+
+            // Greedily pick the next token
+            let logits_v: Vec<f32> = logits.to_vec1()?;
+            let next_token = logits_v.iter().enumerate()
+                .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
+                .map(|(i, _)| i as u32)
+                .unwrap();
+
+            all_tokens.push(next_token);
+            if next_token == 2 { break; } // EOS
+            tokens_to_process = vec![next_token];
+        }
+
+        let output = tokenizer.decode(&all_tokens, true)
+            .map_err(|e| crate::error::EaiError::Inference(format!("Decoding Error: {}", e)))?;
+
+        Ok(output)
     }
 }

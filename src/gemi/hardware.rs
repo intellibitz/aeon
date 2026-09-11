@@ -129,6 +129,17 @@ impl HardwareProfiler {
         caps.join(",")
     }
 
+    pub fn get_candle_device() -> Device {
+        if let Ok(dev) = Device::new_cuda(0) {
+            return dev;
+        }
+        #[cfg(feature = "metal")]
+        if let Ok(dev) = Device::new_metal(0) {
+            return dev;
+        }
+        Device::Cpu
+    }
+
     fn get_os_info() -> String {
         if cfg!(target_os = "linux") {
             if let Ok(content) = std::fs::read_to_string("/etc/os-release") {

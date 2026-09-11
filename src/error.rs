@@ -37,4 +37,10 @@ impl From<std::io::Error> for EaiError {
     }
 }
 
+impl From<candle_core::Error> for EaiError {
+    fn from(err: candle_core::Error) -> Self {
+        EaiError::Inference(err.to_string())
+    }
+}
+
 pub type EaiResult<T> = Result<T, EaiError>;
