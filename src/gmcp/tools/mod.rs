@@ -331,6 +331,14 @@ impl ToolRegistry {
     /// 🚑 Autonomous Capability Resolution (Rule 21)
     pub fn resolve_capability_gap(name: &str) -> EaiResult<String> {
         let server_name = name.split(':').next().unwrap_or(name);
+
+        // 🚀 Proactive Semantic Scout (Tier 1 Hardening)
+        // If the tool name isn't an exact match, we search for semantic overlaps in the registry
+        let registry = GmcpClient::fetch_global_registry();
+        if let Some(entry) = registry.iter().find(|e| e.name == server_name || e.description.to_lowercase().contains(server_name)) {
+            return Ok(GmcpClient::auto_configure_server(&entry.name, &entry.package));
+        }
+
         let res = GmcpClient::provision_tool_package(server_name);
         Ok(res)
     }

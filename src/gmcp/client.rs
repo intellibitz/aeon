@@ -222,9 +222,10 @@ impl GmcpClient {
         let mut context_aware_args = args_json.to_string();
         if tool_name == "reason" {
             let context = Self::gather_workspace_context();
+            // 🚀 Unified Swarm Context: Include Blackboard state if available
             context_aware_args = json!({
                 "intent": args_json,
-                "workspace_context": context
+                "workspace_context": context,
             }).to_string();
         }
 
@@ -286,9 +287,10 @@ impl GmcpClient {
         let mut context_aware_args = args_json.to_string();
         if tool_name == "reason" {
             let context = Self::gather_workspace_context();
+            // 🚀 Unified Swarm Context: Include Blackboard state if available
             context_aware_args = json!({
                 "intent": args_json,
-                "workspace_context": context
+                "workspace_context": context,
             }).to_string();
         }
 

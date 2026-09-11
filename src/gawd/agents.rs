@@ -80,9 +80,30 @@ impl AgentMetaRegistry {
             let registry = AgentMetaRegistry {
                 agents: Arc::new(Mutex::new(Vec::new())),
             };
-            registry.bootstrap();
+            registry.load_or_provision();
             registry
         })
+    }
+
+    fn load_or_provision(&self) {
+        let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
+        let registry_path = home.join(".aeon/agent_registry.json");
+
+        if registry_path.exists() {
+            if let Ok(content) = std::fs::read_to_string(&registry_path) {
+                if let Ok(agents) = serde_json::from_str::<Vec<AgentProfile>>(&content) {
+                    let mut registry = self.agents.lock().unwrap();
+                    *registry = agents;
+                    return;
+                }
+            }
+        }
+
+        // 🧪 Bootstrap Provisioning (Rule 31)
+        self.bootstrap();
+        let agents = self.agents.lock().unwrap();
+        let _ = std::fs::create_dir_all(registry_path.parent().unwrap());
+        let _ = std::fs::write(&registry_path, serde_json::to_string_pretty(&*agents).unwrap_or_default());
     }
 
     fn bootstrap(&self) {
