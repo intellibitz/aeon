@@ -69,14 +69,16 @@ impl ModelManager {
         let global_dir = PathBuf::from(home).join(".aeon");
         let cfg = crate::sandbox::manager::AeonConfig::load(&global_dir);
 
-        // 1. Load Cloud Models from Dynamic Configuration
-        for model in cfg.cloud_models {
-            if let Some(env_key) = &model.env_key {
-                if std::env::var(env_key).is_ok() {
+        // 1. Load Cloud Models from Dynamic Configuration (Disabled by Default - Rule 21)
+        if cfg.enable_cloud_models {
+            for model in cfg.cloud_models {
+                if let Some(env_key) = &model.env_key {
+                    if std::env::var(env_key).is_ok() {
+                        list.push(model);
+                    }
+                } else {
                     list.push(model);
                 }
-            } else {
-                list.push(model);
             }
         }
 

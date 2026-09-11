@@ -70,6 +70,7 @@ pub struct AeonConfig {
     pub cloud_scout_timeout_secs: u64,
     pub beacon_interval_secs: u64,
     pub local_scan_paths: Vec<String>,
+    pub enable_cloud_models: bool,
     pub governance: GovernancePatterns,
 }
 
@@ -84,6 +85,7 @@ impl Default for AeonConfig {
             auto_download_models: true,
             aeon_repo: "intellibitz/aeon".to_string(),
             mcp_registry_url: "https://raw.githubusercontent.com/intellibitz/aeon/main/registry.json".to_string(),
+            enable_cloud_models: false,
             cloud_models: vec![
                 ModelInfo {
                     name: "Meta Model Substrate - Alpha".to_string(),

@@ -3,7 +3,7 @@
 ## System Information
 
 * **Project Name**: `aeon`
-* **Current Engine Version**: `v0.1.2022689`
+* **Current Engine Version**: `v0.1.2022690`
 
 ## Architecture
 
@@ -13,7 +13,7 @@
 
 * **Alpha-Self**: Immutable system rules (`AGENTS.md`), and component topologies (`PROJECTS.md`) compiled directly into strongly-typed Rust data structures (`AlphaSelf`). Eliminates runtime string parsing and provides instantaneous self-awareness to all engine components.
 * **Alpha-User**: Experiential memory and learned actions stored in local neural tensor weights (`aeon-alpha.safetensors`), trained continuously.
-* **Local-First Fallback**: Automatic fallback strategy that prioritizes local execution (Candle tensor substrates and local model vaults) before calling cloud APIs.
+* **Local-First Mandate**: Automatic execution strategy that prioritizes local runtimes (Candle tensor substrates and local model vaults). Cloud fallback is **disabled by default** to ensure privacy, performance, and hardware saturation.
 * **Hardware-Aware Model Selection**: Interrogates system RAM, VRAM, and GPU acceleration capabilities to dynamically identify and default to the best suited local model for the host hardware profile.
 
 ### Unified Identity
