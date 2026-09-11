@@ -146,6 +146,17 @@ impl AgentMetaRegistry {
     pub fn list_agents(&self) -> Vec<AgentProfile> {
         self.agents.lock().unwrap().clone()
     }
+
+    pub fn get_checksum(&self) -> u64 {
+        let agents = self.agents.lock().unwrap();
+        let mut hasher = std::collections::hash_map::DefaultHasher::new();
+        use std::hash::{Hash, Hasher};
+        for agent in agents.iter() {
+            agent.name.hash(&mut hasher);
+            agent.description.hash(&mut hasher);
+        }
+        hasher.finish()
+    }
 }
 
 pub struct GawdAgentFleet;

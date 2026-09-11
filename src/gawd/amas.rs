@@ -65,12 +65,13 @@ impl AmaSupervisor {
                     let mut buf = [0u8; 1024];
                     loop {
                         let local_caps = HardwareProfiler::get_caps_string();
-                        let ping_msg = format!("AEON_PING:{}", local_caps);
+                        let registry_checksum = crate::gawd::agents::AgentMetaRegistry::global().get_checksum();
+                        let ping_msg = format!("AEON_PING:{}:{}", local_caps, registry_checksum);
 
                         if let Ok((amt, src)) = socket.recv_from(&mut buf) {
                             let msg = String::from_utf8_lossy(&buf[..amt]);
                             if msg.starts_with("AEON_PING") {
-                                let pong_msg = format!("AEON_PONG:{}", local_caps);
+                                let pong_msg = format!("AEON_PONG:{}:{}", local_caps, registry_checksum);
                                 let _ = socket.send_to(pong_msg.as_bytes(), src);
                             }
 
@@ -364,5 +365,27 @@ impl AmaSupervisor {
                 }
             }
         }
+    }
+
+    pub fn broadcast_lock_request(resource_id: &str) -> bool {
+        let nodes = Self::list_cluster_nodes();
+        let mut handles = Vec::new();
+
+        for node in nodes {
+            if node.node_id == "aeon-local-master" { continue; }
+            let addr = node.address.clone();
+            let rid = resource_id.to_string();
+            handles.push(std::thread::spawn(move || {
+                let res = Self::dispatch_peer_task(&addr, "locks/acquire", &rid);
+                res.contains("SUCCESS")
+            }));
+        }
+
+        for handle in handles {
+            if let Ok(success) = handle.join() {
+                if !success { return false; }
+            }
+        }
+        true
     }
 }

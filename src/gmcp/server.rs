@@ -177,6 +177,24 @@ impl ProtocolDispatcher for GmcpProtocolHandler {
                     }
                 }).to_string()
             }
+            Some("locks/acquire") => {
+                let resource_id = extract_tool_arg(line).unwrap_or_default();
+                let success = ToolRegistry::acquire_local_lock(&resource_id);
+                json!({
+                    "jsonrpc": "2.0",
+                    "id": id,
+                    "result": if success { "SUCCESS" } else { "DENIED" }
+                }).to_string()
+            }
+            Some("locks/release") => {
+                let resource_id = extract_tool_arg(line).unwrap_or_default();
+                ToolRegistry::release_meta_lock(&resource_id);
+                json!({
+                    "jsonrpc": "2.0",
+                    "id": id,
+                    "result": "RELEASED"
+                }).to_string()
+            }
             Some("tools/call") => {
                 let tool_name = extract_tool_name(line).unwrap_or_default();
                 let tool_arg = extract_tool_arg(line).unwrap_or_default();

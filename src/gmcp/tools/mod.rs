@@ -344,12 +344,30 @@ impl ToolRegistry {
     }
 
     pub fn acquire_meta_lock(resource_id: &str) -> bool {
-        let registry = Self::global();
-        let mut locks = registry.locks.lock().unwrap();
-        if locks.contains_key(resource_id) {
+        if !Self::acquire_local_lock(resource_id) {
             return false;
         }
+
+        // 🚀 Distributed Resource Sovereignty: Broadcast to peers
+        if !crate::gawd::amas::AmaSupervisor::broadcast_lock_request(resource_id) {
+            Self::release_meta_lock(resource_id);
+            return false;
+        }
+
+        true
+    }
+
+    pub fn acquire_local_lock(resource_id: &str) -> bool {
+        let registry = Self::global();
         let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs();
+
+        let mut locks = registry.locks.lock().unwrap();
+        if let Some(&timestamp) = locks.get(resource_id) {
+            // 🛡️ Lease-Based Timed Locks (300s TTL)
+            if now - timestamp < 300 {
+                return false;
+            }
+        }
         locks.insert(resource_id.to_string(), now);
         true
     }
