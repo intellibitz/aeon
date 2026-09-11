@@ -1,85 +1,85 @@
 [
   {
     "name": "postgres",
-    "description": "Official Anthropic PostgreSQL Database Server",
+    "description": "Standard Protocol SQL Database Server",
     "package": "@modelcontextprotocol/server-postgres",
     "category": "database"
   },
   {
     "name": "brave_search",
-    "description": "Official Anthropic Brave Web Search Server",
+    "description": "Standard Protocol Web Search Server",
     "package": "@modelcontextprotocol/server-brave-search",
     "category": "search"
   },
   {
     "name": "google_maps",
-    "description": "Official Anthropic Google Maps & Directions Server",
+    "description": "Standard Protocol Maps & Directions Server",
     "package": "@modelcontextprotocol/server-google-maps",
     "category": "location"
   },
   {
     "name": "slack",
-    "description": "Official Anthropic Slack Collaboration Server",
+    "description": "Standard Protocol Collaboration Server",
     "package": "@modelcontextprotocol/server-slack",
     "category": "productivity"
   },
   {
     "name": "filesystem",
-    "description": "Official Anthropic Filesystem Operations Server",
+    "description": "Standard Protocol Filesystem Operations Server",
     "package": "@modelcontextprotocol/server-filesystem",
     "category": "system"
   },
   {
     "name": "github",
-    "description": "Official Anthropic GitHub Repos, PRs & Issues Server",
+    "description": "Standard Protocol Version Control Server",
     "package": "@modelcontextprotocol/server-github",
     "category": "vcs"
   },
   {
     "name": "memory",
-    "description": "Official Anthropic Knowledge Graph Memory Server",
+    "description": "Standard Protocol Knowledge Graph Memory Server",
     "package": "@modelcontextprotocol/server-memory",
     "category": "memory"
   },
   {
     "name": "puppeteer",
-    "description": "Official Anthropic Headless Browser Automation Server",
+    "description": "Standard Protocol Browser Automation Server",
     "package": "@modelcontextprotocol/server-puppeteer",
     "category": "web"
   },
   {
     "name": "fetch",
-    "description": "Official Anthropic Web Fetch & Content Scraper Server",
+    "description": "Standard Protocol Web Fetch & Scraper Server",
     "package": "@modelcontextprotocol/server-fetch",
     "category": "web"
   },
   {
     "name": "sequential_thinking",
-    "description": "Official Anthropic Step-by-Step Reasoning Server",
+    "description": "Standard Protocol Step-by-Step Reasoning Server",
     "package": "@modelcontextprotocol/server-sequential-thinking",
     "category": "reasoning"
   },
   {
     "name": "sentry",
-    "description": "Official Anthropic Sentry Error Diagnostics Server",
+    "description": "Standard Protocol Error Diagnostics Server",
     "package": "@modelcontextprotocol/server-sentry",
     "category": "diagnostics"
   },
   {
     "name": "alpha_vantage",
-    "description": "Community Financial Stock & Market Data Server",
+    "description": "Standard Protocol Financial & Market Data Server",
     "package": "@modelcontextprotocol/server-alpha-vantage",
     "category": "finance"
   },
   {
     "name": "git",
-    "description": "Community PyPI Git Version Control Server",
+    "description": "Standard Protocol Git Version Control Server",
     "package": "mcp-server-git",
     "category": "vcs"
   },
   {
     "name": "sqlite",
-    "description": "Community PyPI SQLite Database Server",
+    "description": "Standard Protocol SQLite Database Server",
     "package": "mcp-server-sqlite",
     "category": "database"
   }
