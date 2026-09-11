@@ -169,6 +169,20 @@ impl ToolRegistry {
             Ok(format!("MCP Server '{}' configuration status: {}", name, res))
         });
 
+        Self::register_meta_tool(&mut tools, "agent_register", "Dynamically register a new agent profile", MetaCategory::IntelligenceBridge, |arg, _ws| {
+            let parts: Vec<&str> = arg.splitn(3, ' ').collect();
+            if parts.len() < 3 { return Err(EaiError::Protocol("Usage: agent_register <name> <description> <categories_comma_separated>".into())); }
+
+            let profile = crate::gawd::agents::AgentProfile {
+                name: parts[0].to_string(),
+                description: parts[1].to_string(),
+                categories: parts[2].split(',').map(|s| s.trim().to_string()).collect(),
+            };
+
+            crate::gawd::agents::AgentMetaRegistry::global().register_agent(profile);
+            Ok(format!("Successfully registered agent: {}", parts[0]))
+        });
+
         // 5. Meta-Intelligence Bridge Primitives
         Self::register_meta_tool(&mut tools, "power_reason", "Delegate complex reasoning to Power-Tier MCP remotes", MetaCategory::IntelligenceBridge, |arg, _ws| {
             if arg.trim().is_empty() {

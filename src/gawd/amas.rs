@@ -147,15 +147,29 @@ impl AmaSupervisor {
             });
         }
 
-        // 5. Final State Convergence Check
+        // 5. Final Swarm Consensus Pass
         let final_state = blackboard.lock().unwrap();
         if !final_state.is_empty() {
-            a2a_logs.push(A2AMessage {
-                sender: "Blackboard".into(),
-                recipient: "AMA-Master".into(),
-                action: "STATE_CONVERGENCE".into(),
-                payload: format!("Converged knowledge from {} agents.", final_state.len()),
-            });
+            let consensus_prompt = format!(
+                "MISSION_GOAL: {}\n\n[BLACKBOARD_STATE]:\n{:?}\n\n[INSTRUCTION]: Resolve conflicts and synthesize a unified high-fidelity mission answer.",
+                goal, *final_state
+            );
+
+            if let Ok(synthesized) = crate::gemi::pulse::AeonPulse::reason(&consensus_prompt, workspace) {
+                a2a_logs.push(A2AMessage {
+                    sender: "ConsensusMaster".into(),
+                    recipient: "AMA-Master".into(),
+                    action: "STATE_CONVERGENCE".into(),
+                    payload: synthesized,
+                });
+            } else {
+                 a2a_logs.push(A2AMessage {
+                    sender: "Blackboard".into(),
+                    recipient: "AMA-Master".into(),
+                    action: "STATE_CONVERGENCE".into(),
+                    payload: format!("Converged knowledge from {} agents.", final_state.len()),
+                });
+            }
         }
 
         // 6. Autonomous Substrate Distillation (Rule 23)
