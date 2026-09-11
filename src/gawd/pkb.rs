@@ -70,10 +70,11 @@ impl ProtocolKnowledgeBase {
         // High-fidelity synthetic generation for Tier 0 reflex training
         let mut pair = format!("INTENT: {}\n", intent);
 
-        let agents = super::agents::GawdAgentFleet::list_active_agents();
+        let agents = super::agents::GawdAgentFleet::synthesize_fleet(intent);
         for agent in agents {
-            if agent.name() == "AeonSafetyAgent" || agent.name() == "AeonContextAgent" {
-                let res = agent.execute(intent, workspace)?;
+            if agent.name() == "SafetyAgent" || agent.name() == "ContextAgent" {
+                let bb = std::sync::Arc::new(std::sync::Mutex::new(std::collections::HashMap::new()));
+                let res = agent.execute(intent, workspace, &bb)?;
                 pair.push_str(&format!("REFLEX_GUARD ({}): {}\n", agent.name(), res));
             }
         }

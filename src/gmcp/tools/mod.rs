@@ -183,6 +183,17 @@ impl ToolRegistry {
             Err(EaiError::Protocol("No Power-Tier reasoning remotes configured or available. AEON local reasoning active.".into()))
         });
 
+        Self::register_meta_tool(&mut tools, "meta_scout_agents", "Discover agent capabilities from connected remotes", MetaCategory::IntelligenceBridge, |_arg, _ws| {
+            let remotes = GmcpClient::list_external_tools();
+            let mut report = "Discovered Meta-Agent Capabilities:\\n\\n".to_string();
+            for r in remotes {
+                if r.name.contains("agent") || r.name.contains("swarm") {
+                    report.push_str(&format!("- [REMOTE] {}: {}\\n", r.name, r.description));
+                }
+            }
+            Ok(report)
+        });
+
         // 🚢 DYNAMIC DISCOVERY: Synthesized Native Reflexes (Rule 11)
         crate::gmcp::reflexes::register_synthesized_reflexes(&mut tools);
     }

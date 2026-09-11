@@ -7,9 +7,10 @@ use std::net::{TcpStream, UdpSocket};
 use std::path::Path;
 use std::time::Duration;
 use std::sync::{Arc, Mutex, OnceLock};
+use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
-use super::agents::{GawdAgentFleet, GawdAgentInfo};
+use super::agents::{GawdAgentFleet, GawdAgentInfo, MissionBlackboard};
 use crate::gemi::hardware::HardwareProfiler;
 use crate::sandbox::manager::NeuralCheckpoint;
 
@@ -114,10 +115,19 @@ impl AmaSupervisor {
     }
 
     pub fn supervise_mission(goal: &str, workspace: &Path) -> (Vec<A2AMessage>, Vec<GawdAgentInfo>) {
-        let fleet_info = GawdAgentFleet::synthesize_fleet(goal);
+        // 1. Initialize Mission Blackboard
+        let blackboard: MissionBlackboard = Arc::new(Mutex::new(HashMap::new()));
 
-        // Exponential Swarm Execution
-        let swarm_logs = GawdAgentFleet::dispatch_explosive_swarm(goal.to_string(), workspace.to_path_buf());
+        // 2. Dynamic Fleet Synthesis
+        let agents = GawdAgentFleet::synthesize_fleet(goal);
+        let fleet_info: Vec<GawdAgentInfo> = agents.iter().map(|a| GawdAgentInfo {
+            name: a.name(),
+            provider: "AEON Local".into(),
+            url: "native://substrate".into()
+        }).collect();
+
+        // 3. Exponential Swarm Execution (Converging on Blackboard)
+        let swarm_logs = GawdAgentFleet::dispatch_explosive_swarm(goal.to_string(), workspace.to_path_buf(), Arc::clone(&blackboard));
 
         let mut a2a_logs = Vec::new();
         for (name, output) in swarm_logs {
@@ -126,6 +136,17 @@ impl AmaSupervisor {
                 recipient: "AMA-Master".to_string(),
                 action: "MISSION_FLUX".to_string(),
                 payload: output,
+            });
+        }
+
+        // 4. Final State Convergence Check
+        let final_state = blackboard.lock().unwrap();
+        if !final_state.is_empty() {
+            a2a_logs.push(A2AMessage {
+                sender: "Blackboard".into(),
+                recipient: "AMA-Master".into(),
+                action: "STATE_CONVERGENCE".into(),
+                payload: format!("Converged knowledge from {} agents.", final_state.len()),
             });
         }
 
@@ -156,7 +177,6 @@ impl AmaSupervisor {
         format!("🌐 [A2A Fallback]: Node '{}' unreachable.", addr)
     }
 
-    #[allow(dead_code)]
     pub fn broadcast_lan_ping() -> Vec<String> {
         let mut active_peers = Vec::new();
         if let Ok(socket) = UdpSocket::bind("0.0.0.0:0") {
@@ -178,7 +198,6 @@ impl AmaSupervisor {
         active_peers
     }
 
-    #[allow(dead_code)]
     pub fn sync_cluster_state(workspace: &Path, payload: &str) -> String {
         let nodes = Self::list_cluster_nodes();
         let mut handles = Vec::new();
@@ -218,7 +237,6 @@ impl AmaSupervisor {
         format!("Synchronized state across {} nodes in parallel (checksum verified).", synced)
     }
 
-    #[allow(dead_code)]
     pub fn borrow_remote_reflex(prompt: &str) -> Option<String> {
         let nodes = Self::list_cluster_nodes();
 
@@ -246,7 +264,6 @@ impl AmaSupervisor {
         }
     }
 
-    #[allow(dead_code)]
     pub fn query_cluster_checkpoints() -> Vec<NeuralCheckpoint> {
         let nodes = Self::list_cluster_nodes();
         let mut checkpoints = Vec::new();
