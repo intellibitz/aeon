@@ -185,11 +185,9 @@ impl NativeInferenceEngine for AeonGgufEngine {
             sorted_indices.sort_by(|&a, &b| probs_v[b].partial_cmp(&probs_v[a]).unwrap());
 
             let mut cumulative_prob = 0.0;
-            let mut cutoff_idx = probs_v.len();
             for (idx, &i) in sorted_indices.iter().enumerate() {
                 cumulative_prob += probs_v[i];
                 if cumulative_prob > top_p {
-                    cutoff_idx = idx + 1;
                     break;
                 }
             }

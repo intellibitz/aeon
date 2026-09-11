@@ -19,7 +19,7 @@ use gemi::GemiServer;
 use gmcp::server::GmcpServer;
 use sandbox::SandboxManager;
 
-pub const AEON_VERSION: &str = "0.1.2022703";
+pub const AEON_VERSION: &str = "0.1.2022704";
 
 fn get_home_dir() -> PathBuf {
     env::var_os("HOME")
