@@ -283,6 +283,29 @@ impl ModelManager {
         (engine, model)
     }
 
+    /// Resolves a model ID to its absolute filesystem path
+    pub fn get_model_path(model_id: &str) -> Option<PathBuf> {
+        let p = PathBuf::from(model_id);
+        if p.is_file() {
+            return Some(p);
+        }
+
+        let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
+        let aeon_models = home.join(".aeon/models");
+
+        // Search in local aeon storage
+        if let Ok(entries) = std::fs::read_dir(&aeon_models) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.to_string_lossy().contains(model_id) && path.is_file() {
+                    return Some(path);
+                }
+            }
+        }
+
+        None
+    }
+
     #[allow(dead_code)]
     pub fn scout_and_benchmark(workspace: &Path) -> Vec<ModelInfo> {
         let models = Self::list_models(workspace);

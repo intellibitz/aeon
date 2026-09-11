@@ -35,40 +35,59 @@ impl AmaMasterAgent {
     }
 
     pub fn solve(&self, goal: &str, workspace: &Path, version: &str) -> EaiResult<AmaMissionReport> {
-        // 1. Pre-Execution Governance Audit
-        super::safety::SafetyDetector::audit_action("AMA_SOLVE", goal, workspace)?;
-        super::security::SecurityDetector::audit_action("AMA_SOLVE", goal, workspace)?;
-        super::model_supervisor::ModelSupervisor::audit_and_prepare_models(workspace)?;
+        let mut retry_count = 0;
+        let mut current_goal = goal.to_string();
+        let mut last_error = String::new();
 
-        // 2. Swarm Supervision (Tier 1 AOA Dispatch)
-        let (interactions, agents) = AmaSupervisor::supervise_mission(goal, workspace);
+        while retry_count < 3 {
+            // 1. Pre-Execution Governance Audit
+            super::safety::SafetyDetector::audit_action("AMA_SOLVE", &current_goal, workspace)?;
+            super::security::SecurityDetector::audit_action("AMA_SOLVE", &current_goal, workspace)?;
+            super::model_supervisor::ModelSupervisor::audit_and_prepare_models(workspace)?;
 
-        // 3. Reflex Result Distillation (Tier 0 -> Tier 2 Bridge)
-        let model_name = crate::gemi::models::ModelManager::get_selected_model()
-            .unwrap_or_else(|| "aeon-alpha.safetensors".to_string());
+            // 2. Swarm Supervision (Tier 1 AOA Dispatch)
+            let (interactions, agents) = AmaSupervisor::supervise_mission(&current_goal, workspace);
 
-        let final_answer = if interactions.is_empty() {
-            format!("AMA-Reflex ({}): No active agents responded to '{}'.", version, goal)
-        } else {
-            let last_payload = &interactions.last().unwrap().payload;
-            if last_payload.len() > 10 {
-                last_payload.clone()
+            // 3. Reflex Result Distillation (Tier 0 -> Tier 2 Bridge)
+            let model_name = crate::gemi::models::ModelManager::get_selected_model()
+                .unwrap_or_else(|| "aeon-alpha.safetensors".to_string());
+
+            let final_answer = if interactions.is_empty() {
+                format!("AMA-Reflex ({}): No active agents responded to '{}'.", version, current_goal)
             } else {
-                format!("AMA-Synthesis ({} via {}):\n\nProcessed goal '{}' across {} active agents.",
-                    version, model_name, goal, agents.len())
+                let last_payload = &interactions.last().unwrap().payload;
+                if last_payload.len() > 10 {
+                    last_payload.clone()
+                } else {
+                    format!("AMA-Synthesis ({} via {}):\n\nProcessed goal '{}' across {} active agents.",
+                        version, model_name, current_goal, agents.len())
+                }
+            };
+
+            // 4. Reality Verification (Rule 15)
+            match super::truth::TruthTransformer::verify_mission_reality(&current_goal, "AMA_SOLVE", &final_answer, workspace) {
+                Ok(verified_answer) => {
+                    return Ok(AmaMissionReport {
+                        goal: goal.to_string(),
+                        status: "COMPLETE".to_string(),
+                        agents,
+                        interactions,
+                        final_answer: verified_answer,
+                    });
+                }
+                Err(e) if e.to_string().contains("TRUTH_VIOLATION") => {
+                    retry_count += 1;
+                    last_error = e.to_string();
+                    crate::sandbox::manager::AeonAuditLogger::log_event(workspace, "HALLUCINATION_DETECTED", &format!("Retry {}/3: {}", retry_count, last_error));
+
+                    // Feed the violation back into the next "thought"
+                    current_goal = format!("{}\n\n[RECURSIVE_CORRECTION]: Your previous response failed reality verification: {}\nPlease grounded your next attempt in verified workspace actions.", goal, last_error);
+                }
+                Err(e) => return Err(e),
             }
-        };
+        }
 
-        // 4. Reality Verification (Rule 15)
-        let verified_answer = super::truth::TruthTransformer::verify_mission_reality(goal, "AMA_SOLVE", &final_answer, workspace)?;
-
-        Ok(AmaMissionReport {
-            goal: goal.to_string(),
-            status: "COMPLETE".to_string(),
-            agents,
-            interactions,
-            final_answer: verified_answer,
-        })
+        Err(crate::error::EaiError::Governance(format!("Recursive reasoning failed after 3 attempts. Last violation: {}", last_error)))
     }
 
     pub fn generate_self_awareness_report(&self, workspace: &Path) -> EaiResult<String> {

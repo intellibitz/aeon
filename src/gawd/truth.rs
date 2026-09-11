@@ -19,25 +19,30 @@ impl AeonTruthAgent {
 
         // Pattern: File System Mutation Detection
         if result.contains("Wrote to ") || result.contains("Saved to ") {
+             let mut found_path = false;
              let parts: Vec<&str> = result.split(|c| c == ' ' || c == '[' || c == ']').collect();
              for part in parts {
                  let path_candidate = part.trim_matches(|c| c == '.' || c == ':' || c == '[' || c == ']');
                  if (path_candidate.contains('/') || path_candidate.contains('.')) && !path_candidate.is_empty() {
                      let target_path = workspace.join(path_candidate);
-                     if target_path.exists() {
-                         if let Ok(m) = target_path.metadata() {
-                             if m.len() == 0 && !result.to_lowercase().contains("empty") {
-                                 violations.push(format!("Reality Mismatch: Resource '{}' is empty despite successful report.", path_candidate));
-                             }
+                     found_path = true;
+                     if !target_path.exists() {
+                         violations.push(format!("Reality Mismatch: Resource '{}' reported as written but does not exist in workspace.", path_candidate));
+                     } else if let Ok(m) = target_path.metadata() {
+                         if m.len() == 0 && !result.to_lowercase().contains("empty") {
+                             violations.push(format!("Reality Mismatch: Resource '{}' exists but is empty (0 bytes). Result claimed success.", path_candidate));
                          }
-                         break; // Found and verified the primary path
                      }
+                     break;
                  }
+             }
+             if !found_path && (result.contains("Wrote to") || result.contains("Saved to")) {
+                 violations.push("Reality Mismatch: Tool reported writing a file but no valid path could be extracted for verification.".to_string());
              }
         }
 
         if !violations.is_empty() {
-            let error_msg = format!("TRUTH VIOLATION: {}\\nMission blocked to prevent substrate pollution.", violations.join("\\n"));
+            let error_msg = format!("TRUTH_VIOLATION: {}\\nSTRUCTURED_FEEDBACK: Please grounded your response in the physical workspace state. Ensure files are actually written before reporting success.", violations.join(" | "));
             return Err(EaiError::Governance(error_msg));
         }
 
