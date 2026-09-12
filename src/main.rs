@@ -225,11 +225,18 @@ fn main() {
                 return;
             }
 
-            let answer = ama.solve_clean(&goal, &cwd, AEON_VERSION);
-            if !io::stdout().is_terminal() {
-                print!("{}", answer);
-            } else {
-                println!("{}", answer);
+            // Axiomatic Pulse Ingestion: Automatically anchor any natural language instruction into pulse.md
+            match crate::daemon::admin::AeonAdmin::ingest_natural_intent(&cwd, &goal) {
+                Ok(msg) => println!("{}", msg),
+                Err(e) => {
+                    // Fallback to direct solving if ingestion fails
+                    let answer = ama.solve_clean(&goal, &cwd, AEON_VERSION);
+                    if !io::stdout().is_terminal() {
+                        print!("{}", answer);
+                    } else {
+                        println!("{}", answer);
+                    }
+                }
             }
         }
     }

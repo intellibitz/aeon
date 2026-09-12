@@ -1,6 +1,6 @@
 # aeon: Exponential Intelligence for Any AI (EAI)
 
-![AEON Version](https://img.shields.io/badge/version-v0.1.2022772-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
+![AEON Version](https://img.shields.io/badge/version-v0.1.2022773-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
 
 **aeon** is a local-first, native Rust AI execution engine designed for high-throughput, hardware-saturated agent orchestration. It transforms static AI interactions into a dynamic, self-evolving intelligence substrate governed by a hard-compiled genome.
 
@@ -40,17 +40,20 @@ curl -sSfL https://raw.githubusercontent.com/intellibitz/aeon/main/install.sh | 
 
 ## Usage
 
-Interact with the substrate using the unified `pulse` command:
+Interact with the substrate using the simplified natural language interface:
 
 ```bash
 # Core Evolution: Trigger a binary mutation
-aeon pulse "Add a new spectral analysis engine to the binary"
+aeon "Add a new spectral analysis engine to the binary"
 
 # Workspace Mission: Execute a task with a swarm
-aeon pulse "analyze this workspace and propose an optimization plan"
+aeon "analyze this workspace and propose an optimization plan"
 
 # Substrate Query: Verify semantic truth
-aeon pulse "identity"
+aeon "identity"
+
+# Optional: The 'pulse' keyword is preserved for explicit ingestion
+aeon pulse "Sync genome version"
 
 # Administration: Atomic genome synchronization
 aeon admin sync
