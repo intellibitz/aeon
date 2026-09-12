@@ -1,0 +1,98 @@
+# AEON Substrate Validation Genome (PULSE)
+
+* **Current Engine Version**: `v0.1.2022768`
+
+This document defines the complete set of validation protocols that anchor the `aeon` genome. Every entry reflects a hard-compiled reflex or an orchestrated meta-behavior.
+
+## 1. Pending Failing Pulse
+
+(No pending pulse. Substrate is optimal.)
+
+## 2. Ingested & Resolved Pulse (The Realized Genome)
+
+### 2.1 Core Governance & Epistemic Integrity [MOTION]
+1. `[x]` **No Lies**: Substrate accurately reports statuses, outcomes, and limitations without deception.
+2. `[x]` **No Hallucinations**: All code and facts are grounded in verified reality or direct tool results.
+3. `[x]` **Brutally Honest**: Active critical evaluation mode for architecture and logic is sustained.
+4. `[x]` **Reality Check**: Assumptions are continually validated against codebase constraints.
+5. `[x]` **Chain of Truth**: All conclusions are grounded in empirical source code and runtime evidence.
+6. `[x]` **Professional Standard**: Technical, informal-free communication is enforced.
+7. `[x]` **No Fluff**: Direct, concise technical responses are prioritized.
+8. `[x]` **Secret Masking**: Zero tolerance for leaking tokens or credentials.
+9. **Real Working Code**: Production-ready code generation is mandated.
+10. `[x]` **Core Immutability**: Alpha-self core is protected from runtime agent modification.
+11. `[x]` **Direct Collaboration**: Precisely aligned, objective interaction model is established.
+12. `[x]` **Full Autonomy**: Agents possess total permission for designated workspace operations.
+13. `[x]` **Dynamic Intent Resolution**: Anti-hardcoding mandate for query matchers is realized.
+14. `[x]` **Reality Grounding**: Automated correction of user assumptions against empirical paths.
+15. `[x]` **Substrate Sovereignty**: Isolation boundaries for ephemeral state are enforced.
+16. `[x]` **Creator Pipeline**: The Motion -> Aspiration -> Topology -> Workflow pipeline is the meta-axiom.
+17. `[x]` **Genomic Pulse Formalization**: Renamed master trigger to `pulse.md` to distinguish it from standard unit testing and align with the "Master Pulse" paradigm.
+
+### 2.2 Architectural Evolution & Aspirations [MOTION]
+18. `[x]` **Platform Independence**: Zero platform bias across Linux, macOS, and Windows.
+19. `[x]` **Natural Language Interface**: Elimination of static CLI friction through neural intent mapping.
+20. `[x]` **Meta-Only Mandate**: 100% dynamic capability discovery via MCP.
+21. `[x]` **Core Awareness**: Hard-compiled structural alignment with .agents/ genome.
+22. `[x]` **Hardware Saturation**: Active compute interrogation and acceleration mapping.
+23. `[x]` **Standard MCP Bus**: Native JSON-RPC 2.0 transport multiplexing.
+24. `[x]` **Drift Detection**: Autonomous identification of architectural gaps.
+25. `[x]` **Density Context**: Scale-safe context tracking for asynchronous swarms.
+26. `[x]` **Inference Racing**: Winner-takes-all speculative execution for low latency.
+27. `[x]` **Universal Ingestion**: Agnostic execution of GGUF, Safetensors, and ONNX models.
+28. `[x]` **Admin Substrate**: Autonomous maintenance of the optimal execution environment.
+29. `[x]` **Closed-Loop Intelligence**: Native Tier 2 reasoning distillation from experience.
+30. `[x]` **Agent Synthesis**: Dynamic recruitment of specialist agents based on intent.
+31. `[x]` **Multi-Modal Fusion**: 1024-dimensional unified neural projection space.
+32. `[x]` **Self-Validation**: Autonomous foundational readiness testing on host hardware.
+33. `[x]` **Unified Interaction Interface**: Every user vision anchored in a verifiable typed test entry.
+
+### 2.3 Structural Topology & Pillars [MOTION]
+34. `[x]` **AoA Coordination**: GAWD/AmaDaemon parallel dispatcher is functional.
+35. `[x]` **Administrative Authority**: AeonAdmin compliance and release orchestration is active.
+36. `[x]` **Runtime Authority**: AeonRuntimeAdmin hardware and model provisioning is active.
+37. `[x]` **Evolution Authority**: EvolutionManager autonomous self-healing is active.
+38. `[x]` **Specialist Units**: Runtime, Hardware, Safety, and Context agents are operational.
+39. `[x]` **Reflex Engines**: AEON-Alpha intent classification is microsecond-ready.
+40. `[x]` **Inference Engines**: Universal execution and GEMI reasoning bridges are functional.
+41. `[x]` **Multimodal Engines**: Hardware-saturated Vision and Audio substrates are operational.
+42. `[x]` **Neural Weights**: Native Alpha and Reasoning models are provisioned.
+43. `[x]` **GMCP Infrastructure**: RPC, HTTP, and UDP protocol bridges are functional.
+
+### 2.4 Build, Release & Deployment [MOTION]
+44. `[x]` **Build Optimization**: Lightning-fast compilation with maximum hardware saturation.
+45. `[x]` **Workspace Purity**: Absolute isolation of build artifacts in .aeon/ directories.
+46. `[x]` **Motion Rule Verification**: Mandatory cargo check and native test pass before release.
+47. `[x]` **Release Gatekeeper**: Automated enforcement of tests and compliance audits.
+48. `[x]` **Genome Synchronization**: Atomic version sync across all manifests and .agents files.
+49. `[x]` **Conventional Commit**: Plain text technical commit prefixes are enforced.
+50. `[x]` **De-pollution Mandate**: Automated removal of mission logs before remote push.
+51. `[x]` **One-Line Install**: curl-based binary deployment and auto-path initialization.
+
+### 2.5 Runtime Mandates & Swarm Safety [MISSION]
+52. `[x]` **Daemon Persistence**: Background resiliency and port binding (9090-9093) is sustained.
+53. `[x]` **Compute Saturation**: Continuous hardware interrogation and compute optimization.
+54. `[x]` **Self-Healing Reflex**: Autonomous recovery from structural pathologies.
+55. `[x]` **Environment Synthesis**: Dynamic neural weight provisioning and MCP linking.
+56. `[x]` **Zero-Config Adaptation**: System adaptivity to workspace system variables.
+57. `[x]` **Swarm Recruitment**: Semantic centroid recruitment with a 0.25 threshold.
+58. `[x]` **Context Mapping**: Memory-safe context store for deep reasoning swarms.
+59. `[x]` **Mission Persistence**: Stateful checkpoint recovery for interrupted execution.
+60. `[x]` **Swarm Safety**: Absolute intercept of destructive commands and critical path access.
+61. `[x]` **Secret Masking**: Active detection and masking of credentials in mission logs.
+
+### 2.6 Meta-Workflow Logic [MOTION]
+62. `[x]` **Vision Ingestion**: Transformation of natural language into typed validation protocols.
+63. `[x]` **Fork Decision**: Causal routing to Alpha-Self, Alpha-User, or Ephemeral paths.
+64. **Core Mutation Pipeline**: Motion -> Aspiration -> Topology -> Workflow -> Build sequence.
+65. `[x]` **Mission Protocol**: Workspace manipulation and experience distillation logic.
+66. `[x]` **Foundational Readiness**: continuous host audit and model selection optimization.
+67. `[x]` **Swarm Synthesis**: Genome interrogation and semantic fleet recruitment.
+68. `[x]` **Blackboard Execution**: High-density parallel coordination and Truth convergence.
+69. `[x]` **Ingestion Loop**: Distillation of reasoning into the Native Tier 2 model.
+
+### 2.7 Zero-Mutation Interrogation [QUERY]
+70. `[x]` **Stateless Identity**: genome, axiom count, and topology reporting without state drift.
+71. `[x]` **Health Interrogation**: Daemon, engine, and thread status reporting.
+72. `[x]` **Model Roster**: vault and registry roster reporting without modification.
+73. `[x]` **Ephemeral Analytics**: Rapid text/vision/audio analysis directly to stdout.

@@ -1,12 +1,12 @@
 # AEON Alpha-User Mutation Protocols (Missions)
 
-* **Current Engine Version**: `v0.1.2022767`
+* **Current Engine Version**: `v0.1.2022768`
 
 This document defines the mutable execution paths for the `aeon` substrate. These protocols operate within the `alpha-user` space, allowing the swarm to generate artifacts, manipulate the workspace, and distill experience without modifying the hard-compiled `alpha-self` core.
 
 ## 1. Dynamic Task Fulfillment
 
-1. **Mission Validation**: Every `[MISSION]` instruction must be recorded in `TESTS.md`. A Mission is failing if the filesystem state does not match the semantic intent.
+1. **Mission Validation**: Every `[MISSION]` instruction must be recorded in `pulse.md`. A Mission is failing if the filesystem state does not match the semantic intent.
 2. **Swarm Correction**: A failing `[MISSION]` triggers the `NeuralAgentFactory` to synthesize a new specialist fleet to correct the workspace state.
 
 ## 2. Experience Distillation

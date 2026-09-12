@@ -1,6 +1,6 @@
 # AEON Architectural Aspirations
 
-* **Current Engine Version**: `v0.1.2022767`
+* **Current Engine Version**: `v0.1.2022768`
 
 This document defines the structural roadmap and evolution goals of the `aeon` substrate.
 
@@ -78,4 +78,4 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 ---
 
 ### [Aspiration 16] Unified Natural Language Evolution
-* **Core Paradigm**: The "Speak-to-Evolve" mandate. Every human instruction is automatically mapped to a verifiable `[MOTION]`, `[MISSION]`, or `[QUERY]` test entry in `TESTS.md`. This anchors the substrate's entire lifecycle in a singular, natural language verification loop.
+* **Core Paradigm**: The "Speak-to-Evolve" mandate. Every human instruction is automatically mapped to a verifiable `[MOTION]`, `[MISSION]`, or `[QUERY]` test entry in `pulse.md`. This anchors the substrate's entire lifecycle in a singular, natural language verification loop.

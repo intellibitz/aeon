@@ -1,12 +1,12 @@
 # AEON Operational Workflow
 
-* **Current Engine Version**: `v0.1.2022767`
+* **Current Engine Version**: `v0.1.2022768`
 
 This document defines the Meta-Workflow for substrate evolution and the Federated Parallelism logic of the active `aeon` engine.
 
 ## 1. The Creator Evolution Pipeline (Meta-Workflow)
 
-1. **Vision Ingestion (`TESTS.md`)**: Every Creator instruction is immediately formalized as a typed test entry:
+1. **Vision Ingestion (`pulse.md`)**: Every Creator instruction is immediately formalized as a typed test entry:
     - `[MOTION]`: Triggers `alpha-self` core mutation (Rust/Binary).
     - `[MISSION]`: Triggers `alpha-user` workspace mutation (Files/Distillation).
     - `[QUERY]`: Triggers ephemeral truth verification (Stateless Analytics).

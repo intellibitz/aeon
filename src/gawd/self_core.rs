@@ -35,7 +35,7 @@ impl AlphaSelf {
     pub const BUILD_MD: &'static str = include_str!("../../.agents/BUILD.md");
     pub const ASPIRATIONS_MD: &'static str = include_str!("../../.agents/ASPIRATIONS.md");
     pub const RUNTIME_MD: &'static str = include_str!("../../.agents/RUNTIME.md");
-    pub const TESTS_MD: &'static str = include_str!("../../.agents/TESTS.md");
+    pub const TESTS_MD: &'static str = include_str!("../../.agents/pulse.md");
     pub const MOTIONS_MD: &'static str = include_str!("../../.agents/MOTIONS.md");
     pub const TOPOLOGY_MD: &'static str = include_str!("../../.agents/TOPOLOGY.md");
     pub const WORKFLOW_MD: &'static str = include_str!("../../.agents/WORKFLOW.md");
@@ -45,7 +45,7 @@ impl AlphaSelf {
 
     pub const RULES: &[AeonAxiomRule] = GEN_RULES;
     pub const WORKFLOW_STEPS: &[AeonAxiomRule] = GEN_WORKFLOW_STEPS;
-    pub const TEST_PROTOCOLS: &[AeonAxiomRule] = GEN_TEST_PROTOCOLS;
+    pub const PULSE_AXIOMS: &[AeonAxiomRule] = GEN_PULSE_AXIOMS;
     pub const MISSION_PROTOCOLS: &[AeonAxiomRule] = GEN_MISSION_PROTOCOLS;
     pub const QUERY_PROTOCOLS: &[AeonAxiomRule] = GEN_QUERY_PROTOCOLS;
     pub const CREATOR_PROTOCOLS: &[AeonAxiomRule] = GEN_CREATOR_PROTOCOLS;
