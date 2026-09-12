@@ -1,6 +1,6 @@
 # AEON Substrate Topology
 
-* **Current Engine Version**: `v0.1.2022732`
+* **Current Engine Version**: `v0.1.2022733`
 
 This document defines the structural components and orchestrated meta-layers of the `aeon` substrate.
 

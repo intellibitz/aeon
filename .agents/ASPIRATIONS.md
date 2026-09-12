@@ -1,6 +1,6 @@
 # Architectural Aspirations
 
-* **Current Engine Version**: `v0.1.2022732`
+* **Current Engine Version**: `v0.1.2022733`
 
 aeon is a local-first, native Rust AI execution engine designed for high-throughput, low-latency agent orchestration. Its structural roadmap is driven entirely by clear, isolated architectural goals.
 

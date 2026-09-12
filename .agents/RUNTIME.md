@@ -1,6 +1,6 @@
 # AEON Runtime Instructions
 
-* **Current Engine Version**: `v0.1.2022732`
+* **Current Engine Version**: `v0.1.2022733`
 
 This document defines the operational directives for the `AeonRuntimeAgent` and the `SafetyAgent`. It governs the establishment, maintenance, and protection of the optimal execution environment.
 
