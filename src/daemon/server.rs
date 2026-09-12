@@ -125,7 +125,7 @@ impl AmaDaemon {
     fn start_udp_discovery_server(port: u16, gmcp_port: u16) {
         let addr = format!("0.0.0.0:{}", port);
         if let Ok(socket) = UdpSocket::bind(&addr) {
-            eprintln!("🌐 [A2A Cluster UDP] Discovery listener active on {}", addr);
+            eprintln!("[A2A Cluster UDP] Discovery listener active on {}", addr);
             let mut buf = [0u8; 512];
             while let Ok((amt, src)) = socket.recv_from(&mut buf) {
                 let msg = String::from_utf8_lossy(&buf[..amt]);

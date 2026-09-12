@@ -66,6 +66,7 @@ pub struct AeonConfig {
     pub beacon_interval_secs: u64,
     pub local_scan_paths: Vec<String>,
     pub agent_rank_threshold: f32,
+    pub alpha_weights_url: String,
     pub governance: GovernancePatterns,
 }
 
@@ -90,6 +91,7 @@ impl Default for AeonConfig {
             beacon_interval_secs: 30,
             local_scan_paths: Vec::new(),
             agent_rank_threshold: 0.6,
+            alpha_weights_url: "https://huggingface.co/intellibitz/aeon-alpha/resolve/main/aeon-alpha.safetensors".to_string(),
             governance: GovernancePatterns {
                 destructive_commands: vec![
                     "rm -rf /".to_string(),

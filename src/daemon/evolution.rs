@@ -11,7 +11,7 @@ use std::collections::HashMap;
 pub struct EvolutionManager;
 
 impl EvolutionManager {
-    /// 🚀 Test-Driven Evolution Loop (Aspirational Core Paradigm)
+    /// Test-Driven Evolution Loop (Aspirational Core Paradigm)
     /// Ingests failure signatures from tests and self-heals the native substrate.
     pub fn execute_evolutionary_cycle(workspace: &Path) -> EaiResult<String> {
         // 1. Execute Test Loop to detect architectural failure signatures

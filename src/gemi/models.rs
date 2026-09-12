@@ -3,11 +3,10 @@
 
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use super::hardware::HardwareProfiler;
 use crate::sandbox::manager::{ModelTier, ModelInfo, ProviderType};
-use crate::error::{EaiError, EaiResult};
+use crate::error::EaiResult;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ModelDownloadProgress {
@@ -185,6 +184,7 @@ impl ModelManager {
     pub fn get_model_path(model_id: &str) -> Option<PathBuf> {
         let p = PathBuf::from(model_id);
         if p.is_file() { return Some(p); }
+
         let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
         let aeon_models = home.join(".aeon/models");
         if let Ok(entries) = std::fs::read_dir(&aeon_models) {
@@ -193,6 +193,14 @@ impl ModelManager {
                 if path.to_string_lossy().contains(model_id) && path.is_file() { return Some(path); }
             }
         }
+
+        // Global Substrate Search (Rule 31)
+        let ws = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+        let system_models = Self::scan_system_for_local_models(&ws);
+        if let Some(m) = system_models.iter().find(|m| m.name.contains(model_id) || m.model_id.contains(model_id)) {
+            return Some(PathBuf::from(&m.model_id));
+        }
+
         None
     }
 
@@ -202,9 +210,22 @@ impl ModelManager {
             let tokenizer_path = parent.join("tokenizer.json");
             if tokenizer_path.exists() { return Some(tokenizer_path); }
         }
+
         let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
         let default_tokenizer = home.join(".aeon/models/tokenizer.json");
         if default_tokenizer.exists() { return Some(default_tokenizer); }
+
+        // Deep Search for Tokenizer
+        let ws = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+        if let Ok(entries) = std::fs::read_dir(&ws) {
+             for entry in entries.flatten() {
+                 let path = entry.path();
+                 if path.is_file() && path.file_name().is_some_and(|n| n == "tokenizer.json") {
+                     return Some(path);
+                 }
+             }
+        }
+
         None
     }
 
@@ -282,7 +303,10 @@ impl ModelManager {
     pub fn install_model(query_or_url: &str) -> String {
         let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
         let models_dir = home.join(".aeon/models");
-        let _ = fs::create_dir_all(&models_dir);
+        if let Err(e) = fs::create_dir_all(&models_dir) {
+            return format!("ERROR: Failed to create models directory: {}", e);
+        }
+
         let target = query_or_url.trim();
         let expected_bytes = match target {
             t if t.contains("72b") => 42_500_000_000,
@@ -294,13 +318,22 @@ impl ModelManager {
         if target.starts_with("http") {
             let file_name = target.split('/').next_back().unwrap_or("model.gguf");
             let dest_path = models_dir.join(file_name);
-            if let Ok(resp) = ureq::get(target).set("User-Agent", "AEON/0.1").call() {
-                if let Ok(mut file) = fs::File::create(&dest_path) {
-                    if std::io::copy(&mut resp.into_reader(), &mut file).is_ok() {
-                        Self::save_download_progress(target, expected_bytes, expected_bytes, "COMPLETED");
-                        return format!("Downloaded to {}", dest_path.display());
+            match ureq::get(target).set("User-Agent", "AEON/0.1").call() {
+                Ok(resp) => {
+                    match fs::File::create(&dest_path) {
+                        Ok(mut file) => {
+                            match std::io::copy(&mut resp.into_reader(), &mut file) {
+                                Ok(_) => {
+                                    Self::save_download_progress(target, expected_bytes, expected_bytes, "COMPLETED");
+                                    return format!("SUCCESS: Downloaded to {}", dest_path.display());
+                                }
+                                Err(e) => return format!("ERROR: Copy failed: {}", e),
+                            }
+                        }
+                        Err(e) => return format!("ERROR: File create failed: {}", e),
                     }
                 }
+                Err(e) => return format!("ERROR: HTTP Request failed: {}", e),
             }
         }
         "Installation enqueued.".to_string()
@@ -320,13 +353,21 @@ impl ModelManager {
         let ws = workspace.to_path_buf();
         std::thread::spawn(move || {
             loop {
-                // Background provisioning logic
-                std::thread::sleep(std::time::Duration::from_secs(300));
+                // Zero-Config Autonomous Model Provisioning (Rule 31)
+                let selected = Self::get_selected_model();
+                if selected.is_none() || selected.as_ref().is_some_and(|s| s.contains("native")) {
+                    eprintln!("[Model Manager] No local reasoning substrate detected. Triggering autonomous provisioning...");
+                    // Default to a small, fast local model if none found
+                    let _ = Self::install_model("https://huggingface.co/intellibitz/aeon-alpha/resolve/main/aeon-alpha.safetensors");
+                }
+
+                let _ = Self::ensure_hardware_optimal_models(&ws);
+                std::thread::sleep(std::time::Duration::from_secs(3600)); // Audit every hour
             }
         });
     }
 
-    pub fn run_fail_proof_model_agent(workspace: &Path) -> ModelAgentReport {
+    pub fn run_fail_proof_model_agent(_workspace: &Path) -> ModelAgentReport {
         ModelAgentReport { active_step: 0, total_steps: 0, total_discovered_on_system: 0, steps: Vec::new() }
     }
 
@@ -334,7 +375,7 @@ impl ModelManager {
         HardwareProfiler::get_progressive_model_ladder().last().cloned().unwrap()
     }
 
-    pub fn ensure_hardware_optimal_models(workspace: &Path) -> EaiResult<String> { Ok("Verified".into()) }
+    pub fn ensure_hardware_optimal_models(_workspace: &Path) -> EaiResult<String> { Ok("Verified".into()) }
 }
 
 #[cfg(test)]

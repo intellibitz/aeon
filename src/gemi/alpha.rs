@@ -1,4 +1,4 @@
-// 🌌 AEON-Alpha: Native Neural Intelligence Substrate
+// AEON-Alpha: Native Neural Intelligence Substrate
 // 100% Rust implementation using Candle for Tier 0 Reflex Distillation
 
 use anyhow::{Result, anyhow};
@@ -39,7 +39,7 @@ impl AeonAlphaModel {
         Ok(Self { fc1, fc2 })
     }
 
-    /// 🧪 Dynamic Intent Surface Discovery (Rule 31 Hardening)
+    /// Dynamic Intent Surface Discovery (Rule 31 Hardening)
     pub fn list_dynamic_intents() -> Vec<String> {
         let mut intents = vec![
             "status".into(), "version".into(), "self_heal_build".into(),
@@ -47,7 +47,7 @@ impl AeonAlphaModel {
             "list_directory".into(), "scout".into(), "reason".into()
         ];
 
-        // 🚀 Add Registered Agents
+        // Add Registered Agents
         let registry = crate::gawd::agents::AgentMetaRegistry::global();
         for agent in registry.list_agents() {
             if !intents.contains(&agent.name) {
@@ -55,7 +55,7 @@ impl AeonAlphaModel {
             }
         }
 
-        // 🚀 Add Installed Tools
+        // Add Installed Tools
         let tools = crate::gmcp::tools::ToolRegistry::list_tools();
         for tool in tools {
             if !intents.contains(&tool.name) {
@@ -103,7 +103,7 @@ impl AeonAlphaModel {
             }
         }
 
-        // 🚀 Neural Seeding (Synthetic Priming): Ensure new tools have at least one sample
+        // Neural Seeding (Synthetic Priming): Ensure new tools have at least one sample
         for (idx, intent) in dynamic_intents.iter().enumerate() {
             let vec = Self::semantic_centroid_projection(intent)?;
             samples.push(Tensor::from_vec(vec, (1, Self::DIM), &device)?);
@@ -116,19 +116,15 @@ impl AeonAlphaModel {
         let y = Tensor::from_vec(labels, samples.len(), &device)?;
 
         // Training Loop
-        for epoch in 1..=100 {
+        for _epoch in 1..=100 {
             let logits = fc1.forward(&x)?.relu()?;
             let logits = fc2.forward(&logits)?;
             let log_sm = candle_nn::ops::log_softmax(&logits, 1)?;
             let loss = candle_nn::loss::nll(&log_sm, &y)?;
             opt.backward_step(&loss)?;
-
-            if epoch % 20 == 0 {
-                eprintln!("Epoch {}: Loss: {:?}", epoch, loss);
-            }
         }
 
-        // 🚀 Atomic Model Save (Rule 13 Hardening)
+        // Atomic Model Save (Rule 13 Hardening)
         let weights_path = global_dir.join("models/aeon-alpha.safetensors");
         let tmp_path = weights_path.with_extension("tmp");
         varmap.save(&tmp_path)?;
@@ -163,7 +159,32 @@ impl AeonAlphaModel {
         let output = self.fc2.forward(&output)?;
 
         let probs = candle_nn::ops::softmax(&output, 1)?;
-        let results = probs.to_vec2::<f32>()?[0].clone();
+
+        // Absolute Rank Hardening (Aspiration 7)
+        let mut p = probs;
+        while p.rank() > 1 {
+            let dims = p.dims();
+            p = p.get(dims[0] - 1)?;
+        }
+
+        if p.rank() == 0 {
+            // Convert scalar to vector of 1
+            let val = p.to_vec0::<f32>()?;
+            let results = vec![val];
+
+            let mut max_idx = 0;
+            let mut max_val = 0.0;
+            for (i, &val) in results.iter().enumerate() {
+                if val > max_val { max_val = val; max_idx = i; }
+            }
+            let dynamic_intents = Self::list_dynamic_intents();
+            if let Some(intent) = dynamic_intents.get(max_idx) {
+                return Ok((format!("ACTION: {}", intent), max_val));
+            }
+            return Err(anyhow!("Logic failure in rank-0 handling"));
+        }
+
+        let results = p.to_vec1::<f32>()?;
 
         let mut max_idx = 0;
         let mut max_val = 0.0;
@@ -182,7 +203,7 @@ impl AeonAlphaModel {
         Err(anyhow!("Low confidence in neural reflex."))
     }
 
-    /// 🧪 Deterministic Semantic Embedding Substrate
+    /// Deterministic Semantic Embedding Substrate
     pub fn semantic_centroid_projection(prompt: &str) -> Result<Vec<f32>> {
         let mut vec = vec![0.0f32; Self::DIM];
         let prompt_lower = prompt.to_lowercase();
@@ -212,7 +233,7 @@ impl AeonAlphaModel {
     fn get_semantic_anchor(word: &str) -> Vec<f32> {
         let mut anchor = vec![0.0f32; Self::DIM];
 
-        // 🚀 Adaptive Semantic Anchors: Query registry for domain specialist keywords
+        // Adaptive Semantic Anchors: Query registry for domain specialist keywords
         let registry = crate::gawd::agents::AgentMetaRegistry::global();
         let agents = registry.list_agents();
         for agent in agents {

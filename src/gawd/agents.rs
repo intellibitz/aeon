@@ -33,7 +33,7 @@ pub struct AgentProfile {
     pub base_rank: f32,
 }
 
-/// 🚀 High-Density Context Store (Aspiration 5)
+/// High-Density Context Store (Aspiration 5)
 /// Implements lease-capped, memory-safe distributed context mapping.
 #[derive(Debug, Default)]
 pub struct HighDensityContextStore {
@@ -68,7 +68,7 @@ impl HighDensityContextStore {
         self.inner.is_empty()
     }
 
-    pub fn iter(&self) -> std::collections::hash_map::Iter<String, String> {
+    pub fn iter(&self) -> std::collections::hash_map::Iter<'_, String, String> {
         self.inner.iter()
     }
 
@@ -77,7 +77,7 @@ impl HighDensityContextStore {
     }
 }
 
-/// 🧠 Mission Blackboard: Shared state for swarm agents to converge on the "Chain of Truth".
+/// Mission Blackboard: Shared state for swarm agents to converge on the "Chain of Truth".
 /// Optimized for High-Density Context Mapping (Aspiration 5).
 pub type MissionBlackboard = Arc<Mutex<HighDensityContextStore>>;
 
@@ -88,7 +88,7 @@ pub trait GawdAgent: Send + Sync {
     fn execute(&self, goal: &str, workspace: &Path, blackboard: &MissionBlackboard) -> EaiResult<String>;
 }
 
-/// 🚀 Dynamic Agent: A generic substrate agent that loads behavior from models and tools.
+/// Dynamic Agent: A generic substrate agent that loads behavior from models and tools.
 pub struct DynamicAgent {
     pub agent_name: String,
     pub mission_profile: String,
@@ -110,8 +110,12 @@ impl GawdAgent for DynamicAgent {
         );
 
         let ws = workspace.to_path_buf();
-        // 🚀 Swarm Intelligence Escalation: Saturate with Tier 2/Meta Reasoning
-        let res = crate::gemi::engine::GemiEngine::generate_reasoning(&prompt, &ws);
+        // Swarm Intelligence Escalation: Use native 'reason' tool directly for absolute autonomy (Rule 31)
+        let res = if crate::gmcp::tools::ToolRegistry::exists("reason") {
+             crate::gmcp::tools::ToolRegistry::execute_tool("reason", &prompt, &ws)
+        } else {
+             crate::gemi::engine::GemiEngine::generate_reasoning(&prompt, &ws)
+        };
 
         let mut bb = blackboard.lock().unwrap();
         bb.insert(self.agent_name.clone(), res.clone());
@@ -139,7 +143,7 @@ impl AgentMetaRegistry {
         let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
         let registry_path = home.join(".aeon/agent_registry.json");
 
-        // 🚀 Registry Hot-Reload: Check timestamp to avoid stale state
+        // Registry Hot-Reload: Check timestamp to avoid stale state
         static LAST_LOAD: OnceLock<Mutex<std::time::SystemTime>> = OnceLock::new();
         let last_load_mutex = LAST_LOAD.get_or_init(|| Mutex::new(std::time::SystemTime::UNIX_EPOCH));
 
@@ -162,7 +166,7 @@ impl AgentMetaRegistry {
             }
         }
 
-        // 🧪 Bootstrap Provisioning (Rule 31)
+        // Bootstrap Provisioning (Rule 31)
         self.bootstrap();
         let agents = self.agents.lock().unwrap();
         let _ = std::fs::create_dir_all(registry_path.parent().unwrap());
@@ -176,6 +180,20 @@ impl AgentMetaRegistry {
             description: "Software engineering, systems architecture, and repository management.".into(),
             categories: vec!["code".into(), "rust".into(), "git".into(), "system".into()],
             semantic_anchors: vec!["build".into(), "test".into(), "deploy".into(), "compile".into()],
+            base_rank: 0.9,
+        });
+        agents.push(AgentProfile {
+            name: "SearchAgent".into(),
+            description: "Deep web searching, knowledge retrieval, and data scouting.".into(),
+            categories: vec!["search".into(), "find".into(), "lyrics".into(), "look".into()],
+            semantic_anchors: vec!["google".into(), "brave".into(), "web".into(), "query".into()],
+            base_rank: 0.9,
+        });
+        agents.push(AgentProfile {
+            name: "TranslationAgent".into(),
+            description: "High-fidelity linguistic translation across global languages. Always use 'reason' tool for complex translation tasks.".into(),
+            categories: vec!["translate".into(), "language".into(), "tamil".into(), "linguistic".into()],
+            semantic_anchors: vec!["tamil".into(), "hindi".into(), "french".into(), "translator".into()],
             base_rank: 0.9,
         });
         agents.push(AgentProfile {
@@ -231,7 +249,7 @@ impl AgentMetaRegistry {
 pub struct GawdAgentFleet;
 
 impl GawdAgentFleet {
-    /// 🧪 Neural Fleet Synthesizer: Dynamically decides which agents are required for a mission.
+    /// Neural Fleet Synthesizer: Dynamically decides which agents are required for a mission.
     /// RULE 31 Hardening: Uses semantic centroids to match agents.
     pub fn synthesize_fleet(goal: &str) -> Vec<Arc<dyn GawdAgent>> {
         let mut fleet: Vec<Arc<dyn GawdAgent>> = Vec::new();
@@ -252,7 +270,7 @@ impl GawdAgentFleet {
         let registry = AgentMetaRegistry::global();
         let available_agents = registry.list_agents();
 
-        // 🚀 Neural Semantic pass: identified via Tier 0 Vector space
+        // Neural Semantic pass: identified via Tier 0 Vector space
         if let Ok(goal_vec) = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(goal) {
             for agent in available_agents {
                 let mut max_similarity = 0.0f32;
@@ -268,7 +286,7 @@ impl GawdAgentFleet {
                     max_similarity = dot_product;
                 }
 
-                // 🧪 Semantic recruitment threshold: 0.25 (tuned for v0.1.2022715)
+                // Semantic recruitment threshold: 0.25 (tuned for v0.1.2022715)
                 if max_similarity > 0.25 || agent.categories.iter().any(|c| goal.to_lowercase().contains(c)) {
                     fleet.push(Arc::new(DynamicAgent {
                         agent_name: agent.name,

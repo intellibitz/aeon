@@ -1,4 +1,4 @@
-// AEON Axiom Substrate: Autonomous Self-Awareness from Compiled Binary Instructions
+// AEON Axiom Substrate: Core Configuration and Integrity Maintenance from Compiled Binary Instructions
 // Bypasses string parsing by leveraging compiled Rust structs and enums in AlphaSelf.
 
 use std::path::Path;
@@ -25,7 +25,7 @@ impl AxiomSubstrate {
     }
 
     #[allow(dead_code)]
-    pub fn get_self_awareness_summary() -> String {
+    pub fn get_substrate_summary() -> String {
         AlphaSelf::inspect_compiled_binary_instructions()
     }
 }

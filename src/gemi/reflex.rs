@@ -1,4 +1,4 @@
-// 🌌 AEON-Alpha: Tier 0 Reflex Reasoning Engine
+// AEON-Alpha: Tier 0 Reflex Reasoning Engine
 // 100% Rust implementation for Hyper-Optimized Protocol Routing (<10ms)
 
 use std::path::Path;

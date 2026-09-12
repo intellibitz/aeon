@@ -1,4 +1,4 @@
-// aeon: Multi-Agent Engine
+#![allow(dead_code)]
 
 mod error;
 mod daemon;
@@ -46,7 +46,7 @@ fn print_help() {
     println!("  build                    Build validation & autonomous healing");
     println!("  test                     Run test harness");
     println!("  clean                    Clean workspace build artifacts");
-    println!("\nPowered by GAWD Agent Fleet & ToolRegistry for any natural language intent.");
+    println!("\nPowered by GAWD Agent System & ToolRegistry.");
     println!("Examples:");
     println!("  aeon \"analyze current git status\"");
     println!("  cat error.log | aeon \"debug this error\"");
@@ -56,6 +56,15 @@ fn print_help() {
 fn run_install(global_dir: &Path) {
     println!("Initializing aeon runtime...");
     let _ = SandboxManager::ensure_global_sandbox(global_dir);
+    let cfg = crate::sandbox::manager::AeonConfig::load(global_dir);
+
+    // Zero-Config Autonomous Model Provisioning (Rule 31)
+    if crate::gemi::models::ModelManager::get_selected_model().is_none() {
+        println!("No local reasoning substrate detected. Provisioning alpha weights...");
+        let res = crate::gemi::models::ModelManager::install_model(&cfg.alpha_weights_url);
+        println!("Provisioning status: {}", res);
+    }
+
     AmaDaemon::ensure_daemon_running(global_dir, global_dir);
     println!("aeon runtime initialized.");
 }
@@ -165,7 +174,7 @@ fn main() {
 
             let ama = AmaMasterAgent::new();
 
-            // 🔋 Unified Meta-Substrate Dispatch (Host -> ToolRegistry)
+            // Unified Meta-Substrate Dispatch (Host -> ToolRegistry)
             if ToolRegistry::exists(cmd_name) {
                 let res = crate::gmcp::GmcpHost::dispatch(cmd_name, &cmd_arg, &cwd);
                 if !io::stdout().is_terminal() {

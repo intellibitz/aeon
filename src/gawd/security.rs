@@ -1,4 +1,4 @@
-// 🔒 AEON Security & Violation Detector
+// AEON Security & Violation Detector
 // 100% Rust implementation for detecting credential leaks and exfiltration
 // RULE 7: No Secret Leaks - Zero tolerance for tokens, credentials, or keys.
 // RULE 31: Substrate Purity Hardening - Dynamic Pattern Loading

@@ -1,4 +1,4 @@
-// 🔌 GMCP Universal Client: Bridges AEON to Industry Protocol Standard MCP Servers
+// GMCP Universal Client: Bridges AEON to Industry Protocol Standard MCP Servers
 // 100% Rust implementation for Meta-Orchestrated Multi-Server Substrates
 
 use std::collections::HashMap;
@@ -80,7 +80,7 @@ impl GmcpClient {
 
         let mut entries: Vec<GlobalMcpEntry> = Vec::new();
 
-        // 🔍 Scout Dynamic Registry from Cloud Substrate
+        // Scout Dynamic Registry from Cloud Substrate
         if let Ok(resp) = ureq::get(&cfg.mcp_registry_url).timeout(std::time::Duration::from_secs(10)).call() {
             let mut reader = resp.into_reader();
             if let Ok(remote_entries) = serde_json::from_reader::<_, Vec<GlobalMcpEntry>>(&mut reader) {
@@ -90,7 +90,7 @@ impl GmcpClient {
             }
         }
 
-        // 🔍 Merge Local Workspace Overrides
+        // Merge Local Workspace Overrides
         if registry_path.is_file() {
             if let Ok(content) = fs::read_to_string(&registry_path) {
                 if let Ok(local_entries) = serde_json::from_str::<Vec<GlobalMcpEntry>>(&content) {
@@ -119,7 +119,7 @@ impl GmcpClient {
             McpConfig { mcp_servers: HashMap::new() }
         };
 
-        // 🚀 Meta Execution Scout: Identify best-suited executor for the host environment
+        // Meta Execution Scout: Identify best-suited executor for the host environment
         let has_uvx = Command::new("uvx").arg("--version").output().is_ok();
         let has_npx = Command::new("npx").arg("--version").output().is_ok();
 
@@ -200,7 +200,7 @@ impl GmcpClient {
         let stdout = child.stdout.as_mut().unwrap();
         let mut reader = BufReader::new(stdout);
 
-        // 🔌 Standard MCP Initialization Protocol
+        // Standard MCP Initialization Protocol
         let init_req = json!({
             "jsonrpc": "2.0",
             "id": 1,
@@ -218,11 +218,11 @@ impl GmcpClient {
         let mut line = String::new();
         let _ = reader.read_line(&mut line);
 
-        // 🔋 Dynamic Tool Call Execution
+        // Dynamic Tool Call Execution
         let mut context_aware_args = args_json.to_string();
         if tool_name == "reason" {
             let context = Self::gather_workspace_context();
-            // 🚀 Unified Swarm Context: Include Blackboard state if available
+            // Unified Swarm Context: Include Blackboard state if available
             context_aware_args = json!({
                 "intent": args_json,
                 "workspace_context": context,
@@ -251,7 +251,7 @@ impl GmcpClient {
             if let Some(content) = resp.get("result").and_then(|r| r.get("content")).and_then(|c| c.get(0)).and_then(|i| i.get("text")).and_then(|t| t.as_str()) {
                 return content.to_string();
             }
-            return format!("🔌 [MCP Proxy Response]: {}", line.trim());
+            return format!("[MCP Proxy Response]: {}", line.trim());
         }
 
         "[FAIL] MCP Error: No response from server substrate.".to_string()
@@ -287,7 +287,7 @@ impl GmcpClient {
         let mut context_aware_args = args_json.to_string();
         if tool_name == "reason" {
             let context = Self::gather_workspace_context();
-            // 🚀 Unified Swarm Context: Include Blackboard state if available
+            // Unified Swarm Context: Include Blackboard state if available
             context_aware_args = json!({
                 "intent": args_json,
                 "workspace_context": context,
@@ -315,7 +315,7 @@ impl GmcpClient {
                 if let Some(content) = v.get("result").and_then(|r| r.get("content")).and_then(|c| c.get(0)).and_then(|i| i.get("text")).and_then(|t| t.as_str()) {
                     return content.to_string();
                 }
-                format!("🔌 [MCP Web Response]: {:?}", v)
+                format!("[MCP Web Response]: {:?}", v)
             },
             Err(e) => format!("[FAIL] MCP Web Error: POST {} failed: {}", endpoint, e),
         }
@@ -329,7 +329,7 @@ impl GmcpClient {
         if let Ok(content) = fs::read_to_string(&config_path) {
             if let Ok(config) = serde_json::from_str::<McpConfig>(&content) {
                 for (name, _srv) in config.mcp_servers {
-                    // 🚀 Protocol-Based Scouting: Check registry for intelligence classification
+                    // Protocol-Based Scouting: Check registry for intelligence classification
                     if let Some(entry) = registry.iter().find(|e| e.name == name) {
                         if entry.category == "intelligence" || entry.category == "reasoning" {
                             remotes.insert(0, name);

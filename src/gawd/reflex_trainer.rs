@@ -1,4 +1,4 @@
-// 🏋️ Reflex Trainer: Autonomous Neural Substrate Evolution
+// Reflex Trainer: Autonomous Neural Substrate Evolution
 // Monitors learning staged buffer and triggers native distillation.
 
 use std::path::Path;
@@ -21,7 +21,7 @@ impl ReflexTrainer {
             let count = content.lines().count();
 
             if count >= Self::TRAINING_THRESHOLD {
-                eprintln!("🧠 [Reflex Trainer] Wisdom buffer saturated ({} samples). Triggering native distillation...", count);
+                eprintln!("[Reflex Trainer] Wisdom buffer saturated ({} samples). Triggering native distillation...", count);
                 match AeonAlphaModel::train_on_staged_data(&global_dir) {
                     Ok(report) => {
                         // Clear the buffer after successful evolution

@@ -1,4 +1,4 @@
-// 🌌 AMAS: Universal EAI Swarm Supervisor
+// AMAS: Universal EAI Swarm Supervisor
 // Tier 1 AOA Protocol governing Exponential Explosive Intelligence Swarms
 
 use std::fs;
@@ -7,7 +7,6 @@ use std::net::{TcpStream, UdpSocket};
 use std::path::Path;
 use std::time::Duration;
 use std::sync::{Arc, Mutex, OnceLock};
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 use super::agents::{GawdAgentFleet, GawdAgentInfo, MissionBlackboard};
@@ -138,7 +137,7 @@ impl AmaSupervisor {
             rank: a.rank()
         }).collect();
 
-        // 🚀 3. Cluster Consensus Protocol: Broadcast blackboard to high-tier peers
+        // Cluster Consensus Protocol: Broadcast blackboard to high-tier peers
         let nodes = Self::rank_peers_for_goal(goal);
         for node in nodes.iter().take(2) {
             if node.node_id != "aeon-local-master" {
@@ -161,9 +160,9 @@ impl AmaSupervisor {
             });
         }
 
-        // 🚀 4.1 Reactive Swarm Reinforcement (Tier 1 Hardening)
+        // 4.1 Reactive Swarm Reinforcement (Tier 1 Hardening)
         if has_gap {
-            eprintln!("🚑 [Swarm Supervisor] Capability gap detected. Dispatching Reinforcement Wave...");
+            eprintln!("[Swarm Supervisor] Capability gap detected. Dispatching Reinforcement Wave...");
             let reinforcement_goal = format!("REINFORCE_MISSION: {}\n[PREVIOUS_FAILURES]: {:?}", goal, a2a_logs);
             let extra_swarm = GawdAgentFleet::dispatch_explosive_swarm(reinforcement_goal, workspace.to_path_buf(), Arc::clone(&blackboard));
             for (name, output) in extra_swarm {
@@ -176,7 +175,7 @@ impl AmaSupervisor {
             }
         }
 
-        // 🚀 5. Weighted Swarm Consensus Pass (Rule 31 Hardening)
+        // 5. Weighted Swarm Consensus Pass (Rule 31 Hardening)
         let final_state = blackboard.lock().unwrap();
         if !final_state.is_empty() {
             // Aggregate agent outputs weighted by rank and node trust
@@ -185,7 +184,7 @@ impl AmaSupervisor {
                 if let Some(info) = fleet_info.iter().find(|i| &i.name == agent_name) {
                     weighted_wisdom.push_str(&format!("[AGENT: {} (Rank: {:.2})] {}\n", agent_name, info.rank, output));
 
-                    // 🚀 Reward successful agents (Empirical Expertise Ranking)
+                    // Reward successful agents (Empirical Expertise Ranking)
                     if !output.contains("FAILURE") && !output.contains("GAP") {
                         crate::gawd::agents::AgentMetaRegistry::global().update_rank(agent_name, 0.01);
                     }
@@ -197,7 +196,7 @@ impl AmaSupervisor {
                 goal, weighted_wisdom
             );
 
-            // 🚀 Consensus Hardening: Use Tier 2/Meta for final synthesis
+            // Consensus Hardening: Use Tier 2/Meta for final synthesis
             let synthesized = crate::gemi::engine::GemiEngine::generate_reasoning(&consensus_prompt, workspace);
 
             a2a_logs.push(A2AMessage {
@@ -214,7 +213,7 @@ impl AmaSupervisor {
         (a2a_logs, fleet_info)
     }
 
-    /// 🏆 Reasoning Auction: Ranks peer nodes based on weighted hardware and trust scores.
+    /// Reasoning Auction: Ranks peer nodes based on weighted hardware and trust scores.
     pub fn rank_reasoning_peers() -> Vec<ClusterPeerNode> {
         let mut nodes = Self::list_cluster_nodes();
 
@@ -227,7 +226,7 @@ impl AmaSupervisor {
         nodes
     }
 
-    /// 🚀 Cluster Intent Routing: Prioritizes peers with semantically relevant capabilities.
+    /// Cluster Intent Routing: Prioritizes peers with semantically relevant capabilities.
     pub fn rank_peers_for_goal(_goal: &str) -> Vec<ClusterPeerNode> {
         let mut nodes = Self::list_cluster_nodes();
 
@@ -260,12 +259,12 @@ impl AmaSupervisor {
                     let mut reader = BufReader::new(stream);
                     let mut resp = String::new();
                     if reader.read_line(&mut resp).is_ok() {
-                        return format!("🌐 [A2A Flux ({})]: {}", addr, resp.trim());
+                        return format!("[A2A Flux ({})]: {}", addr, resp.trim());
                     }
                 }
             }
         }
-        format!("🌐 [A2A Fallback]: Node '{}' unreachable.", addr)
+        format!("[A2A Fallback]: Node '{}' unreachable.", addr)
     }
 
     pub fn broadcast_lan_ping() -> Vec<String> {
@@ -293,7 +292,7 @@ impl AmaSupervisor {
         let nodes = Self::list_cluster_nodes();
         let mut handles = Vec::new();
 
-        // 🚀 Parallel AOA Synchronization Logic (Rule 2: Saturation)
+        // Parallel AOA Synchronization Logic (Rule 2: Saturation)
         for node in nodes.clone() {
             if node.node_id == "aeon-local-master" { continue; }
             let addr = node.address.clone();
@@ -338,7 +337,7 @@ impl AmaSupervisor {
         if let Some(node) = target_node {
              let res = Self::dispatch_peer_task(&node.address, "reason", prompt);
              if !res.contains("fallback") && !res.contains("unreachable") {
-                 return Some(format!("🌐 [Borrowed Reflex from {}]: {}", node.node_id, res));
+                 return Some(format!("[Borrowed Reflex from {}]: {}", node.node_id, res));
              }
         }
         None

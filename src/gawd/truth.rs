@@ -14,7 +14,7 @@ impl AeonTruthAgent {
     pub fn verify_mission_reality(_goal: &str, _tool_name: &str, result: &str, workspace: &Path) -> EaiResult<String> {
         let mut violations = Vec::new();
 
-        // 🚀 META REALITY VERIFICATION
+        // META REALITY VERIFICATION
         // Instead of hardcoded tool names, we detect "Intent of Effect" in the result string.
 
         // Pattern: File System Mutation Detection

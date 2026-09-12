@@ -27,7 +27,7 @@ pub struct McpConfig {
     pub mcp_servers: HashMap<String, McpServerConfig>,
 }
 
-/// 🔋 GMCP Host: The unified execution entry point for the Meta-Intelligence Substrate.
+/// GMCP Host: The unified execution entry point for the Meta-Intelligence Substrate.
 pub struct GmcpHost;
 
 impl GmcpHost {
@@ -36,12 +36,12 @@ impl GmcpHost {
     }
 }
 
-/// 🔌 Protocol Dispatcher: Trait for handling cross-protocol JSON-RPC requests.
+/// Protocol Dispatcher: Trait for handling cross-protocol JSON-RPC requests.
 pub trait ProtocolDispatcher: Send + Sync {
     fn handle_request(&self, line: &str, workspace: &Path) -> String;
 }
 
-/// 🔍 Capability Resolver: Trait for dynamic discovery and resolution of tool capabilities.
+/// Capability Resolver: Trait for dynamic discovery and resolution of tool capabilities.
 pub trait CapabilityResolver: Send + Sync {
     fn resolve(&self, name: &str) -> Option<String>;
 }

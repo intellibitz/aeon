@@ -26,19 +26,19 @@ impl AeonPulse {
         let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
         let global_dir = home.join(".aeon");
 
-        // 🧠 Neural Synchronization (Cache Invalidation)
+        // Neural Synchronization (Cache Invalidation)
         {
             let fingerprint = AeonAlphaModel::get_model_fingerprint(&global_dir);
             let mut current = CURRENT_FINGERPRINT.lock().unwrap();
             if *current != fingerprint {
-                eprintln!("🧠 [Tier 0 Reflex] Neural substrate evolved. Invalidating cache...");
+                eprintln!("[Tier 0 Reflex] Neural substrate evolved. Invalidating cache...");
                 *current = fingerprint;
                 let mut cache = REFLEX_CACHE.lock().unwrap();
                 cache.clear();
             }
         }
 
-        // ⚡ Sub-100μs Reflex Cache
+        // Sub-100us Reflex Cache
         {
             let cache = REFLEX_CACHE.lock().unwrap();
             if let Some(cached_action) = cache.get(prompt_trimmed) {
@@ -49,7 +49,7 @@ impl AeonPulse {
         let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
         let global_dir = home.join(".aeon");
 
-        // 🧠 Neural Reflex Attempt
+        // Neural Reflex Attempt
         if let Ok(model) = AeonAlphaModel::load(&global_dir) {
             match model.predict_intent(prompt_trimmed) {
                 Ok(neural_action) => {
@@ -65,7 +65,7 @@ impl AeonPulse {
                     return Ok(final_action);
                 },
                 Err(e) => {
-                    eprintln!("🧠 [Tier 0 Reflex] Escalating due to: {}", e);
+                    eprintln!("[Tier 0 Reflex] Escalating due to: {}", e);
                     return Err(anyhow!("Low confidence reflex. Escalating to Tier 2 Deep Reasoning..."));
                 }
             }

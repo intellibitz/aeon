@@ -36,7 +36,7 @@ impl AmaMasterAgent {
 
     pub fn solve(&self, goal: &str, workspace: &Path, version: &str) -> EaiResult<AmaMissionReport> {
         let lower_goal = goal.to_lowercase();
-        // 🧪 Autonomous Task Decomposition (Rule 12 Check)
+        // Autonomous Task Decomposition (Rule 12 Check)
         if (goal.len() > 150 || lower_goal.contains(" and then ") || lower_goal.contains(" finally ")) && !goal.contains("[STEP ") {
              return self.solve_planned_mission(goal, workspace, version);
         }
@@ -54,7 +54,7 @@ impl AmaMasterAgent {
             // 2. Swarm Supervision (Tier 1 AOA Dispatch)
             let (interactions, agents) = AmaSupervisor::supervise_mission(&current_goal, workspace);
 
-            // 🚀 3. Context Compression & Reflex Result Distillation (Tier 2 Hardening)
+            // 3. Context Compression & Reflex Result Distillation (Tier 2 Hardening)
             let model_name = crate::gemi::models::ModelManager::get_selected_model()
                 .unwrap_or_else(|| "aeon-alpha.safetensors".to_string());
 
@@ -130,7 +130,7 @@ impl AmaMasterAgent {
             all_agents.extend(report.agents.clone());
             final_responses.push(report.final_answer.clone());
 
-            // 🧪 Dynamic Plan Mutation: Check for failure or gap in the last step
+            // Dynamic Plan Mutation: Check for failure or gap in the last step
             if report.final_answer.contains("FAILURE") || report.final_answer.contains("GAP") {
                 crate::sandbox::manager::AeonAuditLogger::log_event(workspace, "PLAN_MUTATION", &format!("Refining plan due to step {} failure.", current_step + 1));
 
@@ -153,13 +153,13 @@ impl AmaMasterAgent {
         })
     }
 
-    pub fn generate_self_awareness_report(&self, workspace: &Path) -> EaiResult<String> {
+    pub fn generate_substrate_report(&self, workspace: &Path) -> EaiResult<String> {
         let (axiom_summary, topology_summary) = AxiomSubstrate::ingest_constitution(workspace);
         let model_name = crate::gemi::models::ModelManager::get_selected_model()
-            .unwrap_or_else(|| "aeon-alpha.safetensors (Local Neural Reflex)".to_string());
+            .unwrap_or_else(|| "aeon-alpha.safetensors (Local Neural Substrate)".to_string());
 
         let mut report = String::new();
-        report.push_str("# aeon Alpha Brain - Self-Awareness Report\n\n");
+        report.push_str("# aeon Substrate - Technical Report\n\n");
         report.push_str(&format!("- **Engine**: aeon EAI Substrate\n"));
         report.push_str(&format!("- **Version**: {}\n", crate::AEON_VERSION));
         report.push_str(&format!("- **Active Model**: {}\n\n", model_name));

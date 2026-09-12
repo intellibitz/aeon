@@ -1,4 +1,4 @@
-// 🌌 AEON Protocol Knowledge Base (PKB)
+// AEON Protocol Knowledge Base (PKB)
 // Tier 0: Reflex Data Synthesis for AEON-Alpha Training
 
 use std::path::{Path, PathBuf};

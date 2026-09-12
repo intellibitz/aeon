@@ -14,7 +14,7 @@ pub struct GmcpServer;
 
 impl GmcpServer {
     pub fn run_stdio(workspace: &Path, _version: &str) {
-        eprintln!("🔌 [GMCP Server] Started (Listening on stdio).");
+        eprintln!("[GMCP Server] Started (Listening on stdio).");
         let stdin = std::io::stdin();
         let mut stdout = std::io::stdout();
         let server = GmcpProtocolHandler;
@@ -34,7 +34,7 @@ impl GmcpServer {
     pub fn start_tcp_server(workspace: PathBuf, port: u16, _version: String) {
         let addr = format!("0.0.0.0:{}", port);
         let listener = TcpListener::bind(&addr).expect("Failed to bind GMCP TCP server");
-        eprintln!("🔌 [GMCP TCP] Substrate active on {}", addr);
+        eprintln!("[GMCP TCP] Substrate active on {}", addr);
 
         for stream in listener.incoming() {
             let mut stream = stream.expect("GMCP Stream Error");
@@ -58,7 +58,7 @@ impl GmcpServer {
     pub fn start_http_server(workspace: PathBuf, port: u16) {
         let addr = format!("0.0.0.0:{}", port);
         let listener = TcpListener::bind(&addr).expect("Failed to bind GMCP HTTP server");
-        eprintln!("🔌 [GMCP HTTP/SSE] Substrate active on {}", addr);
+        eprintln!("[GMCP HTTP/SSE] Substrate active on {}", addr);
 
         for stream in listener.incoming() {
             let mut stream = stream.expect("GMCP HTTP Error");
@@ -125,7 +125,7 @@ impl GmcpServer {
     }
 }
 
-/// 🔋 GMCP Protocol Handler: Decoupled JSON-RPC implementation for the Substrate.
+/// GMCP Protocol Handler: Decoupled JSON-RPC implementation for the Substrate.
 pub struct GmcpProtocolHandler;
 
 impl ProtocolDispatcher for GmcpProtocolHandler {
@@ -199,7 +199,7 @@ impl ProtocolDispatcher for GmcpProtocolHandler {
                 let tool_name = extract_tool_name(line).unwrap_or_default();
                 let tool_arg = extract_tool_arg(line).unwrap_or_default();
 
-                // 🚀 Fully Meta Dispatch via ToolRegistry
+                // Fully Meta Dispatch via ToolRegistry
                 let result_text = ToolRegistry::execute_tool(&tool_name, &tool_arg, workspace);
 
                 json!({

@@ -137,7 +137,7 @@ impl HardwareProfiler {
     }
 
     pub fn get_candle_device() -> Device {
-        // 🚀 Dynamic Device Refresh: Re-scan for acceleration if previously CPU-bound
+        // Dynamic Device Refresh: Re-scan for acceleration if previously CPU-bound
         static DEVICE_CACHE: OnceLock<Mutex<Device>> = OnceLock::new();
         let cache = DEVICE_CACHE.get_or_init(|| Mutex::new(Device::Cpu));
 

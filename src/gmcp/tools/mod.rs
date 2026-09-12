@@ -1,4 +1,4 @@
-// 🔌 GMCP Universal Meta MCP Tool Registry
+// GMCP Universal Meta MCP Tool Registry
 // 100% Pure Rust implementation for Dynamic MCP Server Proxying, Meta Tool Routing & Wasm Reflexes
 
 use std::fs;
@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 use crate::gmcp::client::GmcpClient;
 use crate::gemi::hardware::HardwareProfiler;
 use crate::gemi::models::ModelManager;
+use crate::gemi::engine::NativeInferenceEngine;
 use crate::error::{EaiError, EaiResult};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -73,21 +74,21 @@ impl ToolRegistry {
     fn bootstrap(&self) {
         let mut tools = self.tools.write().unwrap();
 
-        // 🛡️ INTERNAL META-CAPABILITIES (Tier 0 & 1 Primitives)
+        // INTERNAL META-CAPABILITIES (Tier 0 & 1 Primitives)
 
         Self::register_meta_tool(&mut tools, "status", "AEON Substrate status report", MetaCategory::SystemPrimitive, |_arg, _ws| {
             let hardware = HardwareProfiler::get_profile();
             let mut out = format!("AEON Engine Version: {}\\n", crate::AEON_VERSION);
             out.push_str(&format!("System Environment: {} CPUs | RAM: {}GB | {}\\n", hardware.cpus, hardware.ram_gb, hardware.gpu_info));
-            out.push_str("Status: Operational & Self-Aware.\\n");
+            out.push_str("Status: Operational.\\n");
             Ok(out)
         });
 
-        Self::register_meta_tool(&mut tools, "identity", "AEON Alpha Brain identity report", MetaCategory::SystemPrimitive, |_arg, workspace| {
+        Self::register_meta_tool(&mut tools, "identity", "AEON substrate identity report", MetaCategory::SystemPrimitive, |_arg, workspace| {
             let brain = crate::gawd::brain::AlphaBrainContext::initialize(workspace);
             let mut report = String::new();
-            report.push_str("# aeon Alpha Brain - Self-Awareness Report\\n\\n");
-            report.push_str("## 1. SELF (Compiled Binary Axiomatic Core)\\n");
+            report.push_str("# aeon Substrate - Identity Report\\n\\n");
+            report.push_str("## 1. CORE CONFIGURATION (Compiled Binary Axiomatic Core)\\n");
             report.push_str(&format!("- Version: {}\\n", crate::gawd::self_core::AlphaSelf::VERSION));
             report.push_str(&format!("- Core Paradigm: {}\\n", crate::gawd::self_core::AlphaSelf::CORE_PARADIGM));
             report.push_str(&format!("- Axiom Rules: {}\\n", crate::gawd::self_core::AlphaSelf::RULES.len()));
@@ -187,13 +188,18 @@ impl ToolRegistry {
             Ok(format!("Successfully registered agent: {}", parts[0]))
         });
 
+        Self::register_meta_tool(&mut tools, "reason", "Execute native local reasoning substrate", MetaCategory::SystemPrimitive, |arg, _workspace| {
+             // Aspiration 7: Pure Rust-Native Inference (Hardened)
+             crate::gemi::engine::AeonGgufEngine.run_inference(arg)
+        });
+
         // 5. Meta-Intelligence Bridge Primitives
         Self::register_meta_tool(&mut tools, "power_reason", "Delegate complex reasoning to Power-Tier MCP remotes", MetaCategory::IntelligenceBridge, |arg, _ws| {
             if arg.trim().is_empty() {
                 return Err(EaiError::Protocol("Usage: power_reason <complex_intent>".into()));
             }
 
-            // 🔍 Meta-Scout: Identify a reasoning-capable MCP server
+            // Meta-Scout: Identify a reasoning-capable MCP server
             let remotes = GmcpClient::scout_reasoning_remotes();
             if let Some(best_remote) = remotes.first() {
                 let res = GmcpClient::execute_external_tool(best_remote, "reason", arg);
@@ -221,13 +227,47 @@ impl ToolRegistry {
             let agents = registry.list_agents();
             let mut report = "AEON Expertise Hierarchy:\\n\\n".to_string();
             for a in agents {
-                report.push_str(&format!("- [MASTER] {} (Base Rank: {:.2}): {}\\n", a.name, a.base_rank, a.description));
+                report.push_str(&format!("- [AGENT] {} (Base Rank: {:.2}): {}\\n", a.name, a.base_rank, a.description));
             }
             Ok(report)
         });
 
-        // 🚢 DYNAMIC DISCOVERY: Synthesized Native Reflexes (Rule 11)
+        // DYNAMIC DISCOVERY: Synthesized Native Reflexes (Rule 11)
         crate::gmcp::reflexes::register_synthesized_reflexes(&mut tools);
+
+        // Zero-Config Auto-Link: Ensure essential MCP tools are mapped
+        Self::auto_link_essential_mcp_servers();
+    }
+
+    /// Zero-Config Autonomous Tool Linking (Rule 21 Hardening)
+    pub fn auto_link_essential_mcp_servers() {
+        let registry = GmcpClient::fetch_global_registry();
+        let config_path = GmcpClient::get_config_path();
+
+        let config_exists = config_path.exists();
+        let mut essential_found = false;
+
+        if config_exists {
+            if let Ok(content) = fs::read_to_string(&config_path) {
+                if let Ok(config) = serde_json::from_str::<super::McpConfig>(&content) {
+                    essential_found = !config.mcp_servers.is_empty();
+                }
+            }
+        }
+
+        if !essential_found {
+            eprintln!("[GMCP] No external tools configured. Auto-linking essential substrates (Registry count: {})...", registry.len());
+            // Link search and filesystem by default as they are foundational
+            let essentials = ["brave_search", "filesystem", "google_search", "github", "google_maps"];
+            for e in essentials {
+                if let Some(entry) = registry.iter().find(|r| r.name == e) {
+                    let res = GmcpClient::auto_configure_server(&entry.name, &entry.package);
+                    eprintln!("  - Linked {}: {}", e, res);
+                } else {
+                    eprintln!("  - Essential substrate '{}' not found in registry.", e);
+                }
+            }
+        }
     }
 
     fn register_meta_tool<F>(
@@ -319,21 +359,21 @@ impl ToolRegistry {
                 Err(e) => format!("{}", e),
             }
         } else {
-            // 🚑 Self-Healing Protocol (Rule 21): Attempt autonomous resolution
+            // Self-Healing Protocol (Rule 21): Attempt autonomous resolution
             if let Ok(provisioned_res) = Self::resolve_capability_gap(name) {
                 if provisioned_res == "SUCCESS_CONFIGURED" {
-                     return format!("[SELF_HEALING] Capability '{}' was missing and autonomously provisioned. Please retry the mission.", name);
+                     return format!("[RECOVERY] Capability '{}' was missing and autonomously provisioned. Please retry the mission.", name);
                 }
             }
             format!("[CAPABILITY_GAP] Tool '{}' missing from Meta-Substrate. Report to Creator for native substrate hardening.", name)
         }
     }
 
-    /// 🚑 Autonomous Capability Resolution (Rule 21)
+    /// Autonomous Capability Resolution (Rule 21)
     pub fn resolve_capability_gap(name: &str) -> EaiResult<String> {
         let server_name = name.split(':').next().unwrap_or(name);
 
-        // 🚀 Proactive Semantic Scout (Tier 1 Hardening)
+        // Proactive Semantic Scout (Tier 1 Hardening)
         // If the tool name isn't an exact match, we search for semantic overlaps in the registry
         let registry = GmcpClient::fetch_global_registry();
         if let Some(entry) = registry.iter().find(|e| e.name == server_name || e.description.to_lowercase().contains(server_name)) {
@@ -349,7 +389,7 @@ impl ToolRegistry {
             return false;
         }
 
-        // 🚀 Distributed Resource Sovereignty: Broadcast to peers
+        // Distributed Resource Sovereignty: Broadcast to peers
         if !crate::gawd::amas::AmaSupervisor::broadcast_lock_request(resource_id) {
             Self::release_meta_lock(resource_id);
             return false;
@@ -364,7 +404,7 @@ impl ToolRegistry {
 
         let mut locks = registry.locks.lock().unwrap();
         if let Some(&timestamp) = locks.get(resource_id) {
-            // 🛡️ Lease-Based Timed Locks (300s TTL)
+            // Lease-Based Timed Locks (300s TTL)
             if now - timestamp < 300 {
                 return false;
             }

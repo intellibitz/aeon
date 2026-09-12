@@ -17,8 +17,8 @@ impl GemiServer {
     pub fn start_http_server(workspace: PathBuf, port: u16) {
         let addr = format!("0.0.0.0:{}", port);
         let listener = TcpListener::bind(&addr).expect("Failed to bind GEMI HTTP server");
-        eprintln!("🚀 [GEMI REST] Substrate active on {}", addr);
-        eprintln!("🔗 [GEMI Web] UI Interface: http://localhost:{}/app", port);
+        eprintln!("[GEMI REST] Substrate active on {}", addr);
+        eprintln!("[GEMI Web] UI Interface: http://localhost:{}/app", port);
 
         for stream in listener.incoming() {
             let mut stream = stream.expect("GEMI Stream Error");

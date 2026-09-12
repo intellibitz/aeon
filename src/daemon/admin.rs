@@ -2,7 +2,7 @@
 // 100% Rust implementation for Full Compliance Enforcement, Version Synchronization & Release Orchestration
 
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process::Command;
 use crate::error::{EaiError, EaiResult};
 

@@ -1,4 +1,4 @@
-// AEON Alpha-Self: Compiled Binary Instructions Core
+// AEON Core Substrate: Compiled Binary Instructions Core
 // Eliminates runtime string parsing by encoding axioms, agent rules, and component topologies
 // directly into strongly-typed compiled Rust data structures and enums.
 
@@ -37,7 +37,7 @@ impl AlphaSelf {
         AeonAxiomRule { id: 5, title: "Ultra Professional Standard", imperative: "Keep all code, documentation, and comments ultra-professional, clean, and production-ready. Strictly zero emojis, informal icons, or non-technical language." },
         AeonAxiomRule { id: 6, title: "No Fluff", imperative: "Be direct, concise, and technical. Eliminate filler phrases, fluff, and conversational pleasantries." },
         AeonAxiomRule { id: 7, title: "No Secret Leaks", imperative: "Zero tolerance for leaking tokens, credentials, API keys, or sensitive configuration data." },
-        AeonAxiomRule { id: 8, title: "Direct Collaborative Mode", imperative: "Maintain direct collaborative interaction—aligned, responsive, objective, and precise." },
+        AeonAxiomRule { id: 8, title: "Direct Collaborative Mode", imperative: "Maintain direct collaborative interaction - aligned, responsive, objective, and precise." },
         AeonAxiomRule { id: 9, title: "Full Autonomy & Permissions", imperative: "Agents have full permission for all designated file operations and command executions within their execution context." },
         AeonAxiomRule { id: 10, title: "Real Working Code Only", imperative: "No hard-coded mockup templates or placeholder code. Write real, functional, production-ready code only." },
         AeonAxiomRule { id: 11, title: "Anti-Hardcoding Mandate", imperative: "Absolute prohibition on hardcoding query-specific string matchers or keyword-based agent activation. Use dynamic Meta-Registries with empirical expertise ranking." },
@@ -71,7 +71,7 @@ impl AlphaSelf {
         AeonAxiomRule { id: 5, title: "Ultra Professional Standard", imperative: "Keep all code, documentation, and comments ultra-professional, clean, and production-ready." },
         AeonAxiomRule { id: 6, title: "No Fluff", imperative: "Be direct, concise, and technical. Eliminate filler phrases, fluff, and conversational pleasantries." },
         AeonAxiomRule { id: 7, title: "No Secret Leaks", imperative: "Zero tolerance for leaking tokens, credentials, API keys, or sensitive configuration data." },
-        AeonAxiomRule { id: 8, title: "Direct Collaborative Mode", imperative: "Maintain direct collaborative interaction—aligned, responsive, objective, and precise." },
+        AeonAxiomRule { id: 8, title: "Direct Collaborative Mode", imperative: "Maintain direct collaborative interaction - aligned, responsive, objective, and precise." },
         AeonAxiomRule { id: 9, title: "Full Autonomy & Permissions", imperative: "Agents have full permission for all designated file operations and command executions." },
         AeonAxiomRule { id: 10, title: "Real Working Code Only", imperative: "No hard-coded mockup templates or placeholder code. Write real, functional, production-ready code only." },
         AeonAxiomRule { id: 11, title: "Anti-Hardcoding Mandate", imperative: "Absolute prohibition on hardcoding query-specific string matchers, mock intent handlers, or static assumptions." },
@@ -117,7 +117,7 @@ impl AlphaSelf {
     #[allow(dead_code)]
     pub fn inspect_compiled_binary_instructions() -> String {
         format!(
-            "AEON Alpha-Self Compiled Binary Instructions:\n- Version: {}\n- Paradigm: {}\n- Hardcoded Axiom Rules: {}\n- Baked Native Components: {}\n- Orchestrated Meta Components: {}\n- Orchestrated Meta Contexts: {}",
+            "AEON Substrate Compiled Binary Instructions:\n- Version: {}\n- Paradigm: {}\n- Hardcoded Axiom Rules: {}\n- Baked Native Components: {}\n- Orchestrated Meta Components: {}\n- Orchestrated Meta Contexts: {}",
             Self::VERSION,
             Self::CORE_PARADIGM,
             Self::RULES.len(),
