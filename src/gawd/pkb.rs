@@ -59,7 +59,7 @@ impl ProtocolKnowledgeBase {
         let synthetic = Self::synthesize_training_data(workspace)?;
         reflexes.extend(synthetic);
 
-        let data = serde_json::to_string_pretty(&reflexes).map_err(|e| crate::error::EaiError::Internal(e.to_string()))?;
+        let data = serde_json::to_string_pretty(&reflexes).map_err(|e| crate::error::EaiError::internal(e.to_string()))?;
         let export_path = workspace.join(".aeon/reflex_dataset.json");
         std::fs::write(&export_path, data)?;
 
@@ -117,7 +117,7 @@ impl ProtocolKnowledgeBase {
             let meta = std::fs::metadata(&weights_file)?;
             Ok(format!("AEON-Alpha Substrate Verified: {} ({} bytes)", weights_file.display(), meta.len()))
         } else {
-            Err(crate::error::EaiError::Inference("AEON-Alpha weights missing. Run 'aeon install'.".into()))
+            Err(crate::error::EaiError::inference("AEON-Alpha weights missing. Run 'aeon install'."))
         }
     }
 
@@ -128,7 +128,7 @@ impl ProtocolKnowledgeBase {
         let weights_file = models_dir.join("aeon-alpha.safetensors");
 
         if !weights_file.exists() {
-             return Err(crate::error::EaiError::Inference("AEON-Alpha substrate missing.".into()));
+             return Err(crate::error::EaiError::inference("AEON-Alpha substrate missing."));
         }
 
         // Tier 0 Distillation Logic (Mock for now, will call candle-nn in next evolution)

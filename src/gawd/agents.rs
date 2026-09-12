@@ -316,7 +316,7 @@ impl NeuralAgentFactory {
 
         let res = crate::gemi::engine::GemiEngine::generate_reasoning(&prompt, workspace);
         let profile: AgentProfile = serde_json::from_str(&res).map_err(|e| {
-            crate::error::EaiError::Protocol(format!("Neural Agent Synthesis Failed: {}. Raw: {}", e, res))
+            crate::error::EaiError::protocol(format!("Neural Agent Synthesis Failed: {}. Raw: {}", e, res))
         })?;
 
         Ok(profile)
@@ -326,6 +326,9 @@ impl NeuralAgentFactory {
 pub struct GawdAgentFleet;
 
 impl GawdAgentFleet {
+    /// Absolute limit for concurrent swarm participants to prevent resource exhaustion.
+    pub const MAX_CONCURRENT_AGENTS: usize = 8;
+
     /// Neural Fleet Synthesizer: Dynamically decides which agents are required for a mission.
     /// RULE 31 Hardening: Uses semantic centroids to match agents.
     pub fn synthesize_fleet(goal: &str, workspace: &Path) -> Vec<Arc<dyn GawdAgent>> {
@@ -358,6 +361,8 @@ impl GawdAgentFleet {
         // Neural Semantic pass: identified via Tier 0 Vector space
         if let Ok(goal_vec) = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(goal) {
             for agent in available_agents {
+                if fleet.len() >= Self::MAX_CONCURRENT_AGENTS { break; }
+
                 let mut max_similarity = 0.0f32;
 
                 let mut agent_corpus = agent.categories.join(" ");
@@ -382,7 +387,7 @@ impl GawdAgentFleet {
 
         // 3. Neural Agent Synthesis (Aspiration 13)
         // If no high-quality specialists are found (similarity < 0.4), synthesize one.
-        if max_global_similarity < 0.4 && fleet.len() < 4 {
+        if max_global_similarity < 0.4 && fleet.len() < Self::MAX_CONCURRENT_AGENTS {
             if let Ok(new_profile) = NeuralAgentFactory::synthesize_specialist(goal, workspace) {
                 eprintln!("[Agent Factory] Capability Gap Detected. Synthesized: {}", new_profile.name);
                 registry.register_agent(new_profile.clone());
@@ -395,7 +400,7 @@ impl GawdAgentFleet {
         }
 
         // 4. Fallback Universal Reasoner
-        if fleet.len() < 4 {
+        if fleet.len() < 4 && fleet.len() < Self::MAX_CONCURRENT_AGENTS {
             fleet.push(Arc::new(DynamicAgent {
                 agent_name: "UniversalReasoner".into(),
                 mission_profile: "General-purpose logic and task fulfillment.".into(),

@@ -1,6 +1,6 @@
 [package]
 name = "aeon-engine"
-version = "0.1.2022787"
+version = "0.1.2022789"
 edition = "2021"
 authors = ["IntelliBitz", "Muthu Ramadoss", "AEON EAI Core"]
 description = "aeon-engine: EAI: Exponential Intelligence for Any AI. - GAWD, GEMI & GMCP Multi-Agent Engine"
@@ -31,7 +31,8 @@ md5 = "0.7"
 log = "0.4"
 env_logger = "0.11"
 sha2 = "0.10"
-tokio = { version = "1.37", features = ["full"] }
+tokio = { version = "1.37", features = ["full", "tracing"] }
+console-subscriber = "0.2"
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["fileapi", "winerror"] }

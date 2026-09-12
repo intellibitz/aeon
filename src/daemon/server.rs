@@ -198,11 +198,11 @@ impl AmaDaemon {
         if !hash_file.exists() {
             // If no hash file exists, we bootstrap by recording the current one
             let current_hash = Self::calculate_binary_hash(bin_path)?;
-            fs::write(&hash_file, &current_hash).map_err(|e| EaiError::Filesystem(e.to_string()))?;
+            fs::write(&hash_file, &current_hash).map_err(|e| EaiError::filesystem(e.to_string()))?;
             return Ok(true);
         }
 
-        let trusted_hash = fs::read_to_string(&hash_file).map_err(|e| EaiError::Filesystem(e.to_string()))?;
+        let trusted_hash = fs::read_to_string(&hash_file).map_err(|e| EaiError::filesystem(e.to_string()))?;
         let current_hash = Self::calculate_binary_hash(bin_path)?;
 
         Ok(trusted_hash.trim() == current_hash.trim())

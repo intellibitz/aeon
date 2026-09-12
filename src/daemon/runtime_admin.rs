@@ -86,7 +86,7 @@ impl AeonRuntimeAdmin {
             Ok("All Validation Protocols Passed. Substrate is Optimal.".into())
         } else {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            Err(crate::error::EaiError::Process(format!("Self-Validation Failed: {}", stderr)))
+            Err(crate::error::EaiError::process(format!("Self-Validation Failed: {}", stderr)))
         }
     }
 

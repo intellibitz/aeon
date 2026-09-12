@@ -149,30 +149,30 @@ impl AeonConfig {
         let path = Self::get_config_path(global_dir);
         if path.is_file() {
             let content = fs::read_to_string(&path)
-                .map_err(|e| EaiError::Config(format!("Failed to read config: {}", e)))?;
+                .map_err(|e| EaiError::config(format!("Failed to read config: {}", e)))?;
             return serde_json::from_str(&content)
-                .map_err(|e| EaiError::Config(format!("Malformed configuration: {}", e)));
+                .map_err(|e| EaiError::config(format!("Malformed configuration: {}", e)));
         }
         Ok(Self::default())
     }
 
     pub fn save(&self, global_dir: &Path) -> EaiResult<()> {
         let path = Self::get_config_path(global_dir);
-        let json = serde_json::to_string_pretty(self).map_err(|e| EaiError::Config(e.to_string()))?;
-        fs::write(path, json).map_err(|e| EaiError::Filesystem(e.to_string()))
+        let json = serde_json::to_string_pretty(self).map_err(|e| EaiError::config(e.to_string()))?;
+        fs::write(path, json).map_err(|e| EaiError::filesystem(e.to_string()))
     }
 }
 
 impl SandboxManager {
     pub fn ensure_global_sandbox(global_dir: &Path) -> EaiResult<()> {
         if !global_dir.exists() {
-            fs::create_dir_all(global_dir).map_err(|e| EaiError::Filesystem(e.to_string()))?;
+            fs::create_dir_all(global_dir).map_err(|e| EaiError::filesystem(e.to_string()))?;
         }
         let config_path = AeonConfig::get_config_path(global_dir);
         if !config_path.exists() {
             let default_cfg = AeonConfig::default();
             let json = serde_json::to_string_pretty(&default_cfg).unwrap();
-            fs::write(config_path, json).map_err(|e| EaiError::Filesystem(e.to_string()))?;
+            fs::write(config_path, json).map_err(|e| EaiError::filesystem(e.to_string()))?;
         }
         Ok(())
     }

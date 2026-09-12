@@ -39,10 +39,10 @@ impl InferenceHost {
         ModelManager::verify_model_integrity(model_path)?;
 
         let mut file = std::fs::File::open(model_path)
-            .map_err(|e| EaiError::Inference(format!("Failed to open weights {}: {}", model_path.display(), e)))?;
+            .map_err(|e| EaiError::inference(format!("Failed to open weights {}: {}", model_path.display(), e)))?;
 
         let mut model_data = gguf_file::Content::read(&mut file)
-            .map_err(|e| EaiError::Inference(format!("GGUF Metadata Error: {}", e)))?;
+            .map_err(|e| EaiError::inference(format!("GGUF Metadata Error: {}", e)))?;
 
         // Architectural Scout: Inspect metadata for dynamic dispatch
         let arch = model_data.metadata.get("general.architecture")
@@ -79,7 +79,7 @@ impl InferenceHost {
         // Robust Architectural Loading
         let weights = llama::ModelWeights::from_gguf(model_data, &mut file, device)
             .map_err(|e| {
-                EaiError::Inference(format!("Architecture '{}' load failure: {}", arch, e))
+                EaiError::inference(format!("Architecture '{}' load failure: {}", arch, e))
             })?;
 
         let substrate = match arch.as_str() {
@@ -315,11 +315,11 @@ impl NativeInferenceEngine for AeonGgufEngine {
     fn name(&self) -> String { "AeonGgufEngine".to_string() }
     fn run_inference(&self, prompt: &str) -> EaiResult<String> {
         let model_id = ModelManager::get_selected_model()
-            .ok_or_else(|| EaiError::Inference("No reasoning model selected.".into()))?;
+            .ok_or_else(|| EaiError::inference("No reasoning model selected."))?;
         let model_path = ModelManager::get_model_path(&model_id)
-            .ok_or_else(|| EaiError::Inference(format!("Model '{}' not found.", model_id)))?;
+            .ok_or_else(|| EaiError::inference(format!("Model '{}' not found.", model_id)))?;
         let tokenizer_path = ModelManager::get_tokenizer_path(&model_id)
-            .ok_or_else(|| EaiError::Inference("Tokenizer missing.".into()))?;
+            .ok_or_else(|| EaiError::inference("Tokenizer missing."))?;
 
         let device = HardwareProfiler::get_candle_device();
         let substrate_shared = InferenceHost::get_model(&model_path, &device)?;
@@ -330,9 +330,9 @@ impl NativeInferenceEngine for AeonGgufEngine {
         };
 
         let tokenizer = Tokenizer::from_file(tokenizer_path)
-            .map_err(|e| EaiError::Inference(format!("Tokenizer Error: {}", e)))?;
+            .map_err(|e| EaiError::inference(format!("Tokenizer Error: {}", e)))?;
         let tokens = tokenizer.encode(prompt, true)
-            .map_err(|e| EaiError::Inference(format!("Tokenization Error: {}", e)))?;
+            .map_err(|e| EaiError::inference(format!("Tokenization Error: {}", e)))?;
 
         let prompt_tokens = tokens.get_ids();
         let mut all_tokens = vec![];
@@ -346,22 +346,22 @@ impl NativeInferenceEngine for AeonGgufEngine {
         for i in 0..512 {
             // 2. Continuous Timeout Check
             if start_time.elapsed() > timeout {
-                return Err(EaiError::Inference("Inference timed out after 45s".into()));
+                return Err(EaiError::inference("Inference timed out after 45s"));
             }
 
             let input = candle_core::Tensor::new(tokens_to_process.as_slice(), &device)
-                .map_err(|e| EaiError::Inference(format!("Tensor creation failed: {}", e)))?
+                .map_err(|e| EaiError::inference(format!("Tensor creation failed: {}", e)))?
                 .unsqueeze(0)?;
 
             // KV-Cache Positioning (Correct Synchronization)
             let pos = if i == 0 { 0 } else { prompt_tokens.len() + i - 1 };
 
             let logits = model_weights.forward(&input, pos)
-                .map_err(|e| EaiError::Inference(format!("Model forward failed: {}", e)))?;
+                .map_err(|e| EaiError::inference(format!("Model forward failed: {}", e)))?;
 
             // Absolute Rank-Safe Token Extraction (Aspiration 8)
             let mut t = logits.argmax(candle_core::D::Minus1)
-                .map_err(|e| EaiError::Inference(format!("Argmax failed: {}", e)))?;
+                .map_err(|e| EaiError::inference(format!("Argmax failed: {}", e)))?;
 
             while t.rank() > 0 {
                 let dims = t.dims();
@@ -369,7 +369,7 @@ impl NativeInferenceEngine for AeonGgufEngine {
             }
 
             let next_token = t.to_vec0::<u32>()
-                .map_err(|e| EaiError::Inference(format!("Token extraction failed: {}", e)))?;
+                .map_err(|e| EaiError::inference(format!("Token extraction failed: {}", e)))?;
 
             all_tokens.push(next_token);
 
@@ -379,7 +379,7 @@ impl NativeInferenceEngine for AeonGgufEngine {
         }
 
         let output = tokenizer.decode(&all_tokens, true)
-            .map_err(|e| EaiError::Inference(format!("Decoding Error: {}", e)))?;
+            .map_err(|e| EaiError::inference(format!("Decoding Error: {}", e)))?;
         Ok(output)
     }
 }

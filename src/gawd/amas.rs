@@ -294,7 +294,8 @@ impl AmaSupervisor {
         let mut handles = Vec::new();
 
         // Parallel AOA Synchronization Logic (Rule 2: Saturation)
-        for node in nodes.clone() {
+        // Hardened Limit: Cap concurrent peer syncs to 16 to prevent local resource exhaustion.
+        for node in nodes.clone().into_iter().take(16) {
             if node.node_id == "aeon-local-master" { continue; }
             let addr = node.address.clone();
             let p = payload.to_string();

@@ -25,6 +25,30 @@ impl AmaMasterAgent {
         Self
     }
 
+    /// Validates and sanitizes natural language inputs to prevent injection attacks.
+    fn sanitize_input(&self, input: &str) -> EaiResult<String> {
+        let trimmed = input.trim();
+
+        // 1. Length Constraint (Rule 23 Hardening)
+        if trimmed.len() > 4096 {
+            return Err(crate::error::EaiError::governance("Input exceeds maximum allowed length (4096 characters)."));
+        }
+
+        if trimmed.is_empty() {
+            return Err(crate::error::EaiError::governance("Input goal cannot be empty."));
+        }
+
+        // 2. High-Risk Pattern Intercept (Substrate Security)
+        let risk_patterns = ["$(", "`", "> /dev/", "| nc ", "| netcat ", "0xCC", "\\x"];
+        for pattern in risk_patterns {
+            if trimmed.contains(pattern) {
+                return Err(crate::error::EaiError::governance(format!("High-risk sequence '{}' detected in input. Potential injection attempt blocked.", pattern)));
+            }
+        }
+
+        Ok(trimmed.to_string())
+    }
+
     /// Primary entry point for all natural language intents.
     pub fn solve_clean(&self, goal: &str, workspace: &Path, version: &str) -> String {
         let res = self.solve(goal, workspace, version);
@@ -35,10 +59,11 @@ impl AmaMasterAgent {
     }
 
     pub fn solve(&self, goal: &str, workspace: &Path, version: &str) -> EaiResult<AmaMissionReport> {
+        let goal = self.sanitize_input(goal)?;
         let lower_goal = goal.to_lowercase();
         // Autonomous Task Decomposition (Rule 12 Check)
         if (goal.len() > 150 || lower_goal.contains(" and then ") || lower_goal.contains(" finally ")) && !goal.contains("[STEP ") {
-             return self.solve_planned_mission(goal, workspace, version);
+             return self.solve_planned_mission(&goal, workspace, version);
         }
 
         let mut retry_count = 0;
@@ -134,7 +159,7 @@ impl AmaMasterAgent {
             };
         }
 
-        Err(crate::error::EaiError::Governance(format!("Recursive reasoning failed after 3 attempts. Last violation: {}", last_error)))
+        Err(crate::error::EaiError::governance(format!("Recursive reasoning failed after 3 attempts. Last violation: {}", last_error)))
     }
 
     fn solve_planned_mission(&self, goal: &str, workspace: &Path, version: &str) -> EaiResult<AmaMissionReport> {
@@ -226,21 +251,22 @@ impl AmaMasterAgent {
     }
 
     pub fn solve_with_feedback(&self, goal: &str, workspace: &Path, feedback_tx: std::sync::mpsc::Sender<String>) -> EaiResult<String> {
+        let goal = self.sanitize_input(goal)?;
         let _ = feedback_tx.send(format!("[AMA] Initiating mission for goal: '{}'", goal));
 
         // Step 1: Governance & Preparation
         let _ = feedback_tx.send("[AMA] Auditing safety and security protocols...".to_string());
-        super::safety::SafetyDetector::audit_action("AMA_SOLVE", goal, workspace)?;
-        super::security::SecurityDetector::audit_action("AMA_SOLVE", goal, workspace)?;
+        super::safety::SafetyDetector::audit_action("AMA_SOLVE", &goal, workspace)?;
+        super::security::SecurityDetector::audit_action("AMA_SOLVE", &goal, workspace)?;
 
         // Step 2: Runtime Substrate Preparation (Aspiration 9)
         let _ = feedback_tx.send("[AMA] Establishing optimal runtime environment...".to_string());
         let preparation_blackboard = std::sync::Arc::new(std::sync::Mutex::new(super::agents::HighDensityContextStore::new(1)));
-        super::agents::AeonRuntimeAgent.execute(goal, workspace, &preparation_blackboard)?;
+        super::agents::AeonRuntimeAgent.execute(&goal, workspace, &preparation_blackboard)?;
 
         // Step 3: Swarm Dispatch
         let _ = feedback_tx.send(format!("[AMA] Dispatching swarm to workspace: {}", workspace.display()));
-        let (interactions, agents) = AmaSupervisor::supervise_mission(goal, workspace);
+        let (interactions, agents) = AmaSupervisor::supervise_mission(&goal, workspace);
 
         for msg in &interactions {
             let _ = feedback_tx.send(format!("[Swarm: {}] {}", msg.sender, msg.action));
@@ -255,9 +281,9 @@ impl AmaMasterAgent {
         let ans = format!("AMA-Synthesis ({} via {}):\n\nProcessed goal '{}' across {} agents.",
                         crate::AEON_VERSION, model_name, goal, agents.len());
 
-        let verified = super::truth::TruthTransformer::verify_mission_reality(goal, "AMA_SOLVE", &ans, workspace)?;
+        let verified = super::truth::TruthTransformer::verify_mission_reality(&goal, "AMA_SOLVE", &ans, workspace)?;
 
-        crate::sandbox::manager::AeonMemory::save_interaction(workspace, goal, &verified);
+        crate::sandbox::manager::AeonMemory::save_interaction(workspace, &goal, &verified);
 
         Ok(verified)
     }

@@ -12,25 +12,25 @@ impl WasiSandbox {
     #[allow(dead_code)]
     pub fn execute_wasm_tool(wasm_bytes: &[u8], args: Vec<String>, workspace: &Path) -> EaiResult<String> {
         let mut store = Store::default();
-        let module = Module::new(&store, wasm_bytes).map_err(|e| EaiError::Process(format!("WASM Module Error: {}", e)))?;
+        let module = Module::new(&store, wasm_bytes).map_err(|e| EaiError::process(format!("WASM Module Error: {}", e)))?;
 
         // Restricted Filesystem Access
         let mut wasi_state_builder = WasiState::new("aeon-isolated-tool");
         wasi_state_builder
             .args(args)
-            .preopen_dir(workspace).map_err(|e| EaiError::Process(format!("WASI Preopen Error: {}", e)))?;
+            .preopen_dir(workspace).map_err(|e| EaiError::process(format!("WASI Preopen Error: {}", e)))?;
 
         let wasi_env = wasi_state_builder
             .finalize(&mut store)
-            .map_err(|e| EaiError::Process(format!("WASI Finalize Error: {}", e)))?;
+            .map_err(|e| EaiError::process(format!("WASI Finalize Error: {}", e)))?;
 
-        let import_object = wasi_env.import_object(&mut store, &module).map_err(|e| EaiError::Process(format!("WASI Import Error: {}", e)))?;
-        let instance = Instance::new(&mut store, &module, &import_object).map_err(|e| EaiError::Process(format!("WASI Instance Error: {}", e)))?;
+        let import_object = wasi_env.import_object(&mut store, &module).map_err(|e| EaiError::process(format!("WASI Import Error: {}", e)))?;
+        let instance = Instance::new(&mut store, &module, &import_object).map_err(|e| EaiError::process(format!("WASI Instance Error: {}", e)))?;
 
-        let start = instance.exports.get_function("_start").map_err(|e| EaiError::Process(format!("WASI Start Error: {}", e)))?;
+        let start = instance.exports.get_function("_start").map_err(|e| EaiError::process(format!("WASI Start Error: {}", e)))?;
 
         // Redirect stdout/stderr would be better, but for bootstrap we just execute
-        start.call(&mut store, &[]).map_err(|e| EaiError::Process(format!("WASI Execution Error: {}", e)))?;
+        start.call(&mut store, &[]).map_err(|e| EaiError::process(format!("WASI Execution Error: {}", e)))?;
 
         Ok("WASI tool executed successfully in isolated sandbox.".to_string())
     }
@@ -46,12 +46,12 @@ impl WasiSandbox {
             .arg(cmd)
             .current_dir(workspace)
             .output()
-            .map_err(|e| EaiError::Process(e.to_string()))?;
+            .map_err(|e| EaiError::process(e.to_string()))?;
 
         if out.status.success() {
             Ok(String::from_utf8_lossy(&out.stdout).to_string())
         } else {
-            Err(EaiError::Process(String::from_utf8_lossy(&out.stderr).to_string()))
+            Err(EaiError::process(String::from_utf8_lossy(&out.stderr).to_string()))
         }
     }
 }

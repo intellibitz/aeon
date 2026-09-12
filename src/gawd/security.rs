@@ -21,14 +21,14 @@ impl SecurityDetector {
         // 1. Secret Leak Check (Dynamic)
         for pattern in &patterns.secret_tokens {
             if arg.contains(pattern) {
-                return Err(EaiError::Governance(format!("Suspicious secret or API key pattern detected ('{}')", pattern)));
+                return Err(EaiError::governance(format!("Suspicious secret or API key pattern detected ('{}')", pattern)));
             }
         }
 
         // 2. Exfiltration Check (Dynamic)
         for pattern in &patterns.exfiltration_vectors {
             if lower_arg.contains(&pattern.to_lowercase()) {
-                return Err(EaiError::Governance(format!("Suspicious network exfiltration pattern detected ('{}')", pattern)));
+                return Err(EaiError::governance(format!("Suspicious network exfiltration pattern detected ('{}')", pattern)));
             }
         }
 

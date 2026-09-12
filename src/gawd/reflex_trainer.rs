@@ -39,6 +39,6 @@ impl ReflexTrainer {
     pub fn force_train(_workspace: &Path) -> EaiResult<String> {
         let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
         let global_dir = home.join(".aeon");
-        AeonAlphaModel::train_on_staged_data(&global_dir).map_err(|e| crate::error::EaiError::Inference(e.to_string()))
+        AeonAlphaModel::train_on_staged_data(&global_dir).map_err(|e| crate::error::EaiError::inference(e.to_string()))
     }
 }

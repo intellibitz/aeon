@@ -76,10 +76,10 @@ impl ReflexSynthesizer {
                 Ok(wasm_out.to_string_lossy().to_string())
             }
             Ok(output) => {
-                Err(EaiError::Process(format!("WASM compilation failed: {}", String::from_utf8_lossy(&output.stderr))))
+                Err(EaiError::process(format!("WASM compilation failed: {}", String::from_utf8_lossy(&output.stderr))))
             }
             Err(e) => {
-                Err(EaiError::Process(format!("rustc/wasm32-wasi target missing: {}", e)))
+                Err(EaiError::process(format!("rustc/wasm32-wasi target missing: {}", e)))
             }
         }
     }
@@ -87,11 +87,11 @@ impl ReflexSynthesizer {
     pub fn evolve_substrate_native(intent: &str, workspace: &Path) -> EaiResult<String> {
         let code = match crate::gemi::pulse::AeonPulse::reason(&format!("GENERATE_RUST_TOOL: {}", intent), workspace) {
              Ok(c) => c,
-             Err(_) => return Err(EaiError::Protocol("Reflex synthesis failed: No reasoning response.".into())),
+             Err(_) => return Err(EaiError::protocol("Reflex synthesis failed: No reasoning response.")),
         };
 
         if !code.contains("struct ") || !code.contains("impl AeonTool for ") {
-            return Err(EaiError::Protocol("Synthesized code missing AeonTool implementation.".into()));
+            return Err(EaiError::protocol("Synthesized code missing AeonTool implementation."));
         }
 
         let tool_name = intent.split_whitespace().next().unwrap_or("new_tool");

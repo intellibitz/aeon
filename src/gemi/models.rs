@@ -221,21 +221,21 @@ impl ModelManager {
 
         let prov_file = model_path.with_extension("provenance.json");
         if !prov_file.exists() {
-             return Err(crate::error::EaiError::Governance(format!("Untrusted model: No provenance found for {}", model_path.display())));
+             return Err(crate::error::EaiError::governance(format!("Untrusted model: No provenance found for {}", model_path.display())));
         }
 
         let prov_content = fs::read_to_string(&prov_file)
-            .map_err(|_| crate::error::EaiError::Governance("Failed to read model provenance".into()))?;
+            .map_err(|_| crate::error::EaiError::governance("Failed to read model provenance"))?;
         let provenance: ModelProvenance = serde_json::from_str(&prov_content)
-            .map_err(|_| crate::error::EaiError::Governance("Malformed model provenance".into()))?;
+            .map_err(|_| crate::error::EaiError::governance("Malformed model provenance"))?;
 
         if let Some(trusted_checksum) = provenance.original_checksum {
             let actual_checksum = Self::calculate_simple_checksum(model_path)?;
             if actual_checksum != trusted_checksum {
-                return Err(crate::error::EaiError::Governance(format!("Model TAMPERING detected! Hash mismatch for {}", model_path.display())));
+                return Err(crate::error::EaiError::governance(format!("Model TAMPERING detected! Hash mismatch for {}", model_path.display())));
             }
         } else {
-            return Err(crate::error::EaiError::Governance("Model provenance missing trusted checksum".into()));
+            return Err(crate::error::EaiError::governance("Model provenance missing trusted checksum"));
         }
 
         Ok(())

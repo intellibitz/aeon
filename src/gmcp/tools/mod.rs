@@ -59,11 +59,11 @@ fn secure_path(workspace: &Path, user_path: &str) -> EaiResult<PathBuf> {
     let path = PathBuf::from(user_path);
 
     if path.is_absolute() {
-        return Err(EaiError::Filesystem("Absolute paths not allowed".into()));
+        return Err(EaiError::filesystem("Absolute paths not allowed"));
     }
 
     let canonical_workspace = workspace.canonicalize()
-        .map_err(|e| EaiError::Filesystem(format!("Workspace error: {}", e)))?;
+        .map_err(|e| EaiError::filesystem(format!("Workspace error: {}", e)))?;
 
     let full_path = workspace.join(&path);
     let canonical_path = full_path.canonicalize()
@@ -71,12 +71,12 @@ fn secure_path(workspace: &Path, user_path: &str) -> EaiResult<PathBuf> {
         .unwrap_or_else(|| full_path.clone());
 
     if !canonical_path.starts_with(&canonical_workspace) {
-        return Err(EaiError::Filesystem(format!("Path escape attempt: {}", user_path)));
+        return Err(EaiError::filesystem(format!("Path escape attempt: {}", user_path)));
     }
 
     for component in path.components() {
         if let Component::ParentDir = component {
-            return Err(EaiError::Filesystem("Parent directory traversal not allowed".into()));
+            return Err(EaiError::filesystem("Parent directory traversal not allowed"));
         }
     }
 
@@ -169,9 +169,9 @@ impl ToolRegistry {
         });
 
         Self::register_meta_tool(&mut tools, "read_file", "Read file content in workspace", MetaCategory::WorkspaceIo, |arg, workspace| {
-            let arg_s = arg.as_str().ok_or_else(|| EaiError::Protocol("Invalid argument type".into()))?;
+            let arg_s = arg.as_str().ok_or_else(|| EaiError::protocol("Invalid argument type"))?;
             let path = secure_path(workspace, arg_s)?;
-            let content = fs::read_to_string(&path).map_err(|e| EaiError::Filesystem(e.to_string()))?;
+            let content = fs::read_to_string(&path).map_err(|e| EaiError::filesystem(e.to_string()))?;
             Ok(content)
         });
 
@@ -182,31 +182,31 @@ impl ToolRegistry {
             if let (Some(p), Some(content)) = (path_s, content_s) {
                 let dest = secure_path(workspace, p)?;
                 if let Some(parent) = dest.parent() { let _ = fs::create_dir_all(parent); }
-                fs::write(&dest, content).map_err(|e| EaiError::Filesystem(e.to_string()))?;
+                fs::write(&dest, content).map_err(|e| EaiError::filesystem(e.to_string()))?;
                 Ok(format!("Wrote to {}", p))
             } else {
-                Err(EaiError::Protocol("Usage: write_file {path: <path>, content: <content>}".into()))
+                Err(EaiError::protocol("Usage: write_file {path: <path>, content: <content>}"))
             }
         });
 
         Self::register_meta_tool(&mut tools, "exec_command", "Execute command in workspace", MetaCategory::WorkspaceIo, |arg, workspace| {
-            let arg_s = arg.as_str().ok_or_else(|| EaiError::Protocol("Invalid argument type".into()))?;
+            let arg_s = arg.as_str().ok_or_else(|| EaiError::protocol("Invalid argument type"))?;
             let clean = arg_s.trim();
-            if clean.is_empty() { return Err(EaiError::Protocol("Usage: exec_command <cmd>".into())); }
+            if clean.is_empty() { return Err(EaiError::protocol("Usage: exec_command <cmd>")); }
 
-            let args = shlex::split(clean).ok_or_else(|| EaiError::Protocol("Invalid shell syntax".into()))?;
-            if args.is_empty() { return Err(EaiError::Protocol("Command cannot be empty".into())); }
+            let args = shlex::split(clean).ok_or_else(|| EaiError::protocol("Invalid shell syntax"))?;
+            if args.is_empty() { return Err(EaiError::protocol("Command cannot be empty")); }
 
             let out = Command::new(&args[0])
                 .args(&args[1..])
                 .current_dir(workspace)
                 .output()
-                .map_err(|e| EaiError::Process(format!("Exec failed: {}", e)))?;
+                .map_err(|e| EaiError::process(format!("Exec failed: {}", e)))?;
 
             let stdout = String::from_utf8_lossy(&out.stdout).to_string();
             let stderr = String::from_utf8_lossy(&out.stderr).to_string();
             if !out.status.success() {
-                Err(EaiError::Process(stderr))
+                Err(EaiError::process(stderr))
             } else {
                 Ok(stdout)
             }
@@ -232,7 +232,7 @@ impl ToolRegistry {
                 let res = GmcpClient::auto_configure_server(n, p);
                 Ok(format!("MCP Server '{}' configuration status: {}", n, res))
             } else {
-                Err(EaiError::Protocol("Usage: mcp_configure {name: <name>, package: <package>}".into()))
+                Err(EaiError::protocol("Usage: mcp_configure {name: <name>, package: <package>}"))
             }
         });
 
@@ -255,7 +255,7 @@ impl ToolRegistry {
                 // Fallback for flat string
                 let arg_s = arg.as_str().unwrap_or("");
                 let parts: Vec<&str> = arg_s.splitn(3, ' ').collect();
-                if parts.len() < 3 { return Err(EaiError::Protocol("Usage: agent_register {name, description, categories}".into())); }
+                if parts.len() < 3 { return Err(EaiError::protocol("Usage: agent_register {name, description, categories}")); }
 
                 let profile = crate::gawd::agents::AgentProfile {
                     name: parts[0].to_string(),
@@ -280,7 +280,7 @@ impl ToolRegistry {
         Self::register_meta_tool(&mut tools, "power_reason", "Delegate complex reasoning to Power-Tier MCP remotes", MetaCategory::IntelligenceBridge, |arg, _ws| {
             let arg_s = if let Some(s) = arg.as_str() { s.to_string() } else { arg.to_string() };
             if arg_s.trim().is_empty() {
-                return Err(EaiError::Protocol("Usage: power_reason <complex_intent>".into()));
+                return Err(EaiError::protocol("Usage: power_reason <complex_intent>"));
             }
 
             // Meta-Scout: Identify a reasoning-capable MCP server
@@ -292,7 +292,7 @@ impl ToolRegistry {
                 }
             }
 
-            Err(EaiError::Protocol("No Power-Tier reasoning remotes configured or available. AEON local reasoning active.".into()))
+            Err(EaiError::protocol("No Power-Tier reasoning remotes configured or available. AEON local reasoning active."))
         });
 
         Self::register_meta_tool(&mut tools, "meta_scout_agents", "Discover agent capabilities from connected remotes", MetaCategory::IntelligenceBridge, |_arg, _ws| {

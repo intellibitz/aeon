@@ -93,7 +93,7 @@ impl AeonAdmin {
         if overall_success {
             Ok(report)
         } else {
-            Err(EaiError::Governance(format!("Compliance Audit Failed:\n{}", report)))
+            Err(EaiError::governance(format!("Compliance Audit Failed:\n{}", report)))
         }
     }
 
@@ -105,7 +105,7 @@ impl AeonAdmin {
         let version = content.lines()
             .find(|l| l.trim().starts_with("version = \""))
             .and_then(|l| l.split('"').nth(1))
-            .ok_or_else(|| EaiError::Config("Could not find version in Cargo.toml".into()))?;
+            .ok_or_else(|| EaiError::config("Could not find version in Cargo.toml"))?;
 
         // 1. Sync Native Launcher Cargo.toml
         let launcher_cargo = workspace.join("src/native/aeon/Cargo.toml");
@@ -187,8 +187,7 @@ impl AeonAdmin {
 
         let version = content.lines()
             .find(|l| l.trim().starts_with("version = \""))
-            .and_then(|l| l.split('"').nth(1))
-            .ok_or_else(|| EaiError::Config("Could not find version in Cargo.toml".into()))?;
+            .ok_or_else(|| EaiError::config("Could not find version in Cargo.toml"))?;
 
         // Check README
         let readme_path = workspace.join("README.md");
@@ -196,7 +195,7 @@ impl AeonAdmin {
             let readme_content = fs::read_to_string(&readme_path)?;
             let expected_badge = format!("version-v{}-blue.svg", version);
             if !readme_content.contains(&expected_badge) {
-                return Err(EaiError::Config(format!("README.md version badge is out of sync with Cargo.toml (v{}). Run 'aeon admin sync'.", version)));
+                return Err(EaiError::config(format!("README.md version badge is out of sync with Cargo.toml (v{}). Run 'aeon admin sync'.", version)));
             }
         }
 
@@ -208,7 +207,7 @@ impl AeonAdmin {
                 let content = fs::read_to_string(&path)?;
                 let expected_line = format!("* **Current Engine Version**: `v{}`", version);
                 if !content.contains(&expected_line) {
-                    return Err(EaiError::Config(format!("{}: version is out of sync with Cargo.toml (v{}). Run 'aeon admin sync'.", file_name, version)));
+                    return Err(EaiError::config(format!("{}: version is out of sync with Cargo.toml (v{}). Run 'aeon admin sync'.", file_name, version)));
                 }
             }
         }
@@ -228,7 +227,7 @@ impl AeonAdmin {
 
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(EaiError::Process(format!("Release aborted: Native tests failed.\n{}", stderr)));
+            return Err(EaiError::process(format!("Release aborted: Native tests failed.\n{}", stderr)));
         }
 
         eprintln!("[Release Gatekeeper] 3. Executing Static Analysis (Clippy)...");
@@ -238,7 +237,7 @@ impl AeonAdmin {
             .output()?;
         if !clippy.status.success() {
             let stderr = String::from_utf8_lossy(&clippy.stderr);
-            return Err(EaiError::Process(format!("Release aborted: Linting failed.\n{}", stderr)));
+            return Err(EaiError::process(format!("Release aborted: Linting failed.\n{}", stderr)));
         }
 
         eprintln!("[Release Gatekeeper] 4. Verifying Ephemeral Mission Protocols...");
@@ -251,7 +250,7 @@ impl AeonAdmin {
 
             if !mission_out.status.success() {
                 let stderr = String::from_utf8_lossy(&mission_out.stderr);
-                return Err(EaiError::Process(format!("Release aborted: Ephemeral mission '{}' failed.\n{}", mission, stderr)));
+                return Err(EaiError::process(format!("Release aborted: Ephemeral mission '{}' failed.\n{}", mission, stderr)));
             }
         }
 

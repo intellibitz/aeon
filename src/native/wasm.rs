@@ -18,7 +18,7 @@ impl WasmHost {
     pub fn execute_reflex(wasm_path: &Path, arg: &str) -> EaiResult<String> {
         let mut store = Store::default();
         let module = Module::from_file(&store, wasm_path)
-            .map_err(|e| EaiError::Process(format!("Failed to load Wasm module: {}", e)))?;
+            .map_err(|e| EaiError::process(format!("Failed to load Wasm module: {}", e)))?;
 
         let output = Pipe::new();
         let mut state_builder = WasiState::new("aeon-reflex");
@@ -27,26 +27,26 @@ impl WasmHost {
 
         let wasi_env = state_builder
             .finalize(&mut store)
-            .map_err(|e| EaiError::Process(format!("WASI finalize failed: {:?}", e)))?;
+            .map_err(|e| EaiError::process(format!("WASI finalize failed: {:?}", e)))?;
 
         let import_object = wasi_env.import_object(&mut store, &module)
-            .map_err(|e| EaiError::Process(format!("WASI import failed: {:?}", e)))?;
+            .map_err(|e| EaiError::process(format!("WASI import failed: {:?}", e)))?;
 
         let instance = Instance::new(&mut store, &module, &import_object)
-            .map_err(|e| EaiError::Process(format!("Wasm instantiation failed: {}", e)))?;
+            .map_err(|e| EaiError::process(format!("Wasm instantiation failed: {}", e)))?;
 
         let start = instance.exports.get_function("_start")
-            .map_err(|_| EaiError::Process("Wasm missing _start entry point".into()))?;
+            .map_err(|_| EaiError::process("Wasm missing _start entry point"))?;
 
         // This is a blocking call
         start.call(&mut store, &[])
-            .map_err(|e| EaiError::Process(format!("Wasm execution failed: {}", e)))?;
+            .map_err(|e| EaiError::process(format!("Wasm execution failed: {}", e)))?;
 
         // Capture stdout
         let mut result = String::new();
         use std::io::Read;
         let mut reader = output;
-        reader.read_to_string(&mut result).map_err(|e| EaiError::Process(format!("Failed to read Wasm output: {}", e)))?;
+        reader.read_to_string(&mut result).map_err(|e| EaiError::process(format!("Failed to read Wasm output: {}", e)))?;
 
         Ok(if result.trim().is_empty() {
              "Wasm execution success (No Output)".to_string()

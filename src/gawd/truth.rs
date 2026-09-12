@@ -43,7 +43,7 @@ impl AeonTruthAgent {
 
         if !violations.is_empty() {
             let error_msg = format!("TRUTH_VIOLATION: {}\nSTRUCTURED_FEEDBACK: Please grounded your response in the physical workspace state. Ensure files are actually written before reporting success.", violations.join(" | "));
-            return Err(EaiError::Governance(error_msg));
+            return Err(EaiError::governance(error_msg));
         }
 
         Ok(result.to_string())
@@ -57,14 +57,14 @@ impl AeonTruthAgent {
         let device = Device::Cpu;
         let data: Vec<f32> = bytes.iter().map(|&b| b as f32 / 255.0).collect();
         let tensor = Tensor::from_vec(data, (bytes.len(),), &device)
-            .map_err(|e| EaiError::Inference(e.to_string()))?;
+            .map_err(|e| EaiError::inference(e.to_string()))?;
 
-        let mean = tensor.mean_all().map_err(|e| EaiError::Inference(e.to_string()))?
-            .to_scalar::<f32>().map_err(|e| EaiError::Inference(e.to_string()))?;
+        let mean = tensor.mean_all().map_err(|e| EaiError::inference(e.to_string()))?
+            .to_scalar::<f32>().map_err(|e| EaiError::inference(e.to_string()))?;
 
-        let var = tensor.sqr().map_err(|e| EaiError::Inference(e.to_string()))?
-            .mean_all().map_err(|e| EaiError::Inference(e.to_string()))?
-            .to_scalar::<f32>().map_err(|e| EaiError::Inference(e.to_string()))? - (mean * mean);
+        let var = tensor.sqr().map_err(|e| EaiError::inference(e.to_string()))?
+            .mean_all().map_err(|e| EaiError::inference(e.to_string()))?
+            .to_scalar::<f32>().map_err(|e| EaiError::inference(e.to_string()))? - (mean * mean);
 
         let score = (var * 10.0 + 0.5).min(1.0).max(0.0);
         Ok(score)

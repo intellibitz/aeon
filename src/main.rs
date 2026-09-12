@@ -107,6 +107,9 @@ fn run_install(global_dir: &Path) {
 }
 
 fn main() {
+    #[cfg(tokio_unstable)]
+    console_subscriber::init();
+
     env_logger::init();
     let cwd = env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
     let home = get_home_dir();
