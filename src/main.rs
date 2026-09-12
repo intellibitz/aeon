@@ -1,25 +1,14 @@
-#![allow(dead_code)]
-
-mod error;
-mod daemon;
-mod gawd;
-mod gemi;
-mod gmcp;
-mod native;
-mod sandbox;
+use aeon_engine::daemon::AmaDaemon;
+use aeon_engine::gawd::ama::AmaMasterAgent;
+use aeon_engine::gemi::server::GemiServer;
+use aeon_engine::gmcp::server::GmcpServer;
+use aeon_engine::gmcp::tools::ToolRegistry;
+use aeon_engine::sandbox::manager::SandboxManager;
+use aeon_engine::AEON_VERSION;
 
 use std::env;
 use std::io::{self, Read, IsTerminal};
 use std::path::{Path, PathBuf};
-
-use crate::gmcp::tools::ToolRegistry;
-use daemon::AmaDaemon;
-use gawd::AmaMasterAgent;
-use gemi::GemiServer;
-use gmcp::server::GmcpServer;
-use sandbox::SandboxManager;
-
-pub const AEON_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 fn get_home_dir() -> PathBuf {
     env::var_os("HOME")
@@ -56,12 +45,15 @@ fn print_help() {
 fn run_install(global_dir: &Path) {
     println!("Initializing aeon runtime...");
     let _ = SandboxManager::ensure_global_sandbox(global_dir);
-    let cfg = crate::sandbox::manager::AeonConfig::load(global_dir);
+    let cfg = aeon_engine::sandbox::manager::AeonConfig::load(global_dir).unwrap_or_else(|e| {
+        eprintln!("FATAL: {}", e);
+        std::process::exit(1);
+    });
 
     // Zero-Config Autonomous Model Provisioning (Rule 31)
-    if crate::gemi::models::ModelManager::get_selected_model().is_none() {
+    if aeon_engine::gemi::models::ModelManager::get_selected_model().is_none() {
         println!("No local reasoning substrate detected. Provisioning alpha weights...");
-        let res = crate::gemi::models::ModelManager::install_model(&cfg.alpha_weights_url);
+        let res = aeon_engine::gemi::models::ModelManager::install_model(&cfg.alpha_weights_url);
         println!("Provisioning status: {}", res);
     }
 
@@ -120,22 +112,29 @@ fn main() {
             GmcpServer::run_stdio(&cwd, AEON_VERSION);
         }
         "gemi-server" | "gemi" => {
-            let cfg = crate::sandbox::manager::AeonConfig::load(&global_dir);
+            let cfg = aeon_engine::sandbox::manager::AeonConfig::load(&global_dir).unwrap_or_else(|e| {
+                eprintln!("FATAL: {}", e);
+                std::process::exit(1);
+            });
             GemiServer::start_http_server(cwd.clone(), cfg.gemi_port);
+        }
+        "models" => {
+            let res = aeon_engine::gmcp::GmcpHost::dispatch("list_models", &serde_json::json!(null).to_string(), &cwd);
+            println!("{}", res);
         }
         "pulse" => {
             let intent = args.get(1..).map(|s| s.join(" ")).unwrap_or_default();
             if intent.is_empty() {
                 println!("Usage: aeon pulse <natural language instruction>");
             } else {
-                match crate::daemon::admin::AeonAdmin::ingest_natural_intent(&cwd, &intent) {
+                match aeon_engine::daemon::admin::AeonAdmin::ingest_natural_intent(&cwd, &intent) {
                     Ok(msg) => println!("{}", msg),
                     Err(e) => eprintln!("Pulse ingestion failed: {}", e),
                 }
             }
         }
         "audit" => {
-            match crate::daemon::admin::AeonAdmin::audit_compliance(&cwd, None) {
+            match aeon_engine::daemon::admin::AeonAdmin::audit_compliance(&cwd, None) {
                 Ok(report) => println!("{}", report),
                 Err(e) => {
                     eprintln!("{}", e);
@@ -147,24 +146,24 @@ fn main() {
             let sub_cmd = args.get(1).map(|s| s.as_str()).unwrap_or("help");
             match sub_cmd {
                 "sync" => {
-                    match crate::daemon::admin::AeonAdmin::enforce_version_consistency(&cwd) {
+                    match aeon_engine::daemon::admin::AeonAdmin::enforce_version_consistency(&cwd) {
                         Ok(v) => println!("Version synchronization complete: v{}", v),
                         Err(e) => eprintln!("Sync failed: {}", e),
                     }
                 }
                 "pulse" => {
-            let intent = args.get(1..).map(|s| s.join(" ")).unwrap_or_default();
-            if intent.is_empty() {
-                println!("Usage: aeon pulse <natural language instruction>");
-            } else {
-                match crate::daemon::admin::AeonAdmin::ingest_natural_intent(&cwd, &intent) {
-                    Ok(msg) => println!("{}", msg),
-                    Err(e) => eprintln!("Pulse ingestion failed: {}", e),
+                    let intent = args.get(2..).map(|s| s.join(" ")).unwrap_or_default();
+                    if intent.is_empty() {
+                        println!("Usage: aeon admin pulse <natural language instruction>");
+                    } else {
+                        match aeon_engine::daemon::admin::AeonAdmin::ingest_natural_intent(&cwd, &intent) {
+                            Ok(msg) => println!("{}", msg),
+                            Err(e) => eprintln!("Pulse ingestion failed: {}", e),
+                        }
+                    }
                 }
-            }
-        }
-        "audit" => {
-                    match crate::daemon::admin::AeonAdmin::audit_compliance(&cwd, None) {
+                "audit" => {
+                    match aeon_engine::daemon::admin::AeonAdmin::audit_compliance(&cwd, None) {
                         Ok(report) => println!("{}", report),
                         Err(e) => {
                             eprintln!("{}", e);
@@ -173,7 +172,7 @@ fn main() {
                     }
                 }
                 "verify" => {
-                    match crate::daemon::admin::AeonAdmin::verify_version_alignment(&cwd) {
+                    match aeon_engine::daemon::admin::AeonAdmin::verify_version_alignment(&cwd) {
                         Ok(_) => println!("Version alignment verified."),
                         Err(e) => {
                             eprintln!("{}", e);
@@ -182,7 +181,7 @@ fn main() {
                     }
                 }
                 "release" => {
-                    match crate::daemon::admin::AeonAdmin::execute_release(&cwd) {
+                    match aeon_engine::daemon::admin::AeonAdmin::execute_release(&cwd) {
                         Ok(msg) => println!("{}", msg),
                         Err(e) => {
                             eprintln!("{}", e);
@@ -216,7 +215,7 @@ fn main() {
 
             // Unified Meta-Substrate Dispatch (Host -> ToolRegistry)
             if ToolRegistry::exists(cmd_name) {
-                let res = crate::gmcp::GmcpHost::dispatch(cmd_name, &cmd_arg, &cwd);
+                let res = aeon_engine::gmcp::GmcpHost::dispatch(cmd_name, &cmd_arg, &cwd);
                 if !io::stdout().is_terminal() {
                     print!("{}", res);
                 } else {
@@ -226,9 +225,9 @@ fn main() {
             }
 
             // Axiomatic Pulse Ingestion: Automatically anchor any natural language instruction into pulse.md
-            match crate::daemon::admin::AeonAdmin::ingest_natural_intent(&cwd, &goal) {
+            match aeon_engine::daemon::admin::AeonAdmin::ingest_natural_intent(&cwd, &goal) {
                 Ok(msg) => println!("{}", msg),
-                Err(e) => {
+                Err(_) => {
                     // Fallback to direct solving if ingestion fails
                     let answer = ama.solve_clean(&goal, &cwd, AEON_VERSION);
                     if !io::stdout().is_terminal() {

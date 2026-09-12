@@ -1,10 +1,8 @@
 // GMCP Server Substrate: Model Context Protocol JSON-RPC 2.0 Interface
 // 100% Rust implementation serving Tier 1 Swarm & ToolRegistry
 
-use std::io::{BufRead, BufReader, Write};
-use std::net::TcpListener;
+use tiny_http::{Server, Response, Method, Header};
 use std::path::{Path, PathBuf};
-use std::thread;
 use serde_json::json;
 
 use crate::gmcp::tools::ToolRegistry;
@@ -19,108 +17,57 @@ impl GmcpServer {
         let mut stdout = std::io::stdout();
         let server = GmcpProtocolHandler;
 
-        for line in stdin.lock().lines() {
+        for line in std::io::BufRead::lines(stdin.lock()) {
             let line = match line {
                 Ok(l) => l,
                 Err(_) => break,
             };
 
             let response = server.handle_request(&line, workspace);
-            let _ = writeln!(stdout, "{}", response);
-            let _ = stdout.flush();
+            let _ = std::io::Write::write_all(&mut stdout, format!("{}\n", response).as_bytes());
+            let _ = std::io::Write::flush(&mut stdout);
         }
     }
 
-    pub fn start_tcp_server(workspace: PathBuf, port: u16, _version: String) {
-        let addr = format!("0.0.0.0:{}", port);
-        let listener = TcpListener::bind(&addr).expect("Failed to bind GMCP TCP server");
-        eprintln!("[GMCP TCP] Substrate active on {}", addr);
-
-        for stream in listener.incoming() {
-            let mut stream = stream.expect("GMCP Stream Error");
-            let mut out_stream = stream.try_clone().expect("Failed to clone GMCP stream");
-            let workspace = workspace.clone();
-            let server = GmcpProtocolHandler;
-
-            thread::spawn(move || {
-                let mut reader = BufReader::new(&mut stream);
-                loop {
-                    let mut line = String::new();
-                    if reader.read_line(&mut line).is_err() || line.is_empty() { break; }
-                    let response = server.handle_request(&line, &workspace);
-                    if writeln!(out_stream, "{}", response).is_err() { break; }
-                    let _ = out_stream.flush();
-                }
-            });
-        }
+    pub fn start_tcp_server(_workspace: PathBuf, _port: u16, _version: String) {
+        // TCP server now consolidated into HTTP/SSE via tiny_http for reliability
+        eprintln!("[GMCP TCP] Protocol deprecated. Use GMCP HTTP/SSE on 9093.");
     }
 
     pub fn start_http_server(workspace: PathBuf, port: u16) {
         let addr = format!("0.0.0.0:{}", port);
-        let listener = TcpListener::bind(&addr).expect("Failed to bind GMCP HTTP server");
+        let server = Server::http(&addr).expect("Failed to bind GMCP HTTP server");
         eprintln!("[GMCP HTTP/SSE] Substrate active on {}", addr);
 
-        for stream in listener.incoming() {
-            let mut stream = stream.expect("GMCP HTTP Error");
+        for mut request in server.incoming_requests() {
             let workspace = workspace.clone();
-            let server = GmcpProtocolHandler;
+            let method = request.method().clone();
+            let url = request.url().to_string();
+            let server_handler = GmcpProtocolHandler;
 
-            thread::spawn(move || {
-                let mut reader = BufReader::new(&mut stream);
-                let mut first_line = String::new();
-                if reader.read_line(&mut first_line).is_err() { return; }
-
-                let parts: Vec<&str> = first_line.split_whitespace().collect();
-                if parts.len() < 2 { return; }
-                let method = parts[0];
-                let path = parts[1];
-
-                if method == "GET" && path == "/sse" {
-                    // MCP SSE Transport: Establish event stream
-                    let mut writer = stream;
-                    let response_headers = "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nCache-Control: no-cache\r\nConnection: keep-alive\r\nAccess-Control-Allow-Origin: *\r\n\r\n";
-                    let _ = writer.write_all(response_headers.as_bytes());
-
-                    // Send the endpoint event as per MCP spec
+            match (method, url.as_str()) {
+                (Method::Get, "/sse") => {
                     let endpoint_event = format!("event: endpoint\ndata: /messages?session={}\n\n", "default-session");
-                    let _ = writer.write_all(endpoint_event.as_bytes());
-                    let _ = writer.flush();
-
-                    // In a production engine, we would keep this open and push tool execution events.
-                    // For now, we maintain the connection.
-                    loop {
-                        thread::sleep(std::time::Duration::from_secs(30));
-                        if writer.write_all(b": keep-alive\n\n").is_err() { break; }
-                    }
-                } else if method == "POST" && path.starts_with("/messages") {
-                    let mut content_length = 0;
-                    loop {
-                        let mut line = String::new();
-                        let _ = reader.read_line(&mut line);
-                        if line == "\r\n" || line.is_empty() { break; }
-                        if line.to_lowercase().starts_with("content-length:") {
-                            content_length = line.split(':').nth(1).unwrap_or("0").trim().parse::<usize>().unwrap_or(0);
-                        }
-                    }
-
-                    if content_length > 0 {
-                        let mut buffer = vec![0u8; content_length];
-                        let _ = std::io::Read::read_exact(&mut reader, &mut buffer);
-                        let body = String::from_utf8_lossy(&buffer).to_string();
-
-                        let response = server.handle_request(&body, &workspace);
-
-                        let mut writer = stream;
-                        let resp = format!(
-                            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\nContent-Length: {}\r\n\r\n{}",
-                            response.len(),
-                            response
-                        );
-                        let _ = writer.write_all(resp.as_bytes());
-                        let _ = writer.flush();
-                    }
+                    let response = Response::from_string(endpoint_event)
+                        .with_header(Header::from_bytes(&b"Content-Type"[..], &b"text/event-stream"[..]).unwrap())
+                        .with_header(Header::from_bytes(&b"Cache-Control"[..], &b"no-cache"[..]).unwrap())
+                        .with_header(Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap());
+                    let _ = request.respond(response);
                 }
-            });
+                (Method::Post, path) if path.starts_with("/messages") => {
+                    let mut body = String::new();
+                    let _ = std::io::Read::read_to_string(request.as_reader(), &mut body);
+
+                    let response_json = server_handler.handle_request(&body, &workspace);
+                    let response = Response::from_string(response_json)
+                        .with_header(Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).unwrap())
+                        .with_header(Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap());
+                    let _ = request.respond(response);
+                }
+                _ => {
+                    let _ = request.respond(Response::from_string("Not Found").with_status_code(404));
+                }
+            }
         }
     }
 }
@@ -178,7 +125,8 @@ impl ProtocolDispatcher for GmcpProtocolHandler {
                 }).to_string()
             }
             Some("locks/acquire") => {
-                let resource_id = extract_tool_arg(line).unwrap_or_default();
+                let arg = extract_tool_val(line).unwrap_or(json!(null));
+                let resource_id = if let Some(s) = arg.as_str() { s.to_string() } else { arg.to_string() };
                 let success = ToolRegistry::acquire_local_lock(&resource_id);
                 json!({
                     "jsonrpc": "2.0",
@@ -187,7 +135,8 @@ impl ProtocolDispatcher for GmcpProtocolHandler {
                 }).to_string()
             }
             Some("locks/release") => {
-                let resource_id = extract_tool_arg(line).unwrap_or_default();
+                let arg = extract_tool_val(line).unwrap_or(json!(null));
+                let resource_id = if let Some(s) = arg.as_str() { s.to_string() } else { arg.to_string() };
                 ToolRegistry::release_meta_lock(&resource_id);
                 json!({
                     "jsonrpc": "2.0",
@@ -197,7 +146,7 @@ impl ProtocolDispatcher for GmcpProtocolHandler {
             }
             Some("tools/call") => {
                 let tool_name = extract_tool_name(line).unwrap_or_default();
-                let tool_arg = extract_tool_arg(line).unwrap_or_default();
+                let tool_arg = extract_tool_val(line).unwrap_or(json!(null));
 
                 // Fully Meta Dispatch via ToolRegistry
                 let result_text = ToolRegistry::execute_tool(&tool_name, &tool_arg, workspace);
@@ -252,19 +201,11 @@ fn extract_tool_name(line: &str) -> Option<String> {
     None
 }
 
-fn extract_tool_arg(line: &str) -> Option<String> {
+fn extract_tool_val(line: &str) -> Option<serde_json::Value> {
     if let Ok(v) = serde_json::from_str::<serde_json::Value>(line) {
         if let Some(params) = v.get("params") {
             if let Some(arguments) = params.get("arguments") {
-                return if let Some(s) = arguments.as_str() {
-                    Some(s.to_string())
-                } else if let Some(command) = arguments.get("command").and_then(|c| c.as_str()) {
-                    Some(command.to_string())
-                } else if let Some(path) = arguments.get("path").and_then(|p| p.as_str()) {
-                    Some(path.to_string())
-                } else {
-                    Some(arguments.to_string())
-                };
+                return Some(arguments.clone());
             }
         }
     }
@@ -279,7 +220,7 @@ mod tests {
     fn test_extract_tool_name_and_arguments() {
         let json_line = r#"{"jsonrpc":"2.0","method":"tools/call","params":{"name":"test_tool","arguments":{"command":"ls"}},"id":1}"#;
         assert_eq!(extract_tool_name(json_line), Some("test_tool".to_string()));
-        assert_eq!(extract_tool_arg(json_line), Some("ls".to_string()));
+        assert_eq!(extract_tool_val(json_line), Some(json!({"command":"ls"})));
     }
 
     #[test]

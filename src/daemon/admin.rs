@@ -55,7 +55,19 @@ impl AeonAdmin {
             }
         }
 
-        // 3. Version Consistency (Rule 1)
+        // 3. Model Integrity & Provenance (Rule 31)
+        let model_verifications = crate::gemi::models::ModelManager::verify_local_models(workspace);
+        if model_verifications.is_empty() {
+            report.push_str("- [WARNING] Models: No local model substrates found.\n");
+        } else {
+            for v in model_verifications {
+                let status = if v.checksum_verified { "PASS" } else { "FAIL" };
+                report.push_str(&format!("- [{}] Model Integrity: {} (Verified: {})\n", status, v.model_id, v.checksum_verified));
+                if !v.checksum_verified { overall_success = false; }
+            }
+        }
+
+        // 4. Version Consistency (Rule 1)
         match Self::enforce_version_consistency(workspace) {
             Ok(v) => report.push_str(&format!("- [PASS] Version Consistency: All manifests synchronized to v{}.\n", v)),
             Err(e) => {
@@ -67,7 +79,7 @@ impl AeonAdmin {
         if overall_success {
             Ok(report)
         } else {
-            Err(EaiError::Protocol(format!("Compliance Audit Failed:\n{}", report)))
+            Err(EaiError::Governance(format!("Compliance Audit Failed:\n{}", report)))
         }
     }
 
@@ -182,7 +194,7 @@ impl AeonAdmin {
 
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(EaiError::Protocol(format!("Release aborted: Native tests failed.\n{}", stderr)));
+            return Err(EaiError::Process(format!("Release aborted: Native tests failed.\n{}", stderr)));
         }
 
         eprintln!("[Release Gatekeeper] 3. Verifying Ephemeral Mission Protocols...");
@@ -195,7 +207,7 @@ impl AeonAdmin {
 
             if !mission_out.status.success() {
                 let stderr = String::from_utf8_lossy(&mission_out.stderr);
-                return Err(EaiError::Protocol(format!("Release aborted: Ephemeral mission '{}' failed.\n{}", mission, stderr)));
+                return Err(EaiError::Process(format!("Release aborted: Ephemeral mission '{}' failed.\n{}", mission, stderr)));
             }
         }
 
@@ -217,11 +229,19 @@ impl AeonAdmin {
             }
         }
 
-        // 1. Classify Intent
+        // 1. Classify Intent (Hardened Classifier)
         let lower_intent = intent.to_lowercase();
-        let (prefix, _category) = if lower_intent.contains("motion") || lower_intent.contains("core") || lower_intent.contains("architecture") || lower_intent.contains("binary") {
+        let (prefix, _category) = if lower_intent.contains("motion") ||
+                                     lower_intent.starts_with("add ") ||
+                                     lower_intent.starts_with("implement ") ||
+                                     lower_intent.contains("architecture") ||
+                                     lower_intent.contains("binary") {
             ("[MOTION]", "Architectural Evolution")
-        } else if lower_intent.contains("query") || lower_intent.contains("status") || lower_intent.contains("identity") || lower_intent.contains("check") {
+        } else if lower_intent.contains("query") ||
+                  lower_intent.starts_with("what is") ||
+                  lower_intent.starts_with("list ") ||
+                  lower_intent.contains("status") ||
+                  lower_intent.contains("identity") {
             ("[QUERY]", "Zero-Mutation Interrogation")
         } else {
             ("[MISSION]", "Dynamic Task Fulfillment")

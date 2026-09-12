@@ -24,7 +24,7 @@ pub struct McpTool {
 pub trait AeonTool: Send + Sync {
     fn name(&self) -> String;
     fn description(&self) -> String;
-    fn execute(&self, arg: &str, workspace: &Path) -> EaiResult<String>;
+    fn execute(&self, arg: &serde_json::Value, workspace: &Path) -> EaiResult<String>;
 }
 
 /// Enum representing Meta-Tool Category in AEON Substrate
@@ -42,13 +42,13 @@ pub struct MetaTool {
     pub tool_name: String,
     pub tool_desc: String,
     pub category: MetaCategory,
-    pub handler: Arc<dyn Fn(&str, &Path) -> EaiResult<String> + Send + Sync>,
+    pub handler: Arc<dyn Fn(&serde_json::Value, &Path) -> EaiResult<String> + Send + Sync>,
 }
 
 impl AeonTool for MetaTool {
     fn name(&self) -> String { self.tool_name.clone() }
     fn description(&self) -> String { self.tool_desc.clone() }
-    fn execute(&self, arg: &str, workspace: &Path) -> EaiResult<String> {
+    fn execute(&self, arg: &serde_json::Value, workspace: &Path) -> EaiResult<String> {
         (self.handler)(arg, workspace)
     }
 }
@@ -126,10 +126,11 @@ impl ToolRegistry {
         });
 
         Self::register_meta_tool(&mut tools, "scout_model", "Scout or install model substrate", MetaCategory::SystemPrimitive, |arg, _workspace| {
-            if arg.trim().is_empty() {
+            let arg_s = arg.as_str().unwrap_or("");
+            if arg_s.trim().is_empty() {
                 return Ok("Usage: scout_model <model_name_or_url>".to_string());
             }
-            let res = ModelManager::install_model(arg.trim());
+            let res = ModelManager::install_model(arg_s.trim());
             Ok(res)
         });
 
@@ -138,31 +139,43 @@ impl ToolRegistry {
         });
 
         Self::register_meta_tool(&mut tools, "read_file", "Read file content in workspace", MetaCategory::WorkspaceIo, |arg, workspace| {
-            let clean = arg.trim().trim_matches('"').trim_matches('\'');
+            let arg_s = arg.as_str().unwrap_or("");
+            let clean = arg_s.trim().trim_matches('"').trim_matches('\'');
             if clean.is_empty() { return Err(EaiError::Protocol("Usage: read_file <file_path>".into())); }
             let path = workspace.join(clean);
             if !path.is_file() {
-                return Err(EaiError::Sandbox(format!("File not found: {}", path.display())));
+                return Err(EaiError::Filesystem(format!("File not found: {}", path.display())));
             }
-            let content = fs::read_to_string(&path).map_err(|e| EaiError::Sandbox(e.to_string()))?;
+            let content = fs::read_to_string(&path).map_err(|e| EaiError::Filesystem(e.to_string()))?;
             Ok(content)
         });
 
         Self::register_meta_tool(&mut tools, "write_file", "Write content to workspace file", MetaCategory::WorkspaceIo, |arg, workspace| {
-            let parts: Vec<&str> = arg.splitn(2, ' ').collect();
-            if parts.len() < 2 { return Err(EaiError::Protocol("Usage: write_file <path> <content>".into())); }
-            let path = workspace.join(parts[0].trim());
-            if let Some(parent) = path.parent() {
-                let _ = fs::create_dir_all(parent);
+            let path_s = arg.get("path").and_then(|v| v.as_str());
+            let content_s = arg.get("content").and_then(|v| v.as_str());
+
+            if let (Some(path), Some(content)) = (path_s, content_s) {
+                let dest = workspace.join(path);
+                if let Some(parent) = dest.parent() { let _ = fs::create_dir_all(parent); }
+                fs::write(&dest, content).map_err(|e| EaiError::Filesystem(e.to_string()))?;
+                Ok(format!("Wrote to {}", path))
+            } else {
+                // Fallback for flat string argument
+                let arg_s = arg.as_str().unwrap_or("");
+                let parts: Vec<&str> = arg_s.splitn(2, ' ').collect();
+                if parts.len() < 2 { return Err(EaiError::Protocol("Usage: write_file {path: <path>, content: <content>}".into())); }
+                let path = workspace.join(parts[0].trim());
+                if let Some(parent) = path.parent() { let _ = fs::create_dir_all(parent); }
+                fs::write(&path, parts[1]).map_err(|e| EaiError::Filesystem(e.to_string()))?;
+                Ok(format!("Wrote to {}", parts[0].trim()))
             }
-            fs::write(&path, parts[1]).map_err(|e| EaiError::Sandbox(e.to_string()))?;
-            Ok(format!("Wrote to {}", parts[0].trim()))
         });
 
         Self::register_meta_tool(&mut tools, "exec_command", "Execute command in workspace", MetaCategory::WorkspaceIo, |arg, workspace| {
-            let clean = arg.trim();
+            let arg_s = arg.as_str().unwrap_or("");
+            let clean = arg_s.trim();
             if clean.is_empty() { return Err(EaiError::Protocol("Usage: exec_command <cmd>".into())); }
-            let out = Command::new("sh").args(["-c", clean]).current_dir(workspace).output().map_err(|e| EaiError::Sandbox(e.to_string()))?;
+            let out = Command::new("sh").args(["-c", clean]).current_dir(workspace).output().map_err(|e| EaiError::Process(e.to_string()))?;
             let stdout = String::from_utf8_lossy(&out.stdout).to_string();
             let stderr = String::from_utf8_lossy(&out.stderr).to_string();
             if !stderr.is_empty() && stdout.is_empty() {
@@ -182,45 +195,71 @@ impl ToolRegistry {
         });
 
         Self::register_meta_tool(&mut tools, "mcp_configure", "Configure external MCP server", MetaCategory::McpProxy, |arg, _ws| {
-            let parts: Vec<&str> = arg.splitn(2, ' ').collect();
-            if parts.is_empty() { return Err(EaiError::Protocol("Usage: mcp_configure <name> [package]".into())); }
-            let name = parts[0];
-            let package = parts.get(1).unwrap_or(&name);
-            let res = GmcpClient::auto_configure_server(name, package);
-            Ok(format!("MCP Server '{}' configuration status: {}", name, res))
+            let name = arg.get("name").and_then(|v| v.as_str())
+                .or_else(|| arg.as_str().and_then(|s| s.split_whitespace().next()));
+            let package = arg.get("package").and_then(|v| v.as_str())
+                .or_else(|| arg.as_str().and_then(|s| s.split_whitespace().nth(1)));
+
+            if let Some(n) = name {
+                let p = package.unwrap_or(n);
+                let res = GmcpClient::auto_configure_server(n, p);
+                Ok(format!("MCP Server '{}' configuration status: {}", n, res))
+            } else {
+                Err(EaiError::Protocol("Usage: mcp_configure {name: <name>, package: <package>}".into()))
+            }
         });
 
         Self::register_meta_tool(&mut tools, "agent_register", "Dynamically register a new agent profile", MetaCategory::IntelligenceBridge, |arg, _ws| {
-            let parts: Vec<&str> = arg.splitn(3, ' ').collect();
-            if parts.len() < 3 { return Err(EaiError::Protocol("Usage: agent_register <name> <description> <categories_comma_separated>".into())); }
+            let name = arg.get("name").and_then(|v| v.as_str());
+            let desc = arg.get("description").and_then(|v| v.as_str());
+            let cats = arg.get("categories").and_then(|v| v.as_str());
 
-            let profile = crate::gawd::agents::AgentProfile {
-                name: parts[0].to_string(),
-                description: parts[1].to_string(),
-                categories: parts[2].split(',').map(|s| s.trim().to_string()).collect(),
-                semantic_anchors: Vec::new(),
-                base_rank: 0.8, // Default rank for dynamic registration
-            };
+            if let (Some(n), Some(d), Some(c)) = (name, desc, cats) {
+                let profile = crate::gawd::agents::AgentProfile {
+                    name: n.to_string(),
+                    description: d.to_string(),
+                    categories: c.split(',').map(|s| s.trim().to_string()).collect(),
+                    semantic_anchors: Vec::new(),
+                    base_rank: 0.8,
+                };
+                crate::gawd::agents::AgentMetaRegistry::global().register_agent(profile);
+                Ok(format!("Successfully registered agent: {}", n))
+            } else {
+                // Fallback for flat string
+                let arg_s = arg.as_str().unwrap_or("");
+                let parts: Vec<&str> = arg_s.splitn(3, ' ').collect();
+                if parts.len() < 3 { return Err(EaiError::Protocol("Usage: agent_register {name, description, categories}".into())); }
 
-            crate::gawd::agents::AgentMetaRegistry::global().register_agent(profile);
-            Ok(format!("Successfully registered agent: {}", parts[0]))
+                let profile = crate::gawd::agents::AgentProfile {
+                    name: parts[0].to_string(),
+                    description: parts[1].to_string(),
+                    categories: parts[2].split(',').map(|s| s.trim().to_string()).collect(),
+                    semantic_anchors: Vec::new(),
+                    base_rank: 0.8,
+                };
+
+                crate::gawd::agents::AgentMetaRegistry::global().register_agent(profile);
+                Ok(format!("Successfully registered agent: {}", parts[0]))
+            }
         });
 
         Self::register_meta_tool(&mut tools, "reason", "Execute native local reasoning substrate", MetaCategory::SystemPrimitive, |arg, _workspace| {
              // Aspiration 8: Pure Rust-Native Inference (Hardened)
-             crate::gemi::engine::AeonGgufEngine.run_inference(arg)
+             let arg_s = if let Some(s) = arg.as_str() { s.to_string() } else { arg.to_string() };
+             crate::gemi::engine::AeonGgufEngine.run_inference(&arg_s)
         });
 
         // 5. Meta-Intelligence Bridge Primitives
         Self::register_meta_tool(&mut tools, "power_reason", "Delegate complex reasoning to Power-Tier MCP remotes", MetaCategory::IntelligenceBridge, |arg, _ws| {
-            if arg.trim().is_empty() {
+            let arg_s = if let Some(s) = arg.as_str() { s.to_string() } else { arg.to_string() };
+            if arg_s.trim().is_empty() {
                 return Err(EaiError::Protocol("Usage: power_reason <complex_intent>".into()));
             }
 
             // Meta-Scout: Identify a reasoning-capable MCP server
             let remotes = GmcpClient::scout_reasoning_remotes();
             if let Some(best_remote) = remotes.first() {
-                let res = GmcpClient::execute_external_tool(best_remote, "reason", arg);
+                let res = GmcpClient::execute_external_tool(best_remote, "reason", &arg_s);
                 if !res.contains("[FAIL]") {
                     return Ok(res);
                 }
@@ -295,7 +334,7 @@ impl ToolRegistry {
         category: MetaCategory,
         handler: F,
     ) where
-        F: Fn(&str, &Path) -> EaiResult<String> + Send + Sync + 'static,
+        F: Fn(&serde_json::Value, &Path) -> EaiResult<String> + Send + Sync + 'static,
     {
         let tool = MetaTool {
             tool_name: name.to_string(),
@@ -350,10 +389,11 @@ impl ToolRegistry {
         false
     }
 
-    pub fn execute_tool(name: &str, arg: &str, workspace: &Path) -> String {
+    pub fn execute_tool(name: &str, arg: &serde_json::Value, workspace: &Path) -> String {
         if name.contains(':') && !name.starts_with("ext_") {
             let parts: Vec<&str> = name.splitn(2, ':').collect();
-            return GmcpClient::execute_external_tool(parts[0], parts[1], arg);
+            let arg_str = if let Some(s) = arg.as_str() { s.to_string() } else { arg.to_string() };
+            return GmcpClient::execute_external_tool(parts[0], parts[1], &arg_str);
         }
 
         if name.starts_with("reflex_") {
@@ -361,7 +401,8 @@ impl ToolRegistry {
             if let Some(home) = std::env::var_os("HOME").map(PathBuf::from) {
                 let wasm_path = home.join(".aeon/reflexes").join(wasm_name);
                 if wasm_path.exists() {
-                    match crate::native::wasm::WasmHost::execute_reflex(&wasm_path, arg) {
+                    let arg_str = if let Some(s) = arg.as_str() { s.to_string() } else { arg.to_string() };
+                    match crate::native::wasm::WasmHost::execute_reflex(&wasm_path, &arg_str) {
                         Ok(res) => return res,
                         Err(e) => return format!("Reflex Error: {}", e),
                     }

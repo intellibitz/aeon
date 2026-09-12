@@ -26,11 +26,17 @@ impl AeonVisionEngine {
         Ok(Self { device, feature_extractor })
     }
 
-    pub fn process_image(&self, _image_path: &Path) -> Result<Tensor> {
-        // 1. Hardware-Saturated Image Loading (Placeholder for real decoding)
-        // In a full implementation, we'd use 'image' crate to decode and resize.
-        // For the substrate gap fix, we synthesize the tensor to demonstrate hardware saturation.
-        let data = vec![0.5f32; 224 * 224 * 3];
+    pub fn process_image(&self, image_path: &Path) -> Result<Tensor> {
+        // 1. Hardware-Saturated Image Loading (Hardened for Reality)
+        let img = image::open(image_path).map_err(|e| anyhow!("Image Load Error: {}", e))?;
+        let resized = img.resize_exact(224, 224, image::imageops::FilterType::Lanczos3);
+        let rgb = resized.to_rgb8();
+
+        let mut data = Vec::with_capacity(224 * 224 * 3);
+        for &p in rgb.as_raw() {
+            data.push(p as f32 / 255.0);
+        }
+
         let input = Tensor::from_vec(data, (1, 224 * 224 * 3), &self.device)?;
 
         // 2. Neural Projection (The Distilled Vision Reflex)

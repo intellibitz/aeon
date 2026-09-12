@@ -6,8 +6,8 @@ This document defines the complete set of validation protocols that anchor the `
 
 ## 1. Pending Failing Pulse
 
-(No pending pulse. Substrate is optimal.)
 
+* `83. [ ] **[MISSION]**: models`
 ## 2. Ingested & Resolved Pulse (The Realized Genome)
 
 ### 2.1 Core Governance & Epistemic Integrity [MOTION]

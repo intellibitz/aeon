@@ -35,7 +35,7 @@ impl AeonRuntimeAdmin {
         // 2. Model Provisioning & Optimization
         let home = std::env::var_os("HOME").map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
         let global_dir = home.join(".aeon");
-        let cfg = AeonConfig::load(&global_dir);
+        let cfg = AeonConfig::load(&global_dir).expect("Fatal: Malformed configuration");
 
         if cfg.auto_download_models {
             eprintln!("[Runtime Admin] Auditing model substrate...");
@@ -86,7 +86,7 @@ impl AeonRuntimeAdmin {
             Ok("All Validation Protocols Passed. Substrate is Optimal.".into())
         } else {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            Err(crate::error::EaiError::Protocol(format!("Self-Validation Failed: {}", stderr)))
+            Err(crate::error::EaiError::Process(format!("Self-Validation Failed: {}", stderr)))
         }
     }
 

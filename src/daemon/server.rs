@@ -2,16 +2,77 @@
 // 100% Rust implementation managing GMCP (Port 9090), GEMI (Port 9091) & A2A Cluster UDP (Port 9092)
 
 use std::fs;
-use std::net::{TcpStream, UdpSocket};
+use std::io::{Write, Read, Seek, SeekFrom};
+use std::net::UdpSocket;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::thread;
 use std::time::Duration;
 
+#[cfg(unix)]
+use std::os::unix::io::AsRawFd;
+#[cfg(windows)]
+use std::os::windows::io::AsRawHandle;
+
 use crate::gemi::GemiServer;
 use crate::gmcp::server::GmcpServer;
 
 pub struct AmaDaemon;
+
+struct DaemonLock {
+    file: fs::File,
+}
+
+impl DaemonLock {
+    fn acquire(path: &Path) -> Result<Self, String> {
+        let file = fs::OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create(true)
+            .open(path)
+            .map_err(|e| e.to_string())?;
+
+        #[cfg(unix)]
+        {
+            let ret = unsafe { libc::flock(file.as_raw_fd(), libc::LOCK_EX | libc::LOCK_NB) };
+            if ret != 0 {
+                return Err("Locked by another process".into());
+            }
+        }
+
+        #[cfg(windows)]
+        {
+            use winapi::um::fileapi::LockFileEx;
+            use winapi::um::minwinbase::{LOCKFILE_EXCLUSIVE_LOCK, LOCKFILE_FAIL_IMMEDIATELY};
+
+            let handle = file.as_raw_handle();
+            let mut overlapped = unsafe { std::mem::zeroed() };
+            let ret = unsafe {
+                LockFileEx(
+                    handle as _,
+                    LOCKFILE_EXCLUSIVE_LOCK | LOCKFILE_FAIL_IMMEDIATELY,
+                    0,
+                    1,
+                    0,
+                    &mut overlapped,
+                )
+            };
+            if ret == 0 {
+                return Err("Locked by another process".into());
+            }
+        }
+
+        Ok(Self { file })
+    }
+
+    fn write_pid(&mut self) -> Result<(), String> {
+        self.file.set_len(0).map_err(|e| e.to_string())?;
+        self.file.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+        write!(self.file, "{}", std::process::id()).map_err(|e| e.to_string())?;
+        self.file.flush().map_err(|e| e.to_string())?;
+        Ok(())
+    }
+}
 
 impl AmaDaemon {
     pub fn get_lock_file(global_dir: &Path) -> PathBuf {
@@ -19,27 +80,53 @@ impl AmaDaemon {
     }
 
     pub fn check_status(global_dir: &Path) -> Option<u32> {
-        let lock_file = Self::get_lock_file(global_dir);
-        if let Ok(content) = fs::read_to_string(&lock_file)
-            && let Ok(pid) = content.trim().parse::<u32>()
+        let lock_file_path = Self::get_lock_file(global_dir);
+        if !lock_file_path.exists() {
+            return None;
+        }
+
+        let mut file = fs::OpenOptions::new().read(true).write(true).open(&lock_file_path).ok()?;
+
+        #[cfg(unix)]
         {
-            if cfg!(target_os = "linux") {
-                let proc_path = PathBuf::from(format!("/proc/{}", pid));
-                if proc_path.exists() {
-                    return Some(pid);
-                }
-            } else {
-                // Cross-platform fallback for Windows & macOS: TCP ping on GMCP server port
-                let cfg = crate::sandbox::manager::AeonConfig::load(global_dir);
-                let addr = format!("127.0.0.1:{}", cfg.gmcp_port);
-                if let Ok(addr_parsed) = addr.parse()
-                    && TcpStream::connect_timeout(&addr_parsed, Duration::from_millis(100)).is_ok()
-                {
-                    return Some(pid);
-                }
+            let ret = unsafe { libc::flock(file.as_raw_fd(), libc::LOCK_EX | libc::LOCK_NB) };
+            if ret == 0 {
+                // Successfully locked means no one else has it. Release and return None.
+                let _ = unsafe { libc::flock(file.as_raw_fd(), libc::LOCK_UN) };
+                return None;
             }
         }
-        None
+
+        #[cfg(windows)]
+        {
+            use winapi::um::fileapi::{LockFileEx, UnlockFileEx};
+            use winapi::um::minwinbase::{LOCKFILE_EXCLUSIVE_LOCK, LOCKFILE_FAIL_IMMEDIATELY};
+            let handle = file.as_raw_handle();
+            let mut overlapped = unsafe { std::mem::zeroed() };
+            let ret = unsafe {
+                LockFileEx(
+                    handle as _,
+                    LOCKFILE_EXCLUSIVE_LOCK | LOCKFILE_FAIL_IMMEDIATELY,
+                    0,
+                    1,
+                    0,
+                    &mut overlapped,
+                )
+            };
+            if ret != 0 {
+                // Successfully locked means no one else has it. Release and return None.
+                unsafe { UnlockFileEx(handle as _, 0, 1, 0, &mut overlapped) };
+                return None;
+            }
+        }
+
+        // If we reach here, it means we couldn't acquire the lock, so it's running.
+        let mut content = String::new();
+        if file.read_to_string(&mut content).is_ok() {
+            content.trim().parse::<u32>().ok()
+        } else {
+            None
+        }
     }
 
     pub fn ensure_daemon_running(workspace: &Path, global_dir: &Path) {
@@ -80,11 +167,20 @@ impl AmaDaemon {
     }
 
     pub fn run_daemon_loop(workspace: PathBuf, global_dir: PathBuf) {
-        let pid = std::process::id();
-        let lock_file = Self::get_lock_file(&global_dir);
-        let _ = fs::write(&lock_file, pid.to_string());
+        let lock_file_path = Self::get_lock_file(&global_dir);
+        let mut lock = match DaemonLock::acquire(&lock_file_path) {
+            Ok(l) => l,
+            Err(_) => {
+                eprintln!("[AmaDaemon] Failed to acquire lock. Daemon likely already running.");
+                return;
+            }
+        };
 
-        let cfg = crate::sandbox::manager::AeonConfig::load(&global_dir);
+        if let Err(e) = lock.write_pid() {
+            eprintln!("[AmaDaemon] Failed to write PID to lock file: {}", e);
+        }
+
+        let cfg = crate::sandbox::manager::AeonConfig::load(&global_dir).expect("Fatal: Malformed configuration");
 
         // Substrate Administration & Hardware Optimization (Pillar 1)
         crate::daemon::runtime_admin::AeonRuntimeAdmin::start_administration_cycle(&workspace);

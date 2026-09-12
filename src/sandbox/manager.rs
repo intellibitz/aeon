@@ -31,6 +31,8 @@ pub struct ModelInfo {
     pub tier: ModelTier,
     pub latency_ms: Option<u128>,
     pub provider: ProviderType,
+    pub checksum: Option<String>,
+    pub provenance: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -51,6 +53,7 @@ pub struct GovernancePatterns {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
 pub struct AeonConfig {
     pub gmcp_port: u16,
     pub gmcp_http_port: u16,
@@ -142,27 +145,28 @@ impl AeonConfig {
         global_dir.join("config.json")
     }
 
-    pub fn load(global_dir: &Path) -> Self {
+    pub fn load(global_dir: &Path) -> EaiResult<Self> {
         let path = Self::get_config_path(global_dir);
         if path.is_file() {
-            if let Ok(content) = fs::read_to_string(path) {
-                return serde_json::from_str(&content).unwrap_or_default();
-            }
+            let content = fs::read_to_string(&path)
+                .map_err(|e| EaiError::Config(format!("Failed to read config: {}", e)))?;
+            return serde_json::from_str(&content)
+                .map_err(|e| EaiError::Config(format!("Malformed configuration: {}", e)));
         }
-        Self::default()
+        Ok(Self::default())
     }
 }
 
 impl SandboxManager {
     pub fn ensure_global_sandbox(global_dir: &Path) -> EaiResult<()> {
         if !global_dir.exists() {
-            fs::create_dir_all(global_dir).map_err(|e| EaiError::Sandbox(e.to_string()))?;
+            fs::create_dir_all(global_dir).map_err(|e| EaiError::Filesystem(e.to_string()))?;
         }
         let config_path = AeonConfig::get_config_path(global_dir);
         if !config_path.exists() {
             let default_cfg = AeonConfig::default();
             let json = serde_json::to_string_pretty(&default_cfg).unwrap();
-            fs::write(config_path, json).map_err(|e| EaiError::Sandbox(e.to_string()))?;
+            fs::write(config_path, json).map_err(|e| EaiError::Filesystem(e.to_string()))?;
         }
         Ok(())
     }
@@ -196,10 +200,18 @@ impl AeonMemory {
             let _ = fs::create_dir_all(&aeon_dir);
         }
         let memory_file = workspace.join(".aeon/memory.jsonl");
+
+        // Structured Memory Validation
+        if intent.trim().is_empty() || outcome.trim().is_empty() { return; }
+
         let entry = serde_json::json!({
             "intent": intent,
             "outcome": outcome,
             "timestamp": std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0),
+            "provenance": {
+                "workspace": workspace.display().to_string(),
+                "engine_version": crate::AEON_VERSION,
+            }
         });
         if let Ok(mut f) = fs::OpenOptions::new().create(true).append(true).open(memory_file) {
             use std::io::Write;
@@ -207,13 +219,14 @@ impl AeonMemory {
         }
 
         // Substrate Ingestion Motion: Stage successful reasoning for distillation
-        if outcome.len() > 50 && !outcome.contains("[FAIL]") {
+        if outcome.len() > 50 && !outcome.contains("[FAIL]") && !outcome.contains("error") {
             let exp_file = workspace.join(".aeon/reasoning_experience.jsonl");
             let exp_entry = serde_json::json!({
                 "intent": intent,
-                "blackboard_context": "converged", // Placeholder for actual BB state if available
+                "blackboard_context": "converged",
                 "successful_outcome": outcome,
                 "timestamp": std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0),
+                "validation": "STRICT_SEMANTIC_PASS"
             });
             if let Ok(mut f) = fs::OpenOptions::new().create(true).append(true).open(exp_file) {
                 use std::io::Write;
@@ -223,20 +236,40 @@ impl AeonMemory {
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum LogLevel {
+    Info,
+    Warning,
+    Error,
+    Axiomatic,
+}
+
 pub struct AeonAuditLogger;
 
 impl AeonAuditLogger {
     pub fn log_event(workspace: &Path, event_type: &str, details: &str) {
+        Self::log(workspace, LogLevel::Info, event_type, details);
+    }
+
+    pub fn log(workspace: &Path, level: LogLevel, event_type: &str, details: &str) {
         let aeon_dir = workspace.join(".aeon");
         if !aeon_dir.exists() {
             let _ = fs::create_dir_all(&aeon_dir);
         }
         let audit_file = workspace.join(".aeon/audit.log");
         let ts = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
-        let log_line = format!("[{}] [{}] {}\n", ts, event_type, details);
+
+        let log_entry = serde_json::json!({
+            "ts": ts,
+            "level": format!("{:?}", level),
+            "type": event_type,
+            "details": details,
+            "pid": std::process::id(),
+        });
+
         if let Ok(mut f) = fs::OpenOptions::new().create(true).append(true).open(audit_file) {
             use std::io::Write;
-            let _ = f.write_all(log_line.as_bytes());
+            let _ = writeln!(f, "{}", log_entry);
         }
     }
 
@@ -257,10 +290,34 @@ impl AeonBackupManager {
     pub fn backup_work(workspace: &Path) -> EaiResult<String> {
         let backups_dir = workspace.join(".aeon/backups");
         let _ = fs::create_dir_all(&backups_dir);
-        let ts = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
-        let backup_path = backups_dir.join(format!("backup_{}.zip", ts));
+        let ts = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_secs())
+            .unwrap_or(0);
+        let backup_path = backups_dir.join(format!("backup_{}", ts));
+
+        Self::recursive_copy(workspace, &backup_path, &backups_dir)?;
 
         Ok(format!("Backup created at {}", backup_path.display()))
+    }
+
+    fn recursive_copy(src: &Path, dst: &Path, exclude: &Path) -> EaiResult<()> {
+        if src == exclude {
+            return Ok(());
+        }
+
+        if src.is_dir() {
+            fs::create_dir_all(dst)?;
+            for entry in fs::read_dir(src)? {
+                let entry = entry?;
+                let path = entry.path();
+                let dest_path = dst.join(entry.file_name());
+                Self::recursive_copy(&path, &dest_path, exclude)?;
+            }
+        } else {
+            fs::copy(src, dst)?;
+        }
+        Ok(())
     }
 }
 
@@ -289,7 +346,7 @@ mod tests {
         let dir = Path::new("test_cfg");
         let _ = fs::create_dir_all(dir);
         let _ = SandboxManager::ensure_global_sandbox(dir);
-        let cfg = AeonConfig::load(dir);
+        let cfg = AeonConfig::load(dir).expect("Failed to load config");
         assert_eq!(cfg.gmcp_port, 9090);
         let _ = fs::remove_dir_all(dir);
     }

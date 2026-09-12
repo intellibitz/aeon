@@ -76,7 +76,7 @@ impl GmcpClient {
         let home = std::env::var("HOME").unwrap_or_default();
         let global_dir = PathBuf::from(home).join(".aeon");
         let registry_path = global_dir.join("global_mcp_registry.json");
-        let cfg = crate::sandbox::manager::AeonConfig::load(&global_dir);
+        let cfg = crate::sandbox::manager::AeonConfig::load(&global_dir).expect("Fatal: Malformed configuration");
 
         let mut entries: Vec<GlobalMcpEntry> = Vec::new();
 

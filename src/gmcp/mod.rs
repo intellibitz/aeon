@@ -32,7 +32,8 @@ pub struct GmcpHost;
 
 impl GmcpHost {
     pub fn dispatch(name: &str, arg: &str, workspace: &Path) -> String {
-        self::tools::ToolRegistry::execute_tool(name, arg, workspace)
+        let val = serde_json::from_str(arg).unwrap_or(serde_json::json!(arg));
+        self::tools::ToolRegistry::execute_tool(name, &val, workspace)
     }
 }
 

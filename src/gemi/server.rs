@@ -1,10 +1,8 @@
 // GEMI HTTP REST Substrate: OpenAI-Compatible Interface & Adaptive Web Interface
 // 100% Rust implementation serving Tier 1 & Tier 2 Intelligence Swarms
 
-use std::io::{BufRead, BufReader, Write};
-use std::net::TcpListener;
+use tiny_http::{Server, Response, Method, Header};
 use std::path::PathBuf;
-use std::thread;
 use serde_json::json;
 
 use crate::gawd::ama::AmaMasterAgent;
@@ -16,54 +14,27 @@ pub struct GemiServer;
 impl GemiServer {
     pub fn start_http_server(workspace: PathBuf, port: u16) {
         let addr = format!("0.0.0.0:{}", port);
-        let listener = TcpListener::bind(&addr).expect("Failed to bind GEMI HTTP server");
+        let server = Server::http(&addr).expect("Failed to bind GEMI HTTP server");
         eprintln!("[GEMI REST] Substrate active on {}", addr);
         eprintln!("[GEMI Web] UI Interface: http://localhost:{}/app", port);
 
-        for stream in listener.incoming() {
-            let mut stream = stream.expect("GEMI Stream Error");
+        for mut request in server.incoming_requests() {
             let workspace = workspace.clone();
+            let method = request.method().clone();
+            let url = request.url().to_string();
 
-            thread::spawn(move || {
-                let mut reader = BufReader::new(&mut stream);
-                let mut first_line = String::new();
-                let _ = reader.read_line(&mut first_line);
+            let mut body_str = String::new();
+            let _ = std::io::Read::read_to_string(request.as_reader(), &mut body_str);
 
-                let parts: Vec<&str> = first_line.split_whitespace().collect();
-                if parts.len() < 2 { return; }
-                let method = parts[0];
-                let path = parts[1];
-
-                let mut body_str = String::new();
-                let mut content_length = 0;
-
-                loop {
-                    let mut line = String::new();
-                    let _ = reader.read_line(&mut line);
-                    if line == "\r\n" || line.is_empty() { break; }
-                    if line.to_lowercase().starts_with("content-length:") {
-                        content_length = line.split(':').nth(1).unwrap_or("0").trim().parse::<usize>().unwrap_or(0);
-                    }
-                }
-
-                if content_length > 0 {
-                    let mut buffer = vec![0u8; content_length];
-                    let _ = std::io::Read::read_exact(&mut reader, &mut buffer);
-                    body_str = String::from_utf8_lossy(&buffer).to_string();
-                }
-
-                let mut writer = stream;
-
-                if method == "GET" && (path == "/" || path.starts_with("/app") || path == "/favicon.ico") {
+            match (method, url.as_str()) {
+                (Method::Get, "/" | "/app" | "/favicon.ico") => {
                     let html = get_web_app_html();
-                    let resp = format!(
-                        "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nAccess-Control-Allow-Origin: *\r\nContent-Length: {}\r\n\r\n{}",
-                        html.len(),
-                        html
-                    );
-                    let _ = writer.write_all(resp.as_bytes());
-                    let _ = writer.flush();
-                } else if method == "GET" && (path.starts_with("/v1/models") || path.starts_with("/models")) {
+                    let response = Response::from_string(html)
+                        .with_header(Header::from_bytes(&b"Content-Type"[..], &b"text/html; charset=utf-8"[..]).unwrap())
+                        .with_header(Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap());
+                    let _ = request.respond(response);
+                }
+                (Method::Get, path) if path.starts_with("/v1/models") || path.starts_with("/models") => {
                     let models = ModelManager::list_models(&workspace);
                     let json_models: Vec<serde_json::Value> = models
                         .iter()
@@ -72,14 +43,12 @@ impl GemiServer {
                     let payload_val = json!({"object": "list", "data": json_models});
                     let payload = serde_json::to_string(&payload_val).unwrap_or_default();
 
-                    let resp = format!(
-                        "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Headers: *\r\nContent-Length: {}\r\n\r\n{}",
-                        payload.len(),
-                        payload
-                    );
-                    let _ = writer.write_all(resp.as_bytes());
-                    let _ = writer.flush();
-                } else if method == "GET" && path == "/well-known/aeon" {
+                    let response = Response::from_string(payload)
+                        .with_header(Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).unwrap())
+                        .with_header(Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap());
+                    let _ = request.respond(response);
+                }
+                (Method::Get, "/well-known/aeon") => {
                     let hardware = crate::gemi::hardware::HardwareProfiler::get_profile();
                     let (engine, model) = crate::gemi::models::ModelManager::get_active_engine_and_model();
                     let tools = ToolRegistry::list_tools();
@@ -99,23 +68,18 @@ impl GemiServer {
                     });
 
                     let payload = serde_json::to_string_pretty(&info).unwrap_or_default();
-                    let resp = format!(
-                        "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\nContent-Length: {}\r\n\r\n{}",
-                        payload.len(),
-                        payload
-                    );
-                    let _ = writer.write_all(resp.as_bytes());
-                    let _ = writer.flush();
-                } else if method == "POST" && (path.starts_with("/v1/chat/completions") || path.starts_with("/chat/completions")) {
+                    let response = Response::from_string(payload)
+                        .with_header(Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).unwrap())
+                        .with_header(Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap());
+                    let _ = request.respond(response);
+                }
+                (Method::Post, path) if path.starts_with("/v1/chat/completions") || path.starts_with("/chat/completions") => {
                     let is_streaming = body_str.contains("\"stream\":true") || body_str.contains("\"stream\": true") || body_str.contains("stream");
                     let active_model = crate::gemi::models::ModelManager::get_selected_model()
                         .unwrap_or_else(|| "aeon-native-synthesis".to_string());
                     let model_name = active_model.as_str();
 
-                    // Extract actual user prompt from JSON payload
                     let user_prompt = extract_prompt_from_json(&body_str).unwrap_or_else(|| "list workspace health".to_string());
-
-                    // Audit Log & Session Memory Unified Execution
                     crate::sandbox::manager::AeonAuditLogger::log_event(&workspace, "WEB_MISSION_START", &user_prompt);
 
                     let trimmed_prompt = user_prompt.trim();
@@ -125,7 +89,7 @@ impl GemiServer {
                     let tool_arg = parts.get(1).copied().unwrap_or("").trim();
 
                     let content = if ToolRegistry::exists(&tool_name) {
-                        ToolRegistry::execute_tool(&tool_name, tool_arg, &workspace)
+                        ToolRegistry::execute_tool(&tool_name, &serde_json::json!(tool_arg), &workspace)
                     } else {
                         let ama = AmaMasterAgent::new();
                         let final_resp = ama.solve_clean(trimmed_prompt, &workspace, crate::AEON_VERSION);
@@ -134,72 +98,57 @@ impl GemiServer {
                     };
 
                     if is_streaming {
-                        // Server-Sent Events (SSE) text/event-stream
-                        let sse_headers = "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nCache-Control: no-cache\r\nConnection: keep-alive\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Headers: *\r\n\r\n";
-                        let _ = writer.write_all(sse_headers.as_bytes());
-
                         let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
-
-                        // Chunk 1: Role
-                        let chunk1 = format!(
-                            "data: {{\"id\":\"chatcmpl-aeon-{}\",\"object\":\"chat.completion.chunk\",\"created\":{},\"model\":\"{}\",\"choices\":[{{\"index\":0,\"delta\":{{\"role\":\"assistant\"}},\"finish_reason\":null}}]}}\n\n",
-                            now, now, model_name
-                        );
-                        let _ = writer.write_all(chunk1.as_bytes());
-                        let _ = writer.flush();
-
-                        // Chunk 2: Content
                         let json_content = serde_json::to_string(&content).unwrap_or_default();
-                        let chunk2 = format!(
-                            "data: {{\"id\":\"chatcmpl-aeon-{}\",\"object\":\"chat.completion.chunk\",\"created\":{},\"model\":\"{}\",\"choices\":[{{\"index\":0,\"delta\":{{\"content\":{}}},\"finish_reason\":null}}]}}\n\n",
-                            now, now, model_name, json_content
-                        );
-                        let _ = writer.write_all(chunk2.as_bytes());
-                        let _ = writer.flush();
 
-                        // Chunk 3: Finish Reason
-                        let chunk3 = format!(
-                            "data: {{\"id\":\"chatcmpl-aeon-{}\",\"object\":\"chat.completion.chunk\",\"created\":{},\"model\":\"{}\",\"choices\":[{{\"index\":0,\"delta\":{{}},\"finish_reason\":\"stop\"}}]}}\n\n",
-                            now, now, model_name
+                        let sse_data = format!(
+                            "data: {{\"id\":\"chatcmpl-aeon-{}\",\"object\":\"chat.completion.chunk\",\"created\":{},\"model\":\"{}\",\"choices\":[{{\"index\":0,\"delta\":{{\"role\":\"assistant\"}},\"finish_reason\":null}}]}}\n\n\
+                             data: {{\"id\":\"chatcmpl-aeon-{}\",\"object\":\"chat.completion.chunk\",\"created\":{},\"model\":\"{}\",\"choices\":[{{\"index\":0,\"delta\":{{\"content\":{}}},\"finish_reason\":null}}]}}\n\n\
+                             data: {{\"id\":\"chatcmpl-aeon-{}\",\"object\":\"chat.completion.chunk\",\"created\":{},\"model\":\"{}\",\"choices\":[{{\"index\":0,\"delta\":{{}},\"finish_reason\":\"stop\"}}]}}\n\n\
+                             data: [DONE]\n\n",
+                            now, now, model_name, now, now, model_name, json_content, now, now, model_name
                         );
-                        let _ = writer.write_all(chunk3.as_bytes());
-                        let _ = writer.flush();
 
-                        // Chunk 4: Done
-                        let _ = writer.write_all(b"data: [DONE]\n\n");
-                        let _ = writer.flush();
+                        let response = Response::from_string(sse_data)
+                            .with_header(Header::from_bytes(&b"Content-Type"[..], &b"text/event-stream"[..]).unwrap())
+                            .with_header(Header::from_bytes(&b"Cache-Control"[..], &b"no-cache"[..]).unwrap())
+                            .with_header(Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap());
+                        let _ = request.respond(response);
                     } else {
-                        // Non-streaming JSON response
-                        let payload = format!(
-                            "{{\"id\":\"chatcmpl-aeon-{}\",\"object\":\"chat.completion\",\"created\":1700000000,\"model\":\"{}\",\"choices\":[{{\"index\":0,\"message\":{{\"role\":\"assistant\",\"content\":{}}},\"finish_reason\":\"stop\"}}]}}",
-                            std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0),
-                            model_name,
-                            serde_json::to_string(&content).unwrap_or_default()
-                        );
+                        let payload = json!({
+                            "id": format!("chatcmpl-aeon-{}", std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0)),
+                            "object": "chat.completion",
+                            "created": 1700000000,
+                            "model": model_name,
+                            "choices": [{
+                                "index": 0,
+                                "message": { "role": "assistant", "content": content },
+                                "finish_reason": "stop"
+                            }]
+                        });
 
-                        let resp = format!(
-                            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Headers: *\r\nContent-Length: {}\r\n\r\n{}",
-                            payload.len(),
-                            payload
-                        );
-                        let _ = writer.write_all(resp.as_bytes());
-                        let _ = writer.flush();
+                        let response = Response::from_string(serde_json::to_string(&payload).unwrap_or_default())
+                            .with_header(Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).unwrap())
+                            .with_header(Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap());
+                        let _ = request.respond(response);
                     }
-                } else if method == "OPTIONS" {
-                    let resp = "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: GET, POST, OPTIONS\r\nAccess-Control-Allow-Headers: *\r\nContent-Length: 0\r\n\r\n";
-                    let _ = writer.write_all(resp.as_bytes());
-                    let _ = writer.flush();
-                } else {
-                    let payload = "{\"error\":\"Endpoint not found. Use GET /v1/models or POST /v1/chat/completions\"}";
-                    let resp = format!(
-                        "HTTP/1.1 404 Not Found\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\nContent-Length: {}\r\n\r\n{}",
-                        payload.len(),
-                        payload
-                    );
-                    let _ = writer.write_all(resp.as_bytes());
-                    let _ = writer.flush();
                 }
-            });
+                (Method::Options, _) => {
+                    let response = Response::from_string("")
+                        .with_header(Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap())
+                        .with_header(Header::from_bytes(&b"Access-Control-Allow-Methods"[..], &b"GET, POST, OPTIONS"[..]).unwrap())
+                        .with_header(Header::from_bytes(&b"Access-Control-Allow-Headers"[..], &b"*"[..]).unwrap());
+                    let _ = request.respond(response);
+                }
+                _ => {
+                    let payload = json!({"error": "Endpoint not found"}).to_string();
+                    let response = Response::from_string(payload)
+                        .with_status_code(404)
+                        .with_header(Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).unwrap())
+                        .with_header(Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap());
+                    let _ = request.respond(response);
+                }
+            }
         }
     }
 }

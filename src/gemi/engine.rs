@@ -134,7 +134,7 @@ impl GemiEngine {
 
         // Native Priority: Use local reasoning tool if available
         if crate::gmcp::tools::ToolRegistry::exists("reason") {
-             let res = crate::gmcp::tools::ToolRegistry::execute_tool("reason", prompt, workspace);
+             let res = crate::gmcp::tools::ToolRegistry::execute_tool("reason", &serde_json::json!(prompt), workspace);
              if !res.contains("failed") && !res.is_empty() {
                  return res;
              }
@@ -170,7 +170,7 @@ impl GemiEngine {
 
         thread::spawn(move || {
             // Path 3: Power-reasoning fallback
-            let power_res = crate::gmcp::tools::ToolRegistry::execute_tool("power_reason", &p3, &ws2);
+            let power_res = crate::gmcp::tools::ToolRegistry::execute_tool("power_reason", &serde_json::json!(&p3), &ws2);
             if !power_res.contains("[FAIL]") && !power_res.contains("[CAPABILITY_GAP]") && !power_res.contains("Inference Error") {
                 let _ = tx.send(power_res);
             }

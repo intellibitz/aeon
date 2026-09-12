@@ -76,10 +76,10 @@ impl ReflexSynthesizer {
                 Ok(wasm_out.to_string_lossy().to_string())
             }
             Ok(output) => {
-                Err(EaiError::Hardware(format!("WASM compilation failed: {}", String::from_utf8_lossy(&output.stderr))))
+                Err(EaiError::Process(format!("WASM compilation failed: {}", String::from_utf8_lossy(&output.stderr))))
             }
             Err(e) => {
-                Err(EaiError::Hardware(format!("rustc/wasm32-wasi target missing: {}", e)))
+                Err(EaiError::Process(format!("rustc/wasm32-wasi target missing: {}", e)))
             }
         }
     }

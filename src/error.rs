@@ -11,6 +11,12 @@ pub enum EaiError {
     Inference(String),
     Sandbox(String),
     Config(String),
+    Io(String),
+    Network(String),
+    Filesystem(String),
+    Process(String),
+    Authentication(String),
+    Authorization(String),
     #[allow(dead_code)]
     Internal(String),
 }
@@ -24,6 +30,12 @@ impl fmt::Display for EaiError {
             EaiError::Inference(msg) => write!(f, "Inference Error: {}", msg),
             EaiError::Sandbox(msg) => write!(f, "Sandbox Error: {}", msg),
             EaiError::Config(msg) => write!(f, "Configuration Error: {}", msg),
+            EaiError::Io(msg) => write!(f, "I/O Error: {}", msg),
+            EaiError::Network(msg) => write!(f, "Network Error: {}", msg),
+            EaiError::Filesystem(msg) => write!(f, "Filesystem Error: {}", msg),
+            EaiError::Process(msg) => write!(f, "Process Error: {}", msg),
+            EaiError::Authentication(msg) => write!(f, "Authentication Error: {}", msg),
+            EaiError::Authorization(msg) => write!(f, "Authorization Error: {}", msg),
             EaiError::Internal(msg) => write!(f, "Internal Engine Error: {}", msg),
         }
     }
@@ -33,7 +45,7 @@ impl std::error::Error for EaiError {}
 
 impl From<std::io::Error> for EaiError {
     fn from(err: std::io::Error) -> Self {
-        EaiError::Hardware(err.to_string())
+        EaiError::Io(err.to_string())
     }
 }
 

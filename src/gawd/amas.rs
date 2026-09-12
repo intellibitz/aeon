@@ -186,7 +186,7 @@ impl AmaSupervisor {
 
                     // Reward successful agents (Empirical Expertise Ranking)
                     if !output.contains("FAILURE") && !output.contains("GAP") {
-                        crate::gawd::agents::AgentMetaRegistry::global().update_rank(agent_name, 0.01);
+                        crate::gawd::agents::AgentMetaRegistry::global().update_rank(agent_name, 0.01, "MISSION_SUCCESS");
                     }
                 }
             }
@@ -245,13 +245,14 @@ impl AmaSupervisor {
 
     pub fn dispatch_peer_task(addr: &str, tool_name: &str, arg: &str) -> String {
         if let Ok(mut stream) = TcpStream::connect_timeout(&addr.parse().unwrap_or_else(|_| "127.0.0.1:9090".parse().unwrap()), Duration::from_millis(500)) {
+            let arg_val = serde_json::from_str(arg).unwrap_or(serde_json::json!(arg));
             let req_val = serde_json::json!({
                 "jsonrpc": "2.0",
                 "id": 99,
                 "method": "tools/call",
                 "params": {
                     "name": tool_name,
-                    "arguments": arg
+                    "arguments": arg_val
                 }
             });
             if let Ok(req) = serde_json::to_string(&req_val) {

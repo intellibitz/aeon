@@ -110,9 +110,10 @@ impl GawdAgent for DynamicAgent {
         );
 
         let ws = workspace.to_path_buf();
+        let prompt_val = serde_json::json!(prompt);
         // Swarm Intelligence Escalation: Use native 'reason' tool directly for absolute autonomy (Rule 31)
         let res = if crate::gmcp::tools::ToolRegistry::exists("reason") {
-             crate::gmcp::tools::ToolRegistry::execute_tool("reason", &prompt, &ws)
+             crate::gmcp::tools::ToolRegistry::execute_tool("reason", &prompt_val, &ws)
         } else {
              crate::gemi::engine::GemiEngine::generate_reasoning(&prompt, &ws)
         };
@@ -141,7 +142,7 @@ impl GawdAgent for AeonRuntimeAgent {
         // 3. Autonomous Provisioning & Hardware Tuning (Rule 31 & Rule 33)
         if !cloud_available && !valid_local_found {
              let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
-             let cfg = crate::sandbox::manager::AeonConfig::load(&home.join(".aeon"));
+             let cfg = crate::sandbox::manager::AeonConfig::load(&home.join(".aeon")).unwrap_or_default();
              crate::gemi::models::ModelManager::install_model(&cfg.alpha_weights_url);
              let _ = crate::gemi::models::ModelManager::ensure_hardware_optimal_models(workspace);
         }
@@ -262,11 +263,17 @@ impl AgentMetaRegistry {
         self.save();
     }
 
-    pub fn update_rank(&self, name: &str, delta: f32) {
+    pub fn update_rank(&self, name: &str, delta: f32, source: &str) {
         {
             let mut agents = self.agents.lock().unwrap();
             if let Some(agent) = agents.iter_mut().find(|a| a.name == name) {
+                let old_rank = agent.base_rank;
                 agent.base_rank = (agent.base_rank + delta).clamp(0.1, 1.0);
+
+                // Track Mutation Provenance
+                let log_msg = format!("Agent '{}' rank mutation: {:.2} -> {:.2} (Source: {})", name, old_rank, agent.base_rank, source);
+                let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
+                crate::sandbox::manager::AeonAuditLogger::log(&home.join(".aeon"), crate::sandbox::manager::LogLevel::Info, "AGENT_MUTATION", &log_msg);
             }
         }
         self.save();

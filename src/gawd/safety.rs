@@ -13,7 +13,7 @@ impl SafetyDetector {
     pub fn audit_action(tool_name: &str, arg: &str, _workspace: &Path) -> EaiResult<()> {
         let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
         let global_dir = home.join(".aeon");
-        let cfg = AeonConfig::load(&global_dir);
+        let cfg = AeonConfig::load(&global_dir).expect("Fatal: Malformed configuration");
         let patterns = &cfg.governance;
 
         let lower_arg = arg.to_lowercase();

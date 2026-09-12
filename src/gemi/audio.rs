@@ -26,9 +26,23 @@ impl AeonAudioEngine {
         Ok(Self { device, acoustic_processor })
     }
 
-    pub fn process_audio(&self, _audio_path: &Path) -> Result<Tensor> {
-        // 1. Hardware-Saturated Audio Loading (Placeholder for WAV decoding)
-        let data = vec![0.1f32; 16000];
+    pub fn process_audio(&self, audio_path: &Path) -> Result<Tensor> {
+        // 1. Hardware-Saturated Audio Loading (Hardened for WAV Reality)
+        let mut reader = hound::WavReader::open(audio_path).map_err(|e| anyhow!("Audio Load Error: {}", e))?;
+        let spec = reader.spec();
+
+        let samples: Vec<f32> = if spec.sample_rate == 16000 {
+            reader.samples::<i16>().take(16000).map(|s| s.unwrap_or(0) as f32 / 32768.0).collect()
+        } else {
+            // Very basic resampling placeholder for reality grounding
+            reader.samples::<i16>().step_by((spec.sample_rate / 16000) as usize).take(16000).map(|s| s.unwrap_or(0) as f32 / 32768.0).collect()
+        };
+
+        let mut data = vec![0.0f32; 16000];
+        for (i, &s) in samples.iter().enumerate() {
+            if i < 16000 { data[i] = s; }
+        }
+
         let input = Tensor::from_vec(data, (1, 16000), &self.device)?;
 
         // 2. Neural Projection (The Distilled Audio Reflex)
