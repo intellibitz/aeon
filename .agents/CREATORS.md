@@ -1,6 +1,6 @@
 # AEON Creator Interface Protocols
 
-* **Current Engine Version**: `v0.1.2022773`
+* **Current Engine Version**: `v0.1.2022774`
 
 This document defines the three absolute fronts of interaction between Human Creators and the `aeon` substrate. It maps the intention of the Creator to the exact epistemic boundary within the engine.
 

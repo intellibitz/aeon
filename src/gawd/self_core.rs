@@ -35,7 +35,7 @@ impl AlphaSelf {
     pub const BUILD_MD: &'static str = include_str!("../../.agents/BUILD.md");
     pub const ASPIRATIONS_MD: &'static str = include_str!("../../.agents/ASPIRATIONS.md");
     pub const RUNTIME_MD: &'static str = include_str!("../../.agents/RUNTIME.md");
-    pub const TESTS_MD: &'static str = include_str!("../../.agents/pulse.md");
+    pub const PULSE_MD: &'static str = include_str!("../../.agents/pulse.md");
     pub const MOTIONS_MD: &'static str = include_str!("../../.agents/MOTIONS.md");
     pub const TOPOLOGY_MD: &'static str = include_str!("../../.agents/TOPOLOGY.md");
     pub const WORKFLOW_MD: &'static str = include_str!("../../.agents/WORKFLOW.md");

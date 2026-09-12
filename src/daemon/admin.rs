@@ -203,10 +203,18 @@ impl AeonAdmin {
     }
 
     /// Ingest a natural language intent and automatically inject it into pulse.md
+    /// Supports both Creator mode (.agents/pulse.md) and World User mode (.aeon/pulse.md).
     pub fn ingest_natural_intent(workspace: &Path, intent: &str) -> EaiResult<String> {
-        let pulse_path = workspace.join(".agents/pulse.md");
+        let mut pulse_path = workspace.join(".agents/pulse.md");
+
+        // World User Fallback: If .agents/ is missing, use .aeon/ sandbox
         if !pulse_path.exists() {
-            return Err(EaiError::Config("pulse.md not found".into()));
+            pulse_path = workspace.join(".aeon/pulse.md");
+            if !pulse_path.exists() {
+                 // Synthesize a new local pulse from hard-compiled genome if missing
+                 let _ = fs::create_dir_all(workspace.join(".aeon"));
+                 fs::write(&pulse_path, crate::gawd::self_core::AlphaSelf::PULSE_MD)?;
+            }
         }
 
         // 1. Classify Intent
