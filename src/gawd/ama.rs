@@ -5,7 +5,7 @@
 use std::path::Path;
 use serde::{Deserialize, Serialize};
 use crate::error::EaiResult;
-use super::agents::GawdAgentInfo;
+use super::agents::{GawdAgentInfo, GawdAgent};
 use super::amas::{A2AMessage, AmaSupervisor};
 use super::axiom::AxiomSubstrate;
 
@@ -46,10 +46,13 @@ impl AmaMasterAgent {
         let mut last_error = String::new();
 
         while retry_count < 3 {
-            // 1. Pre-Execution Governance Audit
+            // 1. Pre-Execution Governance Audit & Substrate Preparation
             super::safety::SafetyDetector::audit_action("AMA_SOLVE", &current_goal, workspace)?;
             super::security::SecurityDetector::audit_action("AMA_SOLVE", &current_goal, workspace)?;
-            super::model_supervisor::ModelSupervisor::audit_and_prepare_models(workspace)?;
+
+            // Aspiration 8: Autonomous Runtime Substrate Preparation
+            let preparation_blackboard = std::sync::Arc::new(std::sync::Mutex::new(super::agents::HighDensityContextStore::new(1)));
+            super::agents::AeonRuntimeAgent.execute(&current_goal, workspace, &preparation_blackboard)?;
 
             // 2. Swarm Supervision (Tier 1 AOA Dispatch)
             let (interactions, agents) = AmaSupervisor::supervise_mission(&current_goal, workspace);
@@ -205,14 +208,15 @@ impl AmaMasterAgent {
     pub fn solve_with_feedback(&self, goal: &str, workspace: &Path, feedback_tx: std::sync::mpsc::Sender<String>) -> EaiResult<String> {
         let _ = feedback_tx.send(format!("[AMA] Initiating mission for goal: '{}'", goal));
 
-        // Step 1: Governance
+        // Step 1: Governance & Preparation
         let _ = feedback_tx.send("[AMA] Auditing safety and security protocols...".to_string());
         super::safety::SafetyDetector::audit_action("AMA_SOLVE", goal, workspace)?;
         super::security::SecurityDetector::audit_action("AMA_SOLVE", goal, workspace)?;
 
-        // Step 2: Model Readiness
-        let _ = feedback_tx.send("[AMA] Verifying neural substrate readiness...".to_string());
-        super::model_supervisor::ModelSupervisor::audit_and_prepare_models(workspace)?;
+        // Step 2: Runtime Substrate Preparation (Aspiration 8)
+        let _ = feedback_tx.send("[AMA] Establishing optimal runtime environment...".to_string());
+        let preparation_blackboard = std::sync::Arc::new(std::sync::Mutex::new(super::agents::HighDensityContextStore::new(1)));
+        super::agents::AeonRuntimeAgent.execute(goal, workspace, &preparation_blackboard)?;
 
         // Step 3: Swarm Dispatch
         let _ = feedback_tx.send(format!("[AMA] Dispatching swarm to workspace: {}", workspace.display()));

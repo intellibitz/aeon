@@ -123,6 +123,36 @@ impl GawdAgent for DynamicAgent {
     }
 }
 
+/// Runtime Substrate Preparation Agent (Aspiration 8)
+pub struct AeonRuntimeAgent;
+
+impl GawdAgent for AeonRuntimeAgent {
+    fn name(&self) -> String { "AeonRuntimeAgent".into() }
+    fn rank(&self) -> f32 { 1.0 }
+    fn execute(&self, _goal: &str, workspace: &Path, _blackboard: &MissionBlackboard) -> EaiResult<String> {
+        // 1. Substrate Infrastructure Audit
+        let cloud_env_keys = vec!["AEON_API_KEY", "MODEL_API_KEY", "EAI_API_KEY", "API_KEY"];
+        let cloud_available = cloud_env_keys.iter().any(|k| std::env::var(k).is_ok());
+
+        // 2. Local Weight Verification (Rule 31)
+        let verifications = crate::gemi::models::ModelManager::verify_local_models(workspace);
+        let valid_local_found = verifications.iter().any(|v| v.is_valid_gguf || v.model_id.contains("native"));
+
+        // 3. Autonomous Provisioning & Hardware Tuning (Rule 31 & Rule 33)
+        if !cloud_available && !valid_local_found {
+             let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
+             let cfg = crate::sandbox::manager::AeonConfig::load(&home.join(".aeon"));
+             crate::gemi::models::ModelManager::install_model(&cfg.alpha_weights_url);
+             let _ = crate::gemi::models::ModelManager::ensure_hardware_optimal_models(workspace);
+        }
+
+        // 4. Protocol Linking (Rule 21)
+        crate::gmcp::tools::ToolRegistry::auto_link_essential_mcp_servers();
+
+        Ok("Runtime environment established and optimized for user intent.".into())
+    }
+}
+
 pub struct AgentMetaRegistry {
     agents: Arc<Mutex<Vec<AgentProfile>>>,
 }
@@ -254,7 +284,8 @@ impl GawdAgentFleet {
     pub fn synthesize_fleet(goal: &str) -> Vec<Arc<dyn GawdAgent>> {
         let mut fleet: Vec<Arc<dyn GawdAgent>> = Vec::new();
 
-        // 1. Mandatory Substrate Guards
+        // 1. Mandatory Substrate Guards & Preparation
+        fleet.push(Arc::new(AeonRuntimeAgent));
         fleet.push(Arc::new(DynamicAgent {
             agent_name: "SafetyAgent".into(),
             mission_profile: "Governance and destruction detection.".into(),
@@ -298,7 +329,7 @@ impl GawdAgentFleet {
         }
 
         // 3. Fallback Universal Reasoner
-        if fleet.len() < 3 {
+        if fleet.len() < 4 {
             fleet.push(Arc::new(DynamicAgent {
                 agent_name: "UniversalReasoner".into(),
                 mission_profile: "General-purpose logic and task fulfillment.".into(),

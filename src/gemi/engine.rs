@@ -9,6 +9,7 @@ use std::collections::HashMap;
 use crate::error::{EaiError, EaiResult};
 use crate::gemi::models::ModelManager;
 use crate::gemi::hardware::HardwareProfiler;
+use crate::gawd::agents::GawdAgent;
 
 use candle_core::quantized::gguf_file;
 use candle_transformers::models::quantized_llama as llama;
@@ -121,7 +122,8 @@ impl GemiEngine {
 
     /// Aspiration 6: Ultra-Latency Competitive Inference Racing
     fn reason_internal(prompt: &str, workspace: &Path, allow_reflex: bool) -> String {
-        let _ = crate::gawd::model_supervisor::ModelSupervisor::audit_and_prepare_models(workspace);
+        let preparation_blackboard = std::sync::Arc::new(std::sync::Mutex::new(crate::gawd::agents::HighDensityContextStore::new(1)));
+        let _ = crate::gawd::agents::AeonRuntimeAgent.execute(prompt, workspace, &preparation_blackboard);
 
         if allow_reflex {
             let (reflex_decision, _) = super::reflex::ReflexEngine::try_solve(prompt, workspace);
