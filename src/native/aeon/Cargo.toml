@@ -1,6 +1,6 @@
 [package]
 name = "aeon"
-version = "0.1.2022780"
+version = "0.1.2022781"
 edition = "2021"
 authors = ["IntelliBitz", "Muthu Ramadoss", "AEON EAI Core"]
 description = "AEON Master Agent (AMA) Lightweight Native CLI Binary Launcher"
