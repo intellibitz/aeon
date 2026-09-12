@@ -1,6 +1,6 @@
 # AEON Architectural Aspirations
 
-* **Current Engine Version**: `v0.1.2022750`
+* **Current Engine Version**: `v0.1.2022751`
 
 This document defines the structural roadmap and evolution goals of the `aeon` substrate.
 
@@ -68,3 +68,13 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 
 ### [Aspiration 13] Neural Agent Synthesis
 * **Core Paradigm**: Absolute Agent Breadth. `aeon` eliminates the static agent fleet by implementing a dynamic synthesis protocol. When a capability gap is detected, the substrate autonomously generates, recruits, and benchmarks new specialist agents from its hard-compiled genome and model weights.
+
+---
+
+### [Aspiration 14] Unified Multi-Modal Embedding Space
+* **Core Paradigm**: Beyond Side-by-Side Engines. `aeon` moves toward a single neural projection space where text, vision, and audio intents are unified. This enables true cross-modal reasoning (e.g., "describe the mood of this image using the tone of this audio clip").
+
+---
+
+### [Aspiration 15] Autonomous Substrate Self-Validation
+* **Core Paradigm**: The "Zero-Manual-Verification" mandate. The `AeonRuntimeAdmin` autonomously executes the full suite of Validation Protocols during foundational readiness. The substrate declares itself "optimal" only after empirical self-testing on the host hardware.
