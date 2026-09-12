@@ -1,8 +1,8 @@
 # aeon: Exponential Intelligence for Any AI (EAI)
 
-![AEON Version](https://img.shields.io/badge/version-v0.1.2022771-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
+![AEON Version](https://img.shields.io/badge/version-v0.1.2022772-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
 
-**aeon** is a local-first, native Rust AI execution engine designed for high-throughput, hardware-saturated agent orchestration. It transforms static AI interactions into a dynamic, self-evolving intelligence substrate.
+**aeon** is a local-first, native Rust AI execution engine designed for high-throughput, hardware-saturated agent orchestration. It transforms static AI interactions into a dynamic, self-evolving intelligence substrate governed by a hard-compiled genome.
 
 ## The 5 Pillars of aeon
 
@@ -19,14 +19,17 @@ The substrate is organized into five functional pillars that ensure substrate pu
 ### 1. Hard-Compiled Genome (Alpha-Self)
 Unlike traditional AI frameworks, `aeon` hard-compiles its entire governance genome (`.agents/*.md`) into its binary. This ensures that the engine's core ethics, aspirations, and structural topology are immutable binary reflexes, not mutable prompts.
 
-### 2. Substrate Ingestion Motion
+### 2. The Master Pulse (`pulse.md`)
+The substrate operates via a singular, natural language verification loop. Every human instruction is automatically mapped to a verifiable `[MOTION]`, `[MISSION]`, or `[QUERY]` entry in [pulse.md](.agents/pulse.md). This anchors the substrate's entire lifecycle in a "Test-First" self-healing loop.
+
+### 3. Axiomatic Pulse Ingestion
+`aeon` possesses a native neural reflex to autonomously classify instructions and inject them into the genome. This eliminates the friction between human intent and machine execution, allowing the substrate to evolve at the speed of thought.
+
+### 4. Substrate Ingestion Motion
 `aeon` is a closed-loop intelligence system. It autonomously distills successful reasoning from its mutable interaction history into its own **Native Tier 2 Reasoning Model**, effectively migrating experience into hard-compiled logic.
 
-### 3. Federated Parallelism
+### 5. Federated Parallelism
 Agents run in parallel, coordinating via a shared, high-density **Mission Blackboard**. This allows for "Explosive Swarm Dispatch" where multiple specialists converge on a "Chain of Truth" simultaneously.
-
-### 4. Autonomous Drift Detection
-The substrate independently audits its own capability surface. When architectural gaps are detected, the **Motion Rule** triggers autonomous synthesis and testing of native Rust traits to heal and expand the engine.
 
 ## Installation
 
@@ -37,20 +40,23 @@ curl -sSfL https://raw.githubusercontent.com/intellibitz/aeon/main/install.sh | 
 
 ## Usage
 
-Interact with the substrate using natural language or system commands:
+Interact with the substrate using the unified `pulse` command:
 
 ```bash
-# Identity Report: Inspect the hard-compiled genome
-aeon identity
+# Core Evolution: Trigger a binary mutation
+aeon pulse "Add a new spectral analysis engine to the binary"
 
-# Native Logic: Execute a mission with an explosive swarm
-aeon "analyze this workspace and propose an optimization plan"
+# Workspace Mission: Execute a task with a swarm
+aeon pulse "analyze this workspace and propose an optimization plan"
 
-# Multimodal: Unified vision/text analysis
-aeon "analyze visual/image.png and describe its intent"
+# Substrate Query: Verify semantic truth
+aeon pulse "identity"
 
 # Administration: Atomic genome synchronization
 aeon admin sync
+
+# Release: Execute full compliance audit and test suite
+aeon admin release
 ```
 
 ## License
