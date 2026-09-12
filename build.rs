@@ -65,10 +65,8 @@ fn main() {
     // 5. TESTS.md -> GEN_TEST_PROTOCOLS (60-69)
     generated_code.push_str("pub const GEN_TEST_PROTOCOLS: &[AeonAxiomRule] = &[\n");
     for line in tests_md.lines() {
-        if line.trim().starts_with("## ") {
-            if let Some(caps) = parse_test_header(line) {
-                generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", caps.0 + 60, caps.1, caps.2));
-            }
+        if let Some(rule) = parse_list_item(line) {
+            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 60, rule.1, rule.2));
         }
     }
     generated_code.push_str("];\n\n");
@@ -107,8 +105,6 @@ fn main() {
 
     // 7. Unified RULES List
     generated_code.push_str("pub const GEN_RULES: &[AeonAxiomRule] = &[\n");
-    // Aggregate all rules for easy traversal
-    // (Repeat same parsing logic or use variables - repeat for simplicity in this generated context)
     for line in agents_md.lines() {
         if let Some(rule) = parse_list_item(line) {
             generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0, rule.1, rule.2));
@@ -141,10 +137,8 @@ fn main() {
         }
     }
     for line in tests_md.lines() {
-        if line.trim().starts_with("## ") {
-            if let Some(caps) = parse_test_header(line) {
-                generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", caps.0 + 60, caps.1, caps.2));
-            }
+        if let Some(rule) = parse_list_item(line) {
+            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 60, rule.1, rule.2));
         }
     }
     generated_code.push_str("];\n");
@@ -182,18 +176,6 @@ fn parse_aspiration_header(line: &str) -> Option<(usize, String)> {
     let id: usize = parts[0].trim_start_matches("[Aspiration").trim().parse().ok()?;
     let title = parts[1].trim();
     Some((id, title.to_string()))
-}
-
-fn parse_test_header(line: &str) -> Option<(usize, String, String)> {
-    let line = line.trim_start_matches('#').trim();
-    let parts: Vec<&str> = line.splitn(2, '.').collect();
-    if parts.len() < 2 { return None; }
-    let id: usize = parts[0].parse().ok()?;
-    let content = parts[1].trim();
-    let sub_parts: Vec<&str> = content.splitn(2, '(').collect();
-    let title = sub_parts[0].trim().to_string();
-    let imperative = if sub_parts.len() > 1 { format!("Verification protocol for {}", sub_parts[1].trim_end_matches(')')) } else { "Substrate verification protocol".to_string() };
-    Some((id, title, imperative))
 }
 
 fn parse_topology_item(line: &str) -> Option<(String, String, String)> {

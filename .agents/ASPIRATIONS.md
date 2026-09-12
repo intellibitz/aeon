@@ -1,50 +1,60 @@
 # AEON Architectural Aspirations
 
-* **Current Engine Version**: `v0.1.2022735`
+* **Current Engine Version**: `v0.1.2022736`
 
 This document defines the structural roadmap and evolution goals of the `aeon` substrate.
 
 ---
 
-### [Aspiration 1] Substrate Purity & Meta-Only Mandate
-* **Core Paradigm**: The `alpha-self` core codebase contains zero static domain-specific logic and is immutable at runtime. 100% of operational capabilities and semantic intent matrices are discovered and bound dynamically via MCP and local safetensors.
+### [Aspiration 1] 100% Platform Independence
+* **Core Paradigm**: Mandated native execution across Linux, macOS, Windows, and mobile architectures with zero platform bias. The substrate is self-contained and architecturally neutral.
 
 ---
 
-### [Aspiration 2] Alpha-Self Core Awareness
-* **Core Paradigm**: Immutable design governance rules and structural layouts from `.agents/` are hard-compiled directly into Rust structures. This eliminates runtime string-parsing and ensures absolute alignment with the system genome.
+### [Aspiration 2] Universal Natural Language Interface
+* **Core Paradigm**: All interactions with the substrate—from user intent fulfillment to cross-agent coordination—are strictly natural language driven. Eliminates static CLI friction.
 
 ---
 
-### [Aspiration 3] Hardware-Saturated Inference Routing
-* **Core Paradigm**: Active interrogation of CPU/GPU topologies and native system RAM using the Candle tensor framework. The engine dynamically offloads reasoning to compatible acceleration substrates based on the live hardware profile.
+### [Aspiration 3] Substrate Purity & Meta-Only Mandate
+* **Core Paradigm**: The `alpha-self` core codebase contains zero static domain-specific logic and is immutable at runtime. 100% of operational capabilities are discovered and bound dynamically via MCP.
 
 ---
 
-### [Aspiration 4] Industry-Standard MCP Interop Bus
-* **Core Paradigm**: Native JSON-RPC 2.0 transport multiplexing over stdio and TCP. The substrate acts as a fully compliant MCP server and client proxy, enabling external applications and tool registries to interoperate instantly.
+### [Aspiration 4] Alpha-Self Core Awareness
+* **Core Paradigm**: Immutable design governance rules and structural layouts from `.agents/` are hard-compiled directly into Rust structures, ensuring absolute, instantaneous alignment with the genome.
 
 ---
 
-### [Aspiration 5] Autonomous Test-Driven Evolution (Motion Loop)
-* **Core Paradigm**: Self-healing substrate capabilities. authorized architectural mismatches trigger autonomous sub-processes that run `cargo test`, isolate errors, and synthesize production-ready Rust traits to close the gap.
+### [Aspiration 5] Hardware-Saturated Inference Routing
+* **Core Paradigm**: Active interrogation of CPU/GPU topologies using the Candle tensor framework. The engine dynamically maps reasoning to the optimal acceleration substrate based on live hardware profile.
 
 ---
 
-### [Aspiration 6] High-Density Distributed Context Mapping
-* **Core Paradigm**: High-density context tracking across massive asynchronous swarms and cluster-wide peer-to-peer nodes. Implemented via lease-capped, memory-safe `HighDensityContextStore` primitives to prevent resource starvation.
+### [Aspiration 6] Industry-Standard MCP Interop Bus
+* **Core Paradigm**: Native JSON-RPC 2.0 transport multiplexing. The substrate acts as a fully compliant MCP server and client proxy, enabling instant interoperability with any external tool registry.
 
 ---
 
-### [Aspiration 7] Ultra-Latency Competitive Inference Racing
-* **Core Paradigm**: Speculative parallel execution across local GPU kernels and cloud providers (Power MCP). Uses a winner-takes-all protocol to deliver sub-10ms logic latency while maintaining an axiomatic Chain of Verification.
+### [Aspiration 7] Autonomous Test-Driven Evolution (Motion Loop)
+* **Core Paradigm**: Self-healing substrate capabilities. Authorized architectural gaps trigger autonomous sub-processes that synthesize and test production-ready Rust traits to close the gap.
 
 ---
 
-### [Aspiration 8] Universal Model Substrate Ingestion
-* **Core Paradigm**: Hardware-agnostic execution of any model format (GGUF, Safetensors, ONNX) from any hub. Implemented via hardware-aware speculative offloading, dynamic metadata shimming, and rank-safe token extraction.
+### [Aspiration 8] High-Density Distributed Context Mapping
+* **Core Paradigm**: Scale-safe context tracking across massive asynchronous swarms. Implemented via lease-capped, memory-safe `HighDensityContextStore` primitives to prevent resource starvation.
 
 ---
 
-### [Aspiration 9] Autonomous Runtime Substrate Preparation
-* **Core Paradigm**: Deployment of the `AeonRuntimeAgent` to establish the optimal execution environment. Autonomously handles weight provisioning and hardware tuning strictly in the mutable `alpha-user` space.
+### [Aspiration 9] Ultra-Latency Competitive Inference Racing
+* **Core Paradigm**: Speculative parallel execution across local kernels and cloud providers (Power MCP). Uses a winner-takes-all protocol to deliver sub-10ms logic latency with axiomatic verification.
+
+---
+
+### [Aspiration 10] Universal Model Substrate Ingestion
+* **Core Paradigm**: Hardware-agnostic execution of any model format (GGUF, Safetensors, ONNX). Implemented via hardware-aware speculative offloading and dynamic metadata shimming.
+
+---
+
+### [Aspiration 11] Autonomous Runtime Substrate Preparation
+* **Core Paradigm**: Deployment of the `AeonRuntimeAgent` to establish the optimal execution environment (Weights & Tools) strictly in the mutable `alpha-user` space.

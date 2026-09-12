@@ -1,6 +1,6 @@
 # aeon
 
-![AEON Version](https://img.shields.io/badge/version-v0.1.2022735-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
+![AEON Version](https://img.shields.io/badge/version-v0.1.2022736-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
 
 **aeon** is a Rust-based local-first AI execution engine. It provides a sub-2ms CLI launcher that proxies commands to a persistent background daemon for zero-latency tool execution and agent orchestration.
 
@@ -13,14 +13,9 @@
 
 ## Installation
 
-### Linux / macOS / WSL
+### Platform-Independent One-Liner (Linux / macOS / Windows / WSL)
 ```bash
-curl -sSL https://raw.githubusercontent.com/intellibitz/aeon/main/install.sh | bash
-```
-
-### Windows (PowerShell)
-```powershell
-iwr -useb https://raw.githubusercontent.com/intellibitz/aeon/main/install.ps1 | iex
+curl -sSfL https://raw.githubusercontent.com/intellibitz/aeon/main/install.sh | sh
 ```
 
 ## Configuration
