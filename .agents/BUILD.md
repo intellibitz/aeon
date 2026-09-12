@@ -1,6 +1,6 @@
 # AEON Build & Deployment Substrate
 
-* **Current Engine Version**: `v0.1.2022765`
+* **Current Engine Version**: `v0.1.2022766`
 
 This document defines the mechanics of the `aeon` binary lifecycle, release orchestration, and deployment protocols.
 
