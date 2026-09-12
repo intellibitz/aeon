@@ -129,7 +129,7 @@ impl AmaSupervisor {
         let blackboard: MissionBlackboard = Arc::new(Mutex::new(super::agents::HighDensityContextStore::new(1024)));
 
         // 2. Dynamic Fleet Synthesis
-        let agents = GawdAgentFleet::synthesize_fleet(goal);
+        let agents = GawdAgentFleet::synthesize_fleet(goal, workspace);
         let fleet_info: Vec<GawdAgentInfo> = agents.iter().map(|a| GawdAgentInfo {
             name: a.name(),
             provider: "AEON Local".into(),

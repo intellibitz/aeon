@@ -1,6 +1,6 @@
 # AEON Validation Protocols
 
-* **Current Engine Version**: `v0.1.2022740`
+* **Current Engine Version**: `v0.1.2022741`
 
 This document defines the procedures for verifying the architectural integrity and operational safety of the `aeon` substrate.
 
@@ -18,3 +18,4 @@ This document defines the procedures for verifying the architectural integrity a
 12. **Secret Token Leak Prevention**: Verify that the `SecurityDetector` detects and prevents exfiltration of sensitive credentials. (Ref: Runtime Mandate 14)
 13. **Hardware-Saturated Vision**: Verify that `AeonVisionEngine` correctly interrogates and utilizes GPU acceleration for image tensor projection.
 14. **Hardware-Saturated Audio**: Verify that `AeonAudioEngine` correctly interrogates and utilizes GPU acceleration for acoustic spectral distillation.
+15. **Neural Agent Synthesis**: Verify that the `NeuralAgentFactory` can autonomously generate a new specialist profile when a capability gap is detected. (Ref: Aspiration 13)

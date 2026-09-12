@@ -66,20 +66,21 @@ impl ProtocolKnowledgeBase {
         Ok(format!("Exported {} neural reflexes to {}", reflexes.len(), export_path.display()))
     }
 
-    pub fn generate_synthetic_intent_pair(intent: &str, workspace: &Path) -> EaiResult<String> {
+    pub fn generate_synthetic_intent_pair(intent: &str, _workspace: &Path) -> EaiResult<String> {
         // High-fidelity synthetic generation for Tier 0 reflex training
         let mut pair = format!("INTENT: {}\n", intent);
 
-        let agents = super::agents::GawdAgentFleet::synthesize_fleet(intent);
+        let workspace = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("."));
+        let agents = super::agents::GawdAgentFleet::synthesize_fleet(intent, &workspace);
         for agent in agents {
             if agent.name() == "SafetyAgent" || agent.name() == "ContextAgent" {
                 let bb = std::sync::Arc::new(std::sync::Mutex::new(super::agents::HighDensityContextStore::new(10)));
-                let res = agent.execute(intent, workspace, &bb)?;
+                let res = agent.execute(intent, &workspace, &bb)?;
                 pair.push_str(&format!("REFLEX_GUARD ({}): {}\n", agent.name(), res));
             }
         }
 
-        let action = crate::gemi::pulse::AeonPulse::reason(intent, workspace).unwrap_or_else(|_| "ACTION: status".into());
+        let action = crate::gemi::pulse::AeonPulse::reason(intent, &workspace).unwrap_or_else(|_| "ACTION: status".into());
         pair.push_str(&format!("FINAL_ACTION: {}\n", action));
 
         Ok(pair)

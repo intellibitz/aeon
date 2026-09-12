@@ -1,6 +1,6 @@
 # AEON Substrate Topology
 
-* **Current Engine Version**: `v0.1.2022740`
+* **Current Engine Version**: `v0.1.2022741`
 
 This document defines the structural native components and orchestrated meta-layers of the `aeon` substrate, organized into five functional pillars.
 
@@ -13,6 +13,7 @@ This document defines the structural native components and orchestrated meta-lay
 4. **AeonRuntimeAgent**: Autonomous environment preparation agent (Weights & Tools). (Tier: 1)
 5. **SafetyAgent**: Governance auditor and destructive command interceptor. (Tier: 1)
 6. **ContextAgent**: High-density context manager and workspace analyzer. (Tier: 1)
+7. **NeuralAgentFactory**: Autonomous synthesis and recruitment of domain-specific specialist agents. (Tier: 1)
 
 ## 3. Engines - Execution & Inference Substrates
 7. **AEON-Alpha**: Microsecond intent classification and deterministic neural reflex engine. (Tier: 0)

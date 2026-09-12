@@ -1,6 +1,6 @@
 # AEON Architectural Aspirations
 
-* **Current Engine Version**: `v0.1.2022740`
+* **Current Engine Version**: `v0.1.2022741`
 
 This document defines the structural roadmap and evolution goals of the `aeon` substrate.
 
@@ -63,3 +63,8 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 
 ### [Aspiration 12] Substrate Ingestion Motion
 * **Core Paradigm**: The "Closed-Loop Intelligence" mandate. `aeon` autonomously distills its own learned interactions and mission blackboards into a **Native Tier 2 Reasoning Model**, effectively migrating mutable `alpha-user` experience into immutable `alpha-self` binary reflexes.
+
+---
+
+### [Aspiration 13] Neural Agent Synthesis
+* **Core Paradigm**: Absolute Agent Breadth. `aeon` eliminates the static agent fleet by implementing a dynamic synthesis protocol. When a capability gap is detected, the substrate autonomously generates, recruits, and benchmarks new specialist agents from its hard-compiled genome and model weights.

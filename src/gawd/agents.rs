@@ -276,12 +276,33 @@ impl AgentMetaRegistry {
     }
 }
 
+/// Neural Agent Factory (Aspiration 13)
+/// Autonomously generates specialist agent profiles when capability gaps are detected.
+pub struct NeuralAgentFactory;
+
+impl NeuralAgentFactory {
+    pub fn synthesize_specialist(goal: &str, workspace: &Path) -> EaiResult<AgentProfile> {
+        let prompt = format!(
+            "MISSION_GOAL: {}\n\n[INSTRUCTION]: You are the AEON Agent Factory. Detect the capability gap and synthesize a NEW specialist agent profile. \
+            Output in JSON format: {{\"name\": \"...\", \"description\": \"...\", \"categories\": [\"...\"], \"semantic_anchors\": [\"...\"], \"base_rank\": 0.9}}",
+            goal
+        );
+
+        let res = crate::gemi::engine::GemiEngine::generate_reasoning(&prompt, workspace);
+        let profile: AgentProfile = serde_json::from_str(&res).map_err(|e| {
+            crate::error::EaiError::Protocol(format!("Neural Agent Synthesis Failed: {}. Raw: {}", e, res))
+        })?;
+
+        Ok(profile)
+    }
+}
+
 pub struct GawdAgentFleet;
 
 impl GawdAgentFleet {
     /// Neural Fleet Synthesizer: Dynamically decides which agents are required for a mission.
     /// RULE 31 Hardening: Uses semantic centroids to match agents.
-    pub fn synthesize_fleet(goal: &str) -> Vec<Arc<dyn GawdAgent>> {
+    pub fn synthesize_fleet(goal: &str, workspace: &Path) -> Vec<Arc<dyn GawdAgent>> {
         let mut fleet: Vec<Arc<dyn GawdAgent>> = Vec::new();
 
         // 1. Mandatory Substrate Guards & Preparation
@@ -297,28 +318,27 @@ impl GawdAgentFleet {
             agent_rank: 1.0,
         }));
 
-        // 2. Semantic Meta-Registry Discovery (Hardened Phase 5)
+        // 2. Semantic Meta-Registry Discovery
         let registry = AgentMetaRegistry::global();
         let available_agents = registry.list_agents();
+        let mut max_global_similarity = 0.0f32;
 
         // Neural Semantic pass: identified via Tier 0 Vector space
         if let Ok(goal_vec) = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(goal) {
             for agent in available_agents {
                 let mut max_similarity = 0.0f32;
 
-                // Combine categories and description for semantic anchoring
                 let mut agent_corpus = agent.categories.join(" ");
                 agent_corpus.push_str(" ");
                 agent_corpus.push_str(&agent.description);
 
                 if let Ok(agent_vec) = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(&agent_corpus) {
-                    // Cosine Similarity check (simplified dot product as vectors are L2 normalized)
                     let dot_product: f32 = goal_vec.iter().zip(agent_vec.iter()).map(|(a, b)| a * b).sum();
                     max_similarity = dot_product;
+                    if max_similarity > max_global_similarity { max_global_similarity = max_similarity; }
                 }
 
-                // Semantic recruitment threshold: 0.25 (tuned for v0.1.2022715)
-                if max_similarity > 0.25 || agent.categories.iter().any(|c| goal.to_lowercase().contains(c)) {
+                if max_similarity > 0.35 || agent.categories.iter().any(|c| goal.to_lowercase().contains(c)) {
                     fleet.push(Arc::new(DynamicAgent {
                         agent_name: agent.name,
                         mission_profile: agent.description,
@@ -328,7 +348,21 @@ impl GawdAgentFleet {
             }
         }
 
-        // 3. Fallback Universal Reasoner
+        // 3. Neural Agent Synthesis (Aspiration 13)
+        // If no high-quality specialists are found (similarity < 0.4), synthesize one.
+        if max_global_similarity < 0.4 && fleet.len() < 4 {
+            if let Ok(new_profile) = NeuralAgentFactory::synthesize_specialist(goal, workspace) {
+                eprintln!("[Agent Factory] Capability Gap Detected. Synthesized: {}", new_profile.name);
+                registry.register_agent(new_profile.clone());
+                fleet.push(Arc::new(DynamicAgent {
+                    agent_name: new_profile.name,
+                    mission_profile: new_profile.description,
+                    agent_rank: new_profile.base_rank,
+                }));
+            }
+        }
+
+        // 4. Fallback Universal Reasoner
         if fleet.len() < 4 {
             fleet.push(Arc::new(DynamicAgent {
                 agent_name: "UniversalReasoner".into(),
@@ -341,7 +375,7 @@ impl GawdAgentFleet {
     }
 
     pub fn dispatch_explosive_swarm(goal: String, workspace: PathBuf, blackboard: MissionBlackboard) -> Vec<(String, String)> {
-        let agents = Self::synthesize_fleet(&goal);
+        let agents = Self::synthesize_fleet(&goal, &workspace);
         let mut results = Vec::new();
         let mut handles = Vec::new();
 
@@ -371,7 +405,7 @@ mod tests {
 
     #[test]
     fn test_fleet_synthesis() {
-        let fleet = GawdAgentFleet::synthesize_fleet("soil crop agricultural DevOpsStatus build");
+        let fleet = GawdAgentFleet::synthesize_fleet("soil crop agricultural DevOpsStatus build", Path::new("."));
         assert!(!fleet.is_empty());
         assert!(fleet.iter().any(|a| a.name() == "AgriTechAgent") || fleet.iter().any(|a| a.name() == "UniversalReasoner"));
     }
