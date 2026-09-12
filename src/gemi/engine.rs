@@ -191,7 +191,23 @@ impl GemiEngine {
     }
 
     pub fn generate_multimodal_vision(prompt: &str, image_path: &Path) -> String {
+        if let Ok(vision) = super::vision::AeonVisionEngine::new() {
+             match vision.analyze_visual_intent(prompt, image_path) {
+                 Ok(res) => return res,
+                 Err(e) => return format!("[aeon Native Vision] Error: {}", e),
+             }
+        }
         format!("[aeon Native Vision]: {} -> {}", image_path.display(), prompt)
+    }
+
+    pub fn generate_multimodal_audio(audio_path: &Path) -> String {
+        if let Ok(audio) = super::audio::AeonAudioEngine::new() {
+             match audio.transcribe_and_audit(audio_path) {
+                 Ok(res) => return res,
+                 Err(e) => return format!("[aeon Native Audio] Error: {}", e),
+             }
+        }
+        format!("[aeon Native Audio]: Processed {}", audio_path.display())
     }
 
     pub fn verify_axiomatic_alignment(reasoning: &str, workspace: &Path) -> EaiResult<String> {

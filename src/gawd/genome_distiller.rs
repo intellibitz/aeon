@@ -11,7 +11,7 @@ pub struct GenomeDistiller;
 
 impl GenomeDistiller {
     /// Distills the hard-compiled .md files into synthetic Q&A pairs for model training.
-    pub fn distill_genome_to_experience(workspace: &Path) -> EaiResult<usize> {
+    pub fn distill_genome_to_experience(_workspace: &Path) -> EaiResult<usize> {
         let mut samples = Vec::new();
         let timestamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs();
 

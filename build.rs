@@ -175,6 +175,8 @@ fn main() {
     println!("cargo:rerun-if-changed=.agents/RUNTIME.md");
     println!("cargo:rerun-if-changed=.agents/TESTS.md");
     println!("cargo:rerun-if-changed=.agents/TOPOLOGY.md");
+    println!("cargo:rerun-if-changed=src/gemi/vision.rs");
+    println!("cargo:rerun-if-changed=src/gemi/audio.rs");
 }
 
 fn parse_list_item(line: &str) -> Option<(usize, String, String)> {
