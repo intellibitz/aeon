@@ -169,7 +169,8 @@ fn main() {
                 eprintln!("FATAL: {}", e);
                 std::process::exit(1);
             });
-            GemiServer::start_http_server(cwd.clone(), cfg.gemi_port);
+            let server = tiny_http::Server::http(format!("0.0.0.0:{}", cfg.gemi_port)).expect("Failed to bind GEMI port");
+            GemiServer::start_http_server(cwd.clone(), server);
         }
         "models" => {
             let res = aeon_engine::gmcp::GmcpHost::dispatch("list_models", &serde_json::json!(null).to_string(), &cwd);

@@ -34,9 +34,8 @@ impl GmcpServer {
         eprintln!("[GMCP TCP] Protocol deprecated. Use GMCP HTTP/SSE on 9093.");
     }
 
-    pub fn start_http_server(workspace: PathBuf, port: u16) {
-        let addr = format!("0.0.0.0:{}", port);
-        let server = Server::http(&addr).expect("Failed to bind GMCP HTTP server");
+    pub fn start_http_server(workspace: PathBuf, server: Server) {
+        let addr = server.server_addr().to_string();
         eprintln!("[GMCP HTTP/SSE] Substrate active on {}", addr);
 
         for mut request in server.incoming_requests() {

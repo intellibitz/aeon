@@ -12,11 +12,10 @@ use crate::gemi::models::ModelManager;
 pub struct GemiServer;
 
 impl GemiServer {
-    pub fn start_http_server(workspace: PathBuf, port: u16) {
-        let addr = format!("0.0.0.0:{}", port);
-        let server = Server::http(&addr).expect("Failed to bind GEMI HTTP server");
+    pub fn start_http_server(workspace: PathBuf, server: Server) {
+        let addr = server.server_addr().to_string();
         eprintln!("[GEMI REST] Substrate active on {}", addr);
-        eprintln!("[GEMI Web] UI Interface: http://localhost:{}/app", port);
+        eprintln!("[GEMI Web] UI Interface: http://localhost:{}/app", server.server_addr().to_ip().map(|a| a.port()).unwrap_or(0));
 
         for mut request in server.incoming_requests() {
             let workspace = workspace.clone();

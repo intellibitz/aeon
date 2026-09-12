@@ -155,6 +155,12 @@ impl AeonConfig {
         }
         Ok(Self::default())
     }
+
+    pub fn save(&self, global_dir: &Path) -> EaiResult<()> {
+        let path = Self::get_config_path(global_dir);
+        let json = serde_json::to_string_pretty(self).map_err(|e| EaiError::Config(e.to_string()))?;
+        fs::write(path, json).map_err(|e| EaiError::Filesystem(e.to_string()))
+    }
 }
 
 impl SandboxManager {
