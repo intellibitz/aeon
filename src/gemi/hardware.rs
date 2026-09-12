@@ -143,17 +143,29 @@ impl HardwareProfiler {
 
         let mut dev = cache.lock().unwrap();
         if dev.is_cpu() {
-            if let Ok(cuda_dev) = Device::new_cuda(0) {
+            // Attempt CUDA initialization with panic safety
+            let cuda_attempt = std::panic::catch_unwind(|| {
+                Device::new_cuda(0)
+            });
+            if let Ok(Ok(cuda_dev)) = cuda_attempt {
                 *dev = cuda_dev.clone();
                 return cuda_dev;
             }
+
+            // Attempt Metal initialization with panic safety
             #[cfg(feature = "metal")]
-            if let Ok(metal_dev) = Device::new_metal(0) {
-                *dev = metal_dev.clone();
-                return metal_dev;
+            {
+                let metal_attempt = std::panic::catch_unwind(|| {
+                    Device::new_metal(0)
+                });
+                if let Ok(Ok(metal_dev)) = metal_attempt {
+                    *dev = metal_dev.clone();
+                    return metal_dev;
+                }
             }
         }
-        dev.clone()
+        // Absolute Fallback: CPU
+        Device::Cpu
     }
 
     fn get_os_info() -> String {

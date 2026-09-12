@@ -35,6 +35,9 @@ impl InferenceHost {
             return Ok(Arc::clone(m));
         }
 
+        // Integrity Verification (Aspiration 4 Hardening)
+        ModelManager::verify_model_integrity(model_path)?;
+
         let mut file = std::fs::File::open(model_path)
             .map_err(|e| EaiError::Inference(format!("Failed to open weights {}: {}", model_path.display(), e)))?;
 
@@ -335,8 +338,17 @@ impl NativeInferenceEngine for AeonGgufEngine {
         let mut all_tokens = vec![];
         let mut tokens_to_process = prompt_tokens.to_vec();
 
+        // 1. Set Execution Deadline (Rule 23 Hardening)
+        let start_time = std::time::Instant::now();
+        let timeout = std::time::Duration::from_secs(45);
+
         // Universal Generative Loop
         for i in 0..512 {
+            // 2. Continuous Timeout Check
+            if start_time.elapsed() > timeout {
+                return Err(EaiError::Inference("Inference timed out after 45s".into()));
+            }
+
             let input = candle_core::Tensor::new(tokens_to_process.as_slice(), &device)
                 .map_err(|e| EaiError::Inference(format!("Tensor creation failed: {}", e)))?
                 .unsqueeze(0)?;

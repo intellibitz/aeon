@@ -214,6 +214,33 @@ impl ModelManager {
         None
     }
 
+    pub fn verify_model_integrity(model_path: &Path) -> EaiResult<()> {
+        if model_path.to_string_lossy().contains("aeon-native-synthesis") {
+            return Ok(()); // Native logic is part of the binary
+        }
+
+        let prov_file = model_path.with_extension("provenance.json");
+        if !prov_file.exists() {
+             return Err(crate::error::EaiError::Governance(format!("Untrusted model: No provenance found for {}", model_path.display())));
+        }
+
+        let prov_content = fs::read_to_string(&prov_file)
+            .map_err(|_| crate::error::EaiError::Governance("Failed to read model provenance".into()))?;
+        let provenance: ModelProvenance = serde_json::from_str(&prov_content)
+            .map_err(|_| crate::error::EaiError::Governance("Malformed model provenance".into()))?;
+
+        if let Some(trusted_checksum) = provenance.original_checksum {
+            let actual_checksum = Self::calculate_simple_checksum(model_path)?;
+            if actual_checksum != trusted_checksum {
+                return Err(crate::error::EaiError::Governance(format!("Model TAMPERING detected! Hash mismatch for {}", model_path.display())));
+            }
+        } else {
+            return Err(crate::error::EaiError::Governance("Model provenance missing trusted checksum".into()));
+        }
+
+        Ok(())
+    }
+
     pub fn get_tokenizer_path(model_id: &str) -> Option<PathBuf> {
         let model_path = Self::get_model_path(model_id)?;
         if let Some(parent) = model_path.parent() {
