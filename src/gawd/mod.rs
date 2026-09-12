@@ -7,6 +7,7 @@ pub mod pkb;
 pub mod reflex_synth;
 pub mod reflex_trainer;
 pub mod reason_trainer;
+pub mod genome_distiller;
 pub mod safety;
 pub mod security;
 pub mod self_core;

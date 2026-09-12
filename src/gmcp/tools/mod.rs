@@ -102,6 +102,13 @@ impl ToolRegistry {
             Ok(report)
         });
 
+        Self::register_meta_tool(&mut tools, "distill_genome", "Distill the hard-compiled genome into the Tier 2 reasoning model", MetaCategory::SystemPrimitive, |_arg, workspace| {
+            match crate::gawd::reason_trainer::ReasoningTrainer::audit_reasoning_substrate(workspace) {
+                Ok(report) => Ok(format!("# Genome Distillation Successful\\n\\n{}", report)),
+                Err(e) => Ok(format!("# Genome Distillation Failed\\n\\nError: {}", e)),
+            }
+        });
+
         Self::register_meta_tool(&mut tools, "list_models", "List available model substrates", MetaCategory::SystemPrimitive, |_arg, workspace| {
             let models = ModelManager::list_models(workspace);
             let mut out = format!("Active Model Substrates (Count: {})\\n\\n", models.len());

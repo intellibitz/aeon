@@ -1,6 +1,6 @@
 # AEON Substrate Topology
 
-* **Current Engine Version**: `v0.1.2022738`
+* **Current Engine Version**: `v0.1.2022739`
 
 This document defines the structural native components and orchestrated meta-layers of the `aeon` substrate, organized into five functional pillars.
 
@@ -21,7 +21,7 @@ This document defines the structural native components and orchestrated meta-lay
 
 ## 4. Models - Neural Intelligence & Weights
 10. **NativeAlphaModel**: Local neural weights (`aeon-alpha.safetensors`) for deterministic reflex. (Tier: 0)
-11. **NativeReasoningModel**: Distilled reasoning weights (`aeon-reason.safetensors`) for deep logic. (Tier: 2)
+11. **NativeReasoningModel**: Distilled Tier 2 logic weights (`aeon-reason.safetensors`) trained on the AEON genome. (Target: aeon-reason-7b). (Tier: 2)
 12. **MetaModelSubstrate**: External reasoning models (Local GGUF vaults, Candle tensors, Cloud API). (Tier: 2)
 
 ## 5. MCPs - Interoperability & Tooling
