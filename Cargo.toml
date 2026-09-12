@@ -1,6 +1,6 @@
 [package]
 name = "aeon-engine"
-version = "0.1.2022783"
+version = "0.1.2022784"
 edition = "2021"
 authors = ["IntelliBitz", "Muthu Ramadoss", "AEON EAI Core"]
 description = "aeon-engine: EAI: Exponential Intelligence for Any AI. - GAWD, GEMI & GMCP Multi-Agent Engine"
@@ -30,6 +30,7 @@ signal-hook = "0.3"
 md5 = "0.7"
 log = "0.4"
 env_logger = "0.11"
+sha2 = "0.10"
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["fileapi", "winerror"] }

@@ -16,8 +16,9 @@ use std::os::windows::io::AsRawHandle;
 
 use signal_hook::{consts::{SIGTERM, SIGINT}, iterator::Signals};
 use std::sync::{atomic::{AtomicBool, Ordering}, Arc};
+use log::{info, warn};
 
-use crate::error::EaiError;
+use crate::error::{EaiError, EaiResult};
 use crate::sandbox::manager::AeonConfig;
 use crate::gemi::GemiServer;
 use crate::gmcp::server::GmcpServer;
@@ -188,6 +189,37 @@ impl AmaDaemon {
         false
     }
 
+    pub fn get_hash_file(global_dir: &Path) -> PathBuf {
+        global_dir.join("binary.hash")
+    }
+
+    pub fn verify_binary_integrity(bin_path: &Path, global_dir: &Path) -> EaiResult<bool> {
+        let hash_file = Self::get_hash_file(global_dir);
+        if !hash_file.exists() {
+            // If no hash file exists, we bootstrap by recording the current one
+            let current_hash = Self::calculate_binary_hash(bin_path)?;
+            fs::write(&hash_file, &current_hash).map_err(|e| EaiError::Filesystem(e.to_string()))?;
+            return Ok(true);
+        }
+
+        let trusted_hash = fs::read_to_string(&hash_file).map_err(|e| EaiError::Filesystem(e.to_string()))?;
+        let current_hash = Self::calculate_binary_hash(bin_path)?;
+
+        Ok(trusted_hash.trim() == current_hash.trim())
+    }
+
+    fn calculate_binary_hash(path: &Path) -> EaiResult<String> {
+        use sha2::{Sha256, Digest};
+        let mut file = fs::File::open(path)?;
+        let mut hasher = Sha256::new();
+        let mut buffer = [0u8; 65536];
+        while let Ok(n) = file.read(&mut buffer) {
+            if n == 0 { break; }
+            hasher.update(&buffer[..n]);
+        }
+        Ok(format!("{:x}", hasher.finalize()))
+    }
+
     pub fn ensure_daemon_running(workspace: &Path, global_dir: &Path) {
         if Self::check_status(global_dir).is_some() {
             return;
@@ -204,6 +236,17 @@ impl AmaDaemon {
         } else {
             PathBuf::from(if cfg!(target_os = "windows") { "aeon.exe" } else { "aeon" })
         };
+
+        // Binary Integrity Check (Aspiration 4 Hardening)
+        match Self::verify_binary_integrity(&bin_to_run, global_dir) {
+            Ok(true) => info!("[AmaDaemon] Binary integrity verified."),
+            Ok(false) => {
+                warn!("[AmaDaemon] Binary integrity check FAILED. Potential tampering detected or build out of sync.");
+                // In a strict production mode, we might abort here.
+                // For local evolution, we log and continue if in 'alpha-user' space.
+            }
+            Err(e) => warn!("[AmaDaemon] Could not verify binary integrity: {}", e),
+        }
 
         if cfg!(target_os = "windows") {
             let _ = Command::new(&bin_to_run)

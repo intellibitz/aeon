@@ -271,16 +271,15 @@ impl ModelManager {
 
     fn calculate_simple_checksum(path: &Path) -> EaiResult<String> {
         use std::io::Read;
+        use sha2::{Sha256, Digest};
         let mut file = fs::File::open(path)?;
-        let mut hasher = 0u64;
+        let mut hasher = Sha256::new();
         let mut buffer = [0u8; 65536];
         while let Ok(n) = file.read(&mut buffer) {
             if n == 0 { break; }
-            for &b in &buffer[..n] {
-                hasher = hasher.wrapping_add(b as u64);
-            }
+            hasher.update(&buffer[..n]);
         }
-        Ok(format!("{:x}", hasher))
+        Ok(format!("{:x}", hasher.finalize()))
     }
 
     pub fn scan_system_for_local_models(workspace: &Path) -> Vec<ModelInfo> {

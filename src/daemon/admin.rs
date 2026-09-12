@@ -67,7 +67,21 @@ impl AeonAdmin {
             }
         }
 
-        // 4. Version Consistency (Rule 1)
+        // 4. Binary Integrity Check (Aspiration 4)
+        if let Ok(current_exe) = std::env::current_exe() {
+            let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
+            let global_dir = home.join(".aeon");
+            match crate::daemon::server::AmaDaemon::verify_binary_integrity(&current_exe, &global_dir) {
+                Ok(true) => report.push_str("- [PASS] Binary Integrity: Executable hash matches trusted genome.\n"),
+                Ok(false) => {
+                    report.push_str("- [FAIL] Binary Integrity: Executable hash MISMATCH. Potential tampering or build drift.\n");
+                    overall_success = false;
+                }
+                Err(e) => report.push_str(&format!("- [WARNING] Binary Integrity: Could not verify ({})\n", e)),
+            }
+        }
+
+        // 5. Version Consistency (Rule 1)
         match Self::enforce_version_consistency(workspace) {
             Ok(v) => report.push_str(&format!("- [PASS] Version Consistency: All manifests synchronized to v{}.\n", v)),
             Err(e) => {
@@ -139,6 +153,26 @@ impl AeonAdmin {
                     }
                 }
                 fs::write(&path, updated.join("\n") + "\n")?;
+            }
+        }
+
+        // 4. Update Binary Integrity Hash
+        if let Ok(current_exe) = std::env::current_exe() {
+            let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
+            let global_dir = home.join(".aeon");
+            let _ = fs::create_dir_all(&global_dir);
+            let hash_file = global_dir.join("binary.hash");
+
+            use sha2::{Sha256, Digest};
+            if let Ok(mut file) = fs::File::open(&current_exe) {
+                let mut hasher = Sha256::new();
+                let mut buffer = [0u8; 65536];
+                while let Ok(n) = std::io::Read::read(&mut file, &mut buffer) {
+                    if n == 0 { break; }
+                    hasher.update(&buffer[..n]);
+                }
+                let hash = format!("{:x}", hasher.finalize());
+                let _ = fs::write(&hash_file, hash);
             }
         }
 
