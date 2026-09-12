@@ -12,6 +12,7 @@ fn main() {
     let runtime_md = fs::read_to_string(".agents/RUNTIME.md").expect("Missing RUNTIME.md");
     let tests_md = fs::read_to_string(".agents/TESTS.md").expect("Missing TESTS.md");
     let topology_md = fs::read_to_string(".agents/TOPOLOGY.md").expect("Missing TOPOLOGY.md");
+    let workflow_md = fs::read_to_string(".agents/WORKFLOW.md").expect("Missing WORKFLOW.md");
 
     let mut generated_code = String::new();
 
@@ -53,7 +54,7 @@ fn main() {
     }
     generated_code.push_str("];\n\n");
 
-    // 4. RUNTIME.md -> GEN_RUNTIME_MANDATES (40-69)
+    // 4. RUNTIME.md -> GEN_RUNTIME_MANDATES (40-59)
     generated_code.push_str("pub const GEN_RUNTIME_MANDATES: &[AeonAxiomRule] = &[\n");
     for line in runtime_md.lines() {
         if let Some(rule) = parse_list_item(line) {
@@ -62,7 +63,7 @@ fn main() {
     }
     generated_code.push_str("];\n\n");
 
-    // 5. TESTS.md -> GEN_TEST_PROTOCOLS (60-89)
+    // 5. TESTS.md -> GEN_TEST_PROTOCOLS (60-79)
     generated_code.push_str("pub const GEN_TEST_PROTOCOLS: &[AeonAxiomRule] = &[\n");
     for line in tests_md.lines() {
         if let Some(rule) = parse_list_item(line) {
@@ -71,7 +72,16 @@ fn main() {
     }
     generated_code.push_str("];\n\n");
 
-    // 6. TOPOLOGY.md -> Pillar-based Components
+    // 6. WORKFLOW.md -> GEN_WORKFLOW_STEPS (80-99)
+    generated_code.push_str("pub const GEN_WORKFLOW_STEPS: &[AeonAxiomRule] = &[\n");
+    for line in workflow_md.lines() {
+        if let Some(rule) = parse_list_item(line) {
+            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 80, rule.1, rule.2));
+        }
+    }
+    generated_code.push_str("];\n\n");
+
+    // 7. TOPOLOGY.md -> Pillar-based Components
     let mut current_pillar = "";
     generated_code.push_str("pub const GEN_AOA_COMPONENTS: &[AeonComponentSpec] = &[\n");
     let mut agents = String::from("pub const GEN_AGENT_COMPONENTS: &[AeonComponentSpec] = &[\n");
@@ -127,7 +137,7 @@ fn main() {
     }
     generated_code.push_str("];\n\n");
 
-    // 7. Unified RULES List
+    // 8. Unified RULES List
     generated_code.push_str("pub const GEN_RULES: &[AeonAxiomRule] = &[\n");
     for line in agents_md.lines() {
         if let Some(rule) = parse_list_item(line) {
@@ -165,6 +175,11 @@ fn main() {
             generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 60, rule.1, rule.2));
         }
     }
+    for line in workflow_md.lines() {
+        if let Some(rule) = parse_list_item(line) {
+            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 80, rule.1, rule.2));
+        }
+    }
     generated_code.push_str("];\n");
 
     fs::write(&dest_path, generated_code).unwrap();
@@ -175,8 +190,7 @@ fn main() {
     println!("cargo:rerun-if-changed=.agents/RUNTIME.md");
     println!("cargo:rerun-if-changed=.agents/TESTS.md");
     println!("cargo:rerun-if-changed=.agents/TOPOLOGY.md");
-    println!("cargo:rerun-if-changed=src/gemi/vision.rs");
-    println!("cargo:rerun-if-changed=src/gemi/audio.rs");
+    println!("cargo:rerun-if-changed=.agents/WORKFLOW.md");
 }
 
 fn parse_list_item(line: &str) -> Option<(usize, String, String)> {
@@ -187,7 +201,6 @@ fn parse_list_item(line: &str) -> Option<(usize, String, String)> {
     let id: usize = parts[0].parse().ok()?;
     let content = parts[1].trim();
 
-    // Check if it's a rule item with bold title
     if content.starts_with("**") {
         let sub_parts: Vec<&str> = content.splitn(2, ':').collect();
         if sub_parts.len() < 2 { return None; }
@@ -196,7 +209,6 @@ fn parse_list_item(line: &str) -> Option<(usize, String, String)> {
         return Some((id, title.to_string(), imperative.to_string()));
     }
 
-    // Check if it's a validation protocol item with simple title
     let sub_parts: Vec<&str> = content.splitn(2, ':').collect();
     if sub_parts.len() >= 2 {
         let title = sub_parts[0].trim();
