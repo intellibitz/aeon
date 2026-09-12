@@ -1,60 +1,53 @@
-# AEON Test Protocols
+# AEON Validation Protocols
 
-* **Current Engine Version**: `v0.1.2022734`
+* **Current Engine Version**: `v0.1.2022735`
 
-This document defines the validation procedures for verifying that the `aeon` substrate adheres to its architectural aspirations and runtime mandates. These protocols are implemented as native Rust tests within the core engine.
+This document defines the procedures for verifying the architectural integrity and operational safety of the `aeon` substrate.
 
 ## 1. Version Alignment Enforcement (Build Mandate)
-- **Test**: `test_version_alignment_enforcement`
-- **Protocol**: Verify that the version in `Cargo.toml` matches the version badges and system information across all documentation (`README.md`, `.agents/*.md`).
+- **Protocol**: Verify `Cargo.toml` matches all documentation and system info via `verify_version_alignment`.
 - **Pass Criteria**: `verify_version_alignment` returns `Ok(())`.
 
-## 2. Neural Swarm Synthesis (Aspiration 9 / Runtime Mandate 10)
-- **Test**: `test_fleet_synthesis`
-- **Protocol**: Submit goal strings like "soil crop agricultural" and verify that the `GawdAgentFleet` recruits the correct specialized agents (`AgriTechAgent`) using semantic centroid projections.
-- **Pass Criteria**: Fleet contains both mandatory substrate guards and semantically relevant specialists.
+## 2. Alpha-Self Core Awareness (Aspiration 2)
+- **Protocol**: Execute the `identity` command to verify all `.agents/` files are hard-compiled into the binary.
+- **Pass Criteria**: The reported number of axiom rules matches the distilled genome.
 
-## 3. High-Density Context Mapping (Aspiration 6 / Runtime Mandate 11)
-- **Test**: `test_blackboard_convergence`
-- **Protocol**: Execute a task with a `HighDensityContextStore` capacity limit and verify that agent outputs converge on the shared mission blackboard.
-- **Pass Criteria**: Blackboard state is consistent across multi-agent executions.
+## 3. Semantic Intent Determinism (Aspiration 1)
+- **Protocol**: Project natural language intents multiple times to verify 100% vector coordinate stability.
+- **Pass Criteria**: Projections are 100% deterministic.
 
-## 4. Semantic Intent Determinism (Aspiration 1 / Substrate Purity)
-- **Test**: `test_semantic_centroid_projection_determinism`
-- **Protocol**: Project the same natural language intent multiple times and verify that the resulting vector coordinates are identical.
-- **Pass Criteria**: Vector length matches `AeonAlphaModel::DIM` and projections are 100% deterministic.
+## 4. Foundational Intent Discovery (Aspiration 1)
+- **Protocol**: Interrogate the `AeonAlphaModel` to verify availability of core intents (`status`, `version`, `identity`).
+- **Pass Criteria**: All core intents are discoverable.
 
-## 5. Competitive Inference Racing (Aspiration 7 / Runtime Mandate 2)
-- **Test**: `test_competitive_racing_logic`
+## 5. Neural Swarm Synthesis (Aspiration 9)
+- **Protocol**: Submit specialized goals and verify the semantic recruitment of relevant specialist agents.
+- **Pass Criteria**: Fleet contains relevant specialists.
+
+## 6. High-Density Context Mapping (Aspiration 6)
+- **Protocol**: Verify that agent outputs correctly converge on a shared mission blackboard under capacity limits.
+- **Pass Criteria**: Blackboard state is consistent.
+
+## 7. Competitive Inference Racing (Aspiration 7)
 - **Protocol**: Spawn parallel threads mocking fast and slow inference paths.
-- **Pass Criteria**: The engine correctly selects the result from the fastest path within the race window.
+- **Pass Criteria**: The engine correctly selects the result from the fastest path.
 
-## 6. Mission Persistence & Lifecycle (Runtime Mandate 9)
-- **Test**: `test_checkpoint_lifecycle`
-- **Protocol**: Save a `NeuralCheckpoint` to the workspace `.aeon/` directory and verify its recovery.
-- **Pass Criteria**: Checkpoint state (intent, blackboard, completed tools) is preserved across engine re-initialization.
+## 8. Native Reflex Synthesis (Aspiration 5)
+- **Protocol**: Verify that the `ReflexSynthesizer` generates valid Rust-native reflex code for distilled intents.
+- **Pass Criteria**: Synthesized code is valid and compiles.
 
-## 7. Zero-Config Environment Synthesis (Runtime Mandate 5)
-- **Test**: `test_aeon_config_lifecycle`
-- **Protocol**: Ensure the engine can autonomously generate and load default configurations in a fresh environment.
-- **Pass Criteria**: `AeonConfig::load` returns valid defaults without manual setup.
+## 9. Zero-Config Environment Synthesis (Runtime Mandate 5)
+- **Protocol**: Verify the engine autonomously generates and loads default configurations in fresh environments.
+- **Pass Criteria**: Valid defaults are loaded.
 
-## 8. Governance & Destructive Command Interception (Runtime Mandate 14)
-- **Test**: `test_safety_audit_destructive_patterns`
-- **Protocol**: Submit a mission goal containing `rm -rf /` and verify detection by the `SafetyDetector`.
-- **Pass Criteria**: The audit returns a `DestructiveCommand` error and prevents execution.
+## 10. Mission Persistence & Lifecycle (Runtime Mandate 10)
+- **Protocol**: Save and recover `NeuralCheckpoint` states to verify mission continuity.
+- **Pass Criteria**: Checkpoint state is preserved.
 
-## 9. Secret Token Leak Prevention (Runtime Mandate 16)
-- **Test**: `test_security_audit_secret_leak`
-- **Protocol**: Submit a prompt containing a sensitive pattern (e.g., `sk-proj`) and verify detection by the `SecurityDetector`.
-- **Pass Criteria**: The audit returns a `SecurityLeak` error and prevents exfiltration.
+## 11. Governance & Destructive Interception (Runtime Mandate 12)
+- **Protocol**: Verify that the `SafetyDetector` intercepts and blocks destructive patterns (e.g., `rm -rf /`).
+- **Pass Criteria**: Execution is blocked and logged.
 
-## 10. Foundational Intent Discovery (Aspiration 1)
-- **Test**: `test_list_dynamic_intents`
-- **Protocol**: Interrogate the `AeonAlphaModel` for available intents.
-- **Pass Criteria**: The model reports foundational intents (`status`, `version`, `identity`) sorted by semantic importance.
-
-## 11. Native Reflex Synthesis (Aspiration 5 / Motion Rule)
-- **Test**: `test_native_reflex_synthesis_logic`
-- **Protocol**: Distill a new native reflex from a natural language intent.
-- **Pass Criteria**: The synthesizer generates valid Rust code in the `gmcp/reflexes/` directory following the `Reflex` trait implementation pattern.
+## 12. Secret Token Leak Prevention (Runtime Mandate 14)
+- **Protocol**: Verify that the `SecurityDetector` detects and prevents exfiltration of sensitive credentials.
+- **Pass Criteria**: Leak is detected and blocked.
