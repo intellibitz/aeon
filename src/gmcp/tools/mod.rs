@@ -109,6 +109,13 @@ impl ToolRegistry {
             }
         });
 
+        Self::register_meta_tool(&mut tools, "self_validate", "Execute autonomous substrate self-validation", MetaCategory::SystemPrimitive, |_arg, workspace| {
+            match crate::daemon::runtime_admin::AeonRuntimeAdmin::execute_autonomous_self_validation(workspace) {
+                Ok(report) => Ok(format!("# Substrate Self-Validation Successful\\n\\n{}", report)),
+                Err(e) => Ok(format!("# Substrate Self-Validation Failed\\n\\nError: {}", e)),
+            }
+        });
+
         Self::register_meta_tool(&mut tools, "list_models", "List available model substrates", MetaCategory::SystemPrimitive, |_arg, workspace| {
             let models = ModelManager::list_models(workspace);
             let mut out = format!("Active Model Substrates (Count: {})\\n\\n", models.len());

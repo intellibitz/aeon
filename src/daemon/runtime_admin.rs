@@ -53,15 +53,41 @@ impl AeonRuntimeAdmin {
                 let ladder = HardwareProfiler::get_progressive_model_ladder();
                 if let Some(best_step) = ladder.last() {
                     eprintln!("[Runtime Admin] Defaulting to peak hardware model: {}", best_step.label);
-                    // Selection logic handled by ModelManager internals
                 }
             }
         }
 
-        // 3. Substrate Maintenance
+        // 3. Autonomous Self-Validation (Aspiration 15)
+        let validation_res = Self::execute_autonomous_self_validation(workspace);
+        match validation_res {
+            Ok(_) => eprintln!("[Runtime Admin] Substrate status: OPTIMAL."),
+            Err(e) => eprintln!("[Runtime Admin] Substrate status: DEGRADED. Validation Error: {}", e),
+        }
+
+        // 4. Substrate Maintenance
         Self::perform_maintenance(workspace)?;
 
         Ok("Substrate optimized by Runtime Admin.".into())
+    }
+
+    /// Empirical Self-Testing on Host Hardware (Aspiration 15)
+    pub fn execute_autonomous_self_validation(workspace: &Path) -> EaiResult<String> {
+        use std::process::Command;
+
+        eprintln!("[Runtime Admin] Initializing Autonomous Self-Validation...");
+
+        let output = Command::new("cargo")
+            .arg("test")
+            .arg("--quiet")
+            .current_dir(workspace)
+            .output()?;
+
+        if output.status.success() {
+            Ok("All Validation Protocols Passed. Substrate is Optimal.".into())
+        } else {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            Err(crate::error::EaiError::Protocol(format!("Self-Validation Failed: {}", stderr)))
+        }
     }
 
     fn perform_maintenance(workspace: &Path) -> EaiResult<()> {
