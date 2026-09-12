@@ -1,6 +1,6 @@
 # AEON Universal Agent Governance
 
-* **Current Engine Version**: `v0.1.2022754`
+* **Current Engine Version**: `v0.1.2022755`
 
 This document defines the immutable ethical and operational guardrails for all agents operating within the `aeon` substrate.
 
@@ -27,3 +27,7 @@ This document defines the immutable ethical and operational guardrails for all a
 13. **Anti-Hardcoding Mandate**: Prohibition on hardcoding query-specific matchers. Intents must resolve dynamically using models and tools.
 14. **Reality Grounding**: If requests or assumptions are outside verified reality, correct them objectively and guide execution to the empirical path.
 15. **Substrate Sovereignty**: Respect the isolation boundaries of the substrate. Ephemeral state must remain strictly within `.aeon/` or isolated temporary directories.
+
+## 4. The Creator Meta-Axiom
+
+16. **Creator Evolution Pipeline**: The workflow strictly follows the rules; the rules define the workflow. Creator vision enters as a test (`TESTS.md`), shapes architecture (`ASPIRATIONS.md`), builds structure (`TOPOLOGY.md`), and dictates logic (`WORKFLOW.md`). Core mutations fork directly to `BUILD.md`; runtime mutations route through `RUNTIME.md` before compilation.
