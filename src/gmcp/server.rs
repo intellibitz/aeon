@@ -3,6 +3,7 @@
 
 use tiny_http::{Server, Response, Method, Header};
 use std::path::{Path, PathBuf};
+use std::thread;
 use serde_json::json;
 
 use crate::gmcp::tools::ToolRegistry;
@@ -57,7 +58,25 @@ impl GmcpServer {
                     let mut body = String::new();
                     let _ = std::io::Read::read_to_string(request.as_reader(), &mut body);
 
-                    let response_json = server_handler.handle_request(&body, &workspace);
+                    let (tx, rx) = std::sync::mpsc::channel();
+                    let workspace_thread = workspace.clone();
+                    let body_thread = body.clone();
+                    let server_handler_thread = server_handler;
+
+                    thread::spawn(move || {
+                        let response_json = server_handler_thread.handle_request(&body_thread, &workspace_thread);
+                        let _ = tx.send(response_json);
+                    });
+
+                    // Enforce a strict 60-second timeout for GMCP protocol requests
+                    let response_json = rx.recv_timeout(std::time::Duration::from_secs(60))
+                        .unwrap_or_else(|_| {
+                            json!({
+                                "jsonrpc": "2.0",
+                                "error": { "code": -32000, "message": "Execution Timeout" }
+                            }).to_string()
+                        });
+
                     let response = Response::from_string(response_json)
                         .with_header(Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).unwrap())
                         .with_header(Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap());
