@@ -1,6 +1,6 @@
 # AEON Ephemeral Mission Protocols
 
-* **Current Engine Version**: `v0.1.2022759`
+* **Current Engine Version**: `v0.1.2022760`
 
 This document defines the zero-mutation execution paths for the `aeon` substrate. These protocols bypass the evolutionary pipeline (`alpha-self` / `alpha-user` mutations) and are routed directly to the `GAWD` swarm for immediate execution.
 
