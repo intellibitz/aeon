@@ -3,7 +3,7 @@
 ## System Information
 
 * **Project Name**: `aeon`
-* **Current Engine Version**: `v0.1.2022727`
+* **Current Engine Version**: `v0.1.2022728`
 
 ## Architectural Aspirations
 
@@ -13,7 +13,7 @@ aeon is a local-first, native Rust AI execution engine designed for high-through
 
 ### [Aspiration 0] Substrate Purity & Meta-Only Mandate
 * **Status**: `REALIZED`
-* **Core Paradigm**: The entire compiled core codebase contains zero static domain-specific logic or rules. 100% meta and dynamic; all operational capabilities, specialist agent mappings, and semantic intent matrices are discovered and bound dynamically at runtime via local safetensors, system environment discovery, and Model Context Protocol (MCP) registries. 0 vendor bias and 0 platform bias—the substrate remains purely a protocol-driven execution layer.
+* **Core Paradigm**: The entire compiled core codebase (alpha-self) contains zero static domain-specific logic or rules and is immutable at runtime. 100% meta and dynamic; all operational capabilities, specialist agent mappings, and semantic intent matrices are discovered and bound dynamically at runtime via local safetensors, system environment discovery, and Model Context Protocol (MCP) registries. 0 vendor bias and 0 platform bias—the substrate remains purely a protocol-driven execution layer.
 
 ---
 
@@ -57,6 +57,12 @@ aeon is a local-first, native Rust AI execution engine designed for high-through
 * **Status**: `REALIZED`
 * **Core Paradigm**: Transformation of AEON into a world-scale universal model ingestion engine. Enables absolute hardware-agnostic execution of any model from any web-based hub (Hugging Face, ModelScope, AEON CDN) regardless of weight, size, or native format (GGUF, Safetensors, ONNX, PyTorch). Implemented via hardware-aware speculative offloading and multi-format scanner substrates.
 
+---
+
+### [Aspiration 8] Autonomous Runtime Substrate Preparation
+* **Status**: `IN_PROGRESS`
+* **Core Paradigm**: Deployment of the AeonRuntimeAgent, responsible for establishing the optimal execution environment for the user. This agent operates strictly in the dynamic runtime layer (alpha-user space) and is prohibited from modifying the immutable alpha-self core. It autonomously handles weight provisioning, tool protocol linking, and hardware tuning to ensure the core is ready for immediate user intent fulfillment.
+
 ## Project Mechanics & Deployment Workflow
 
 0. **Clean Build Auto-Push**: Once aeon cleanly compiles (build success, 0 warnings, 0 errors, no functionality broken), automatically push to GitHub.
@@ -74,3 +80,4 @@ aeon is a local-first, native Rust AI execution engine designed for high-through
 12. **Workspace Purity Enforcement**: The main workspace must remain free of temporary artifacts and test pollutants. All runtime tests must use isolated ephemeral directories or .aeon/.
 13. **Full Compliance Enforcement on Push**: Before every GitHub push, the agent MUST apply all Agent Instructions and AEON Execution Rules to the entire codebase. This includes verifying version synchronization, auditing security patterns, enforcing workspace purity, and ensuring that no hardcoded simulations remain.
 14. **Substrate Evolution Deployment**: Fulfilling a creator directive or architectural goal through the Motion Rule triggers the automated release sequence: (1) Clean Build; (2) Integration Test Pass; (3) Version Increment; (4) Compliance Audit; (5) GitHub Push.
+15. **Runtime Substrate Preparation Rule**: The AeonRuntimeAgent autonomously prepares the optimal runtime environment. It links tools, provisions models, and tunes hardware for user intents while maintaining the immutability of the alpha-self core.

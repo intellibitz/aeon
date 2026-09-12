@@ -60,6 +60,7 @@ impl AlphaSelf {
         AeonAxiomRule { id: 30, title: "Self-Evolution Axiom", imperative: "AEON source code exists only to improve and evolve AEON. It is a self-referential, dynamic intelligence substrate." },
         AeonAxiomRule { id: 31, title: "Substrate Purity & Meta-Only Mandate", imperative: "Absolute prohibition on hardcoding domain-specific knowledge. Swarm synthesis is semantic and cluster-aware." },
         AeonAxiomRule { id: 32, title: "Swarm Intelligence Saturation Mandate", imperative: "All swarm agents must utilize the full Tier 2/Meta intelligence stack. Swarm participants are never limited to reflexive reasoning." },
+        AeonAxiomRule { id: 33, title: "Runtime Substrate Preparation Mandate", imperative: "The AeonRuntimeAgent autonomously establishes the optimal execution environment for the user. It operates strictly in the dynamic runtime layer and is prohibited from modifying the immutable alpha-self core." },
     ];
 
     pub const RULES: &[AeonAxiomRule] = &[
@@ -79,7 +80,7 @@ impl AlphaSelf {
         AeonAxiomRule { id: 13, title: "Clean Workspace & State Isolation", imperative: "Maintain clean workspace. Ephemeral scaffolding uses tempdirs or local git-ignored state." },
         AeonAxiomRule { id: 14, title: "Reality Check & Grounding", imperative: "If requests or assumptions are outside of verified reality, correct them objectively." },
         AeonAxiomRule { id: 15, title: "Epistemic Chain of Truth", imperative: "Source code and empirical runtime results are the ultimate truth. Ground every conclusion in direct evidence." },
-        // ENGINE_AXIOMS (21-30)
+        // ENGINE_AXIOMS (21-33)
         AeonAxiomRule { id: 21, title: "Native Intent Meta-Execution Protocol", imperative: "User intents use the meta-substrate. Failure triggers mandatory self-healing via autonomous protocol-based provisioning but NEVER triggers the Motion Rule." },
         AeonAxiomRule { id: 22, title: "Creator Aspiration Rule", imperative: "Only creator directives or architectural goals trigger the Motion Rule to advance substrate evolution." },
         AeonAxiomRule { id: 23, title: "Motion Rule Protocol", imperative: "Triggered by Creator or Autonomous Distillation: Detect gap, synthesize native Rust code or retrain neural reflexes, compile/test, and auto-deploy." },
@@ -92,6 +93,7 @@ impl AlphaSelf {
         AeonAxiomRule { id: 30, title: "Self-Evolution Axiom", imperative: "AEON source code exists only to improve and evolve AEON. It is a self-referential, dynamic intelligence substrate." },
         AeonAxiomRule { id: 31, title: "Substrate Purity & Meta-Only Mandate", imperative: "Absolute prohibition on hardcoding domain-specific knowledge. Swarm synthesis is semantic and cluster-aware." },
         AeonAxiomRule { id: 32, title: "Swarm Intelligence Saturation Mandate", imperative: "All swarm agents must utilize the full Tier 2/Meta intelligence stack. Swarm participants are never limited to reflexive reasoning." },
+        AeonAxiomRule { id: 33, title: "Runtime Substrate Preparation Mandate", imperative: "The AeonRuntimeAgent autonomously establishes the optimal execution environment for the user. It operates strictly in the dynamic runtime layer and is prohibited from modifying the immutable core." },
     ];
 
     pub const COMPONENTS: &[AeonComponentSpec] = &[
@@ -100,6 +102,7 @@ impl AlphaSelf {
         AeonComponentSpec { name: "GEMI", tier: AeonCoreTier::Tier2Reasoning, description: "Deep reasoning bridge, model scouting, local neural tensor execution, and unified cloud provider racing." },
         AeonComponentSpec { name: "GMCP Substrate", tier: AeonCoreTier::Tier1Swarm, description: "Model Context Protocol JSON-RPC 2.0 protocol interop bus and Meta ToolRegistry executor." },
         AeonComponentSpec { name: "AmaDaemon", tier: AeonCoreTier::Tier1Swarm, description: "Persistent background host ensuring permanent availability and instant background recovery." },
+        AeonComponentSpec { name: "AeonRuntimeAgent", tier: AeonCoreTier::Tier1Swarm, description: "Autonomous environment preparation agent responsible for weight provisioning and tool linking." },
     ];
 
     pub const META_COMPONENTS: &[AeonComponentSpec] = &[
