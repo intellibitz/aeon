@@ -52,6 +52,25 @@ impl EvolutionManager {
         Self::execute_evolutionary_cycle(workspace)
     }
 
+    /// Autonomous Drift Detection (Aspiration 7)
+    /// Periodic audit of the substrate health and capability surface.
+    pub fn perform_autonomous_drift_audit(workspace: &Path) -> EaiResult<String> {
+        // 1. Audit for High-Frequency Capability Gaps
+        let gap = Self::detect_high_frequency_gap(workspace);
+
+        // 2. Audit for Staged Experience (Substrate Ingestion Motion)
+        let ingestion_res = crate::gawd::reason_trainer::ReasoningTrainer::audit_reasoning_substrate(workspace)?;
+
+        // 3. If a high-frequency gap is detected and not yet synthesized, trigger synthesis
+        if gap != "calculate square root" { // Heuristic check for non-default gap
+             eprintln!("[Evolution Manager] Capability drift detected: {}. Initializing autonomous repair...", gap);
+             let res = ReflexSynthesizer::distill_native_reflex(&gap, workspace)?;
+             return Ok(format!("Autonomous evolution successful: {}", res));
+        }
+
+        Ok(format!("Substrate Optimal. {}", ingestion_res))
+    }
+
     fn detect_evolutionary_target(workspace: &Path, test_output: &str) -> String {
         // In real evolutionary scenarios, this parses compiler errors and test failure messages
         // to identify the specific component or trait implementation that is missing or broken.

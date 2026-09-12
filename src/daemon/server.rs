@@ -116,9 +116,18 @@ impl AmaDaemon {
             Self::start_udp_discovery_server(udp_port, gmcp_port);
         });
 
-        // 4. Keep main daemon thread alive
+        // 5. Autonomous Evolution & Drift Detection Loop (Aspiration 7)
+        let workspace_evo = workspace.clone();
+        thread::spawn(move || {
+            loop {
+                thread::sleep(Duration::from_secs(3600)); // Audit every hour
+                let _ = crate::daemon::evolution::EvolutionManager::perform_autonomous_drift_audit(&workspace_evo);
+            }
+        });
+
+        // 6. Keep main daemon thread alive
         loop {
-            thread::sleep(Duration::from_secs(3600));
+            thread::sleep(Duration::from_secs(86400));
         }
     }
 

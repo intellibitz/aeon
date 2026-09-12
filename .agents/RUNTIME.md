@@ -1,6 +1,6 @@
 # AEON Runtime Mandates
 
-* **Current Engine Version**: `v0.1.2022741`
+* **Current Engine Version**: `v0.1.2022742`
 
 This document defines the operational directives for environment establishment, maintenance, and safety within the `alpha-user` space.
 
@@ -27,3 +27,4 @@ This document defines the operational directives for environment establishment, 
 13. **Critical Path Protection**: Zero-tolerance for unauthorized access to system-critical paths like `/etc/shadow` or `/boot`.
 14. **Secret Token Recognition**: Active detection and masking of sensitive credentials (e.g., `sk-`, `ghp_`, `AWS_SECRET_ACCESS_KEY`).
 15. **Exfiltration Vector Defense**: Detect and intercept unauthorized data exfiltration attempts via network pipes or post-data tools.
+16. **Autonomous Drift Detection**: The background daemon must periodically audit the substrate for capability gaps and trigger autonomous evolution cycles (Motion Rule) without user command.

@@ -1,6 +1,6 @@
 # AEON Architectural Aspirations
 
-* **Current Engine Version**: `v0.1.2022741`
+* **Current Engine Version**: `v0.1.2022742`
 
 This document defines the structural roadmap and evolution goals of the `aeon` substrate.
 
@@ -36,8 +36,8 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 
 ---
 
-### [Aspiration 7] Autonomous Test-Driven Evolution (Motion Loop)
-* **Core Paradigm**: Self-healing substrate capabilities. Authorized architectural gaps trigger autonomous sub-processes that synthesize and test production-ready Rust traits to close the gap.
+### [Aspiration 7] Autonomous Test-Driven Evolution
+* **Core Paradigm**: The "Autonomous Drift Correction" mandate. The substrate independently detects architectural gaps and capability drift through periodic background audits. It autonomously triggers sub-processes to synthesize, test, and deploy production-ready Rust traits without creator intervention.
 
 ---
 
