@@ -1,6 +1,6 @@
 # AEON Operational Workflow
 
-* **Current Engine Version**: `v0.1.2022751`
+* **Current Engine Version**: `v0.1.2022752`
 
 This document defines the Federated Parallelism and interaction logic of the `aeon` substrate.
 

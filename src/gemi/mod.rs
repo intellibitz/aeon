@@ -7,6 +7,7 @@ pub mod models;
 pub mod pulse;
 pub mod reflex;
 pub mod server;
+pub mod unified;
 pub mod vision;
 
 pub use server::GemiServer;

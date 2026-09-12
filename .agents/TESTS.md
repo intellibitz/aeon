@@ -1,6 +1,6 @@
 # AEON Validation Protocols
 
-* **Current Engine Version**: `v0.1.2022751`
+* **Current Engine Version**: `v0.1.2022752`
 
 This document defines the procedures for verifying the architectural integrity and operational safety of the `aeon` substrate.
 
