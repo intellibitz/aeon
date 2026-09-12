@@ -1,6 +1,6 @@
 # AEON Substrate Topology
 
-* **Current Engine Version**: `v0.1.2022744`
+* **Current Engine Version**: `v0.1.2022745`
 
 This document defines the structural native components and orchestrated meta-layers of the `aeon` substrate, organized into five functional pillars.
 
@@ -19,18 +19,19 @@ This document defines the structural native components and orchestrated meta-lay
 ## 3. Engines - Execution & Inference Substrates
 9. **AEON-Alpha**: Microsecond intent classification and deterministic neural reflex engine. (Tier: 0)
 10. **ReflexSynthesizer**: Native Rust code distillation and reflex generation for distilled intents. (Tier: 0)
-11. **GEMI**: Deep reasoning bridge and unified cloud provider inference racing. (Tier: 2)
-12. **AEON-Vision**: Hardware-saturated neural vision substrate for visual/text semantic fusion. (Tier: 2)
-13. **AEON-Audio**: Hardware-saturated neural audio substrate for spectral logic distillation. (Tier: 2)
+11. **UniversalExecutionSubstrate**: Absolute engine-agnosticism. AEON can execute any model in the world (any weights, any architecture) using a unified, hardware-saturated inference layer. (Tier: 2)
+12. **GEMI**: Deep reasoning bridge and unified cloud provider inference racing. (Tier: 2)
+13. **AEON-Vision**: Hardware-saturated neural vision substrate for visual/text semantic fusion. (Tier: 2)
+14. **AEON-Audio**: Hardware-saturated neural audio substrate for spectral logic distillation. (Tier: 2)
 
 ## 4. Models - Neural Intelligence & Weights
-14. **NativeAlphaModel**: Local neural weights (`aeon-alpha.safetensors`) for deterministic reflex. (Tier: 0)
-15. **NativeReasoningModel**: Distilled Tier 2 logic weights (`aeon-reason.safetensors`) trained on the AEON genome. (Tier: 2)
-16. **UniversalSubstrateModels**: Absolute model-agnosticism. AEON can ingest any model weights (GGUF, Safetensors, ONNX, PyTorch) from any global repository (Hugging Face, ModelScope, Local Vaults). (Tier: 2)
+15. **NativeAlphaModel**: Local neural weights (`aeon-alpha.safetensors`) for deterministic reflex. (Tier: 0)
+16. **NativeReasoningModel**: Distilled Tier 2 logic weights (`aeon-reason.safetensors`) trained on the AEON genome. (Tier: 2)
+17. **UniversalSubstrateModels**: Absolute model-agnosticism. AEON can ingest any model weights (GGUF, Safetensors, ONNX, PyTorch) from any global repository (Hugging Face, ModelScope, Local Vaults). (Tier: 2)
 
 ## 5. MCPs - Interoperability & Tooling (GMCP Infrastructure)
-17. **GMCP Server**: Background daemon exposing multi-protocol endpoints (RPC: 9090, HTTP/SSE: 9093, UDP: 9092) for external AI interoperability. (Tier: 1)
-18. **GMCP Host**: The `aeon` CLI proxy that acts as a protocol bridge between users and the background server. (Tier: 1)
-19. **GEMI Server**: Dedicated RESTful endpoint (Port 9091) for Tier 2 reasoning and model management. (Tier: 1)
-20. **MetaMcpServer**: External Model Context Protocol servers connected via stdio or TCP. (Tier: 1)
-21. **MetaExecutionContext**: Dynamic mission blackboard and orchestrated session memory. (Tier: 1)
+18. **GMCP Server**: Background daemon exposing multi-protocol endpoints (RPC: 9090, HTTP/SSE: 9093, UDP: 9092) for external AI interoperability. (Tier: 1)
+19. **GMCP Host**: The `aeon` CLI proxy that acts as a protocol bridge between users and the background server. (Tier: 1)
+20. **GEMI Server**: Dedicated RESTful endpoint (Port 9091) for Tier 2 reasoning and model management. (Tier: 1)
+21. **MetaMcpServer**: External Model Context Protocol servers connected via stdio or TCP. (Tier: 1)
+22. **MetaExecutionContext**: Dynamic mission blackboard and orchestrated session memory. (Tier: 1)
