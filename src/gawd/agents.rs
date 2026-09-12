@@ -33,7 +33,7 @@ pub struct AgentProfile {
     pub base_rank: f32,
 }
 
-/// High-Density Context Store (Aspiration 5)
+/// High-Density Context Store (Aspiration 6)
 /// Implements lease-capped, memory-safe distributed context mapping.
 #[derive(Debug, Default)]
 pub struct HighDensityContextStore {
@@ -48,7 +48,7 @@ impl HighDensityContextStore {
 
     pub fn insert(&mut self, key: String, value: String) {
         if self.inner.len() >= self.capacity_limit && !self.inner.contains_key(&key) {
-            // Evict oldest or overflow logic (Aspiration 5 placeholder)
+            // Evict oldest or overflow logic (Aspiration 6 placeholder)
             if let Some(old_key) = self.inner.keys().next().cloned() {
                 self.inner.remove(&old_key);
             }
@@ -78,7 +78,7 @@ impl HighDensityContextStore {
 }
 
 /// Mission Blackboard: Shared state for swarm agents to converge on the "Chain of Truth".
-/// Optimized for High-Density Context Mapping (Aspiration 5).
+/// Optimized for High-Density Context Mapping (Aspiration 6).
 pub type MissionBlackboard = Arc<Mutex<HighDensityContextStore>>;
 
 /// Core Intelligence Trait for AEON Swarm Agents
@@ -123,7 +123,7 @@ impl GawdAgent for DynamicAgent {
     }
 }
 
-/// Runtime Substrate Preparation Agent (Aspiration 8)
+/// Runtime Substrate Preparation Agent (Aspiration 9)
 pub struct AeonRuntimeAgent;
 
 impl GawdAgent for AeonRuntimeAgent {

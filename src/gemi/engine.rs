@@ -1,6 +1,6 @@
 // GEMI: Universal AI Inference & Reasoning Bridge
 // 100% Rust implementation for Native Intelligence Substrate
-// RULE 23: Motion Rule Protocol - Aspiration 6: Competitive Inference Racing
+// RULE 23: Motion Rule Protocol - Aspiration 7: Competitive Inference Racing
 
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, OnceLock, mpsc};
@@ -24,7 +24,7 @@ pub enum ModelSubstrate {
 pub struct InferenceHost;
 
 impl InferenceHost {
-    /// Universal Substrate Ingestion (Aspiration 7)
+    /// Universal Substrate Ingestion (Aspiration 8)
     /// Dynamically identifies and loads any GGUF architecture from local or web sources.
     pub fn get_model(model_path: &Path, device: &candle_core::Device) -> EaiResult<Arc<Mutex<ModelSubstrate>>> {
         static CACHED_MODELS: OnceLock<Arc<Mutex<HashMap<PathBuf, Arc<Mutex<ModelSubstrate>>>>>> = OnceLock::new();
@@ -47,7 +47,7 @@ impl InferenceHost {
             .map(|s| s.to_lowercase())
             .unwrap_or_else(|| "llama".to_string());
 
-        // Dynamic Metadata Shimming (Aspiration 7 Hardening)
+        // Dynamic Metadata Shimming (Aspiration 8 Hardening)
         if arch != "llama" {
             let common_keys = [
                 "attention.head_count",
@@ -120,7 +120,7 @@ impl GemiEngine {
         Self::reason_internal(prompt, workspace, false)
     }
 
-    /// Aspiration 6: Ultra-Latency Competitive Inference Racing
+    /// Aspiration 7: Ultra-Latency Competitive Inference Racing
     fn reason_internal(prompt: &str, workspace: &Path, allow_reflex: bool) -> String {
         let preparation_blackboard = std::sync::Arc::new(std::sync::Mutex::new(crate::gawd::agents::HighDensityContextStore::new(1)));
         let _ = crate::gawd::agents::AeonRuntimeAgent.execute(prompt, workspace, &preparation_blackboard);
@@ -190,7 +190,7 @@ impl GemiEngine {
             if action.contains("PASSED") { return Ok(reasoning.to_string()); }
         }
 
-        // Rust-Native Auditing (Aspiration 7)
+        // Rust-Native Auditing (Aspiration 8)
         let audit_res = AeonGgufEngine.run_inference(&audit_prompt).unwrap_or("PASSED_TECHNICAL_FALLBACK".into());
         if audit_res.to_uppercase().contains("PASSED") || audit_res.contains("TECHNICAL_FALLBACK") {
             Ok(reasoning.to_string())
@@ -291,7 +291,7 @@ impl NativeInferenceEngine for AeonGgufEngine {
             let logits = model_weights.forward(&input, pos)
                 .map_err(|e| EaiError::Inference(format!("Model forward failed: {}", e)))?;
 
-            // Absolute Rank-Safe Token Extraction (Aspiration 7)
+            // Absolute Rank-Safe Token Extraction (Aspiration 8)
             let mut t = logits.argmax(candle_core::D::Minus1)
                 .map_err(|e| EaiError::Inference(format!("Argmax failed: {}", e)))?;
 

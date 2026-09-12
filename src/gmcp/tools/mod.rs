@@ -189,7 +189,7 @@ impl ToolRegistry {
         });
 
         Self::register_meta_tool(&mut tools, "reason", "Execute native local reasoning substrate", MetaCategory::SystemPrimitive, |arg, _workspace| {
-             // Aspiration 7: Pure Rust-Native Inference (Hardened)
+             // Aspiration 8: Pure Rust-Native Inference (Hardened)
              crate::gemi::engine::AeonGgufEngine.run_inference(arg)
         });
 

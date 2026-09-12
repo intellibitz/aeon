@@ -160,7 +160,7 @@ impl AeonAlphaModel {
 
         let probs = candle_nn::ops::softmax(&output, 1)?;
 
-        // Absolute Rank Hardening (Aspiration 7)
+        // Absolute Rank Hardening (Aspiration 8)
         let mut p = probs;
         while p.rank() > 1 {
             let dims = p.dims();

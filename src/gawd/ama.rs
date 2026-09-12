@@ -50,7 +50,7 @@ impl AmaMasterAgent {
             super::safety::SafetyDetector::audit_action("AMA_SOLVE", &current_goal, workspace)?;
             super::security::SecurityDetector::audit_action("AMA_SOLVE", &current_goal, workspace)?;
 
-            // Aspiration 8: Autonomous Runtime Substrate Preparation
+            // Aspiration 9: Autonomous Runtime Substrate Preparation
             let preparation_blackboard = std::sync::Arc::new(std::sync::Mutex::new(super::agents::HighDensityContextStore::new(1)));
             super::agents::AeonRuntimeAgent.execute(&current_goal, workspace, &preparation_blackboard)?;
 
@@ -213,7 +213,7 @@ impl AmaMasterAgent {
         super::safety::SafetyDetector::audit_action("AMA_SOLVE", goal, workspace)?;
         super::security::SecurityDetector::audit_action("AMA_SOLVE", goal, workspace)?;
 
-        // Step 2: Runtime Substrate Preparation (Aspiration 8)
+        // Step 2: Runtime Substrate Preparation (Aspiration 9)
         let _ = feedback_tx.send("[AMA] Establishing optimal runtime environment...".to_string());
         let preparation_blackboard = std::sync::Arc::new(std::sync::Mutex::new(super::agents::HighDensityContextStore::new(1)));
         super::agents::AeonRuntimeAgent.execute(goal, workspace, &preparation_blackboard)?;
