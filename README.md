@@ -1,6 +1,6 @@
 # aeon: Exponential Intelligence for Any AI (EAI)
 
-![AEON Version](https://img.shields.io/badge/version-v0.1.2022776-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
+![AEON Version](https://img.shields.io/badge/version-v0.1.2022777-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
 
 **aeon** is a local-first, native Rust AI execution engine designed for high-throughput, hardware-saturated agent orchestration. It transforms static AI interactions into a dynamic, self-evolving intelligence substrate governed by a hard-compiled genome.
 
@@ -28,7 +28,10 @@ The substrate operates via a singular, natural language verification loop. Every
 ### 4. Substrate Ingestion Motion
 `aeon` is a closed-loop intelligence system. It autonomously distills successful reasoning from its mutable interaction history into its own **Native Tier 2 Reasoning Model**, effectively migrating experience into hard-compiled logic.
 
-### 5. Federated Parallelism
+### 5. Federated Experience Aggregation
+`aeon` implements a secure, privacy-preserving protocol for aggregating distilled reasoning from `alpha-user` environments. This enables the collective intelligence of all World Users to evolve the global `alpha-self` genome through federated distillation.
+
+### 6. Federated Parallelism
 Agents run in parallel, coordinating via a shared, high-density **Mission Blackboard**. This allows for "Explosive Swarm Dispatch" where multiple specialists converge on a "Chain of Truth" simultaneously.
 
 ## Installation
