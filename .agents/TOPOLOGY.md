@@ -1,6 +1,6 @@
 # AEON Substrate Topology
 
-* **Current Engine Version**: `v0.1.2022743`
+* **Current Engine Version**: `v0.1.2022744`
 
 This document defines the structural native components and orchestrated meta-layers of the `aeon` substrate, organized into five functional pillars.
 
@@ -26,7 +26,7 @@ This document defines the structural native components and orchestrated meta-lay
 ## 4. Models - Neural Intelligence & Weights
 14. **NativeAlphaModel**: Local neural weights (`aeon-alpha.safetensors`) for deterministic reflex. (Tier: 0)
 15. **NativeReasoningModel**: Distilled Tier 2 logic weights (`aeon-reason.safetensors`) trained on the AEON genome. (Tier: 2)
-16. **MetaModelSubstrate**: External reasoning models (Local GGUF vaults, Candle tensors, Cloud API). (Tier: 2)
+16. **UniversalSubstrateModels**: Absolute model-agnosticism. AEON can ingest any model weights (GGUF, Safetensors, ONNX, PyTorch) from any global repository (Hugging Face, ModelScope, Local Vaults). (Tier: 2)
 
 ## 5. MCPs - Interoperability & Tooling (GMCP Infrastructure)
 17. **GMCP Server**: Background daemon exposing multi-protocol endpoints (RPC: 9090, HTTP/SSE: 9093, UDP: 9092) for external AI interoperability. (Tier: 1)
