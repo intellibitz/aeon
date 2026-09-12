@@ -1,14 +1,15 @@
 # AEON Creator Interface Protocols
 
-* **Current Engine Version**: `v0.1.2022774`
+* **Current Engine Version**: `v0.1.2022775`
 
 This document defines the three absolute fronts of interaction between Human Creators and the `aeon` substrate. It maps the intention of the Creator to the exact epistemic boundary within the engine.
 
 ## 1. Motions (Alpha-Self Mutation)
 1. **Definition**: Architectural evolution and structural engineering.
 2. **Blast Radius**: The immutable `alpha-self` core (binary code, traits, genome).
-3. **Protocol (`MOTIONS.md`)**: A Motion is an authorized Creator directive that exposes a capability gap or defines a new aspiration. It triggers the `Motion Rule` (Test-Driven Evolution). The engine will autonomously synthesize, compile, and deploy new Rust logic to heal the gap.
-4. **Command Syntax**: `aeon "<motion_intent>"` (or `aeon pulse "<motion_intent>"`)
+3. **Sovereign Boundary**: Motions are **Creator-Only**. They require the AEON Genome Source (`src/`) and a Rust compiler.
+4. **Protocol (`MOTIONS.md`)**: A Motion is an authorized Creator directive that exposes a capability gap or defines a new aspiration. It triggers the `Motion Rule` (Test-Driven Evolution). The engine will autonomously synthesize, compile, and deploy new Rust logic to heal the gap.
+5. **Command Syntax**: `aeon "<motion_intent>"` (or `aeon pulse "<motion_intent>"`)
 
 ## 2. Missions (Alpha-User Mutation)
 5. **Definition**: Dynamic task fulfillment and workspace state generation.
