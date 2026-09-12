@@ -1,6 +1,6 @@
 # AEON Operational Workflow
 
-* **Current Engine Version**: `v0.1.2022761`
+* **Current Engine Version**: `v0.1.2022762`
 
 This document defines the Meta-Workflow for substrate evolution and the Federated Parallelism logic of the active `aeon` engine.
 
@@ -15,13 +15,14 @@ This document defines the Meta-Workflow for substrate evolution and the Federate
 5. **Operational Logic (`WORKFLOW.md`)**: The core component's interaction mechanics and parallel behaviors are defined.
 6. **Core Synthesis (`BUILD.md`)**: The workflow triggers the build sequence directly to evolve the `alpha-self`.
 
-### 1b. Alpha-User Mutation Path (Runtime Evolution)
-7. **Runtime Mandate (`RUNTIME.md`)**: The vision alters the dynamic environment without mutating core traits. It translates directly into operational mandates.
-8. **Runtime Synthesis (`BUILD.md`)**: The updated runtime rules trigger a fast-path compilation, evolving the `alpha-user` state.
+### 1b. Alpha-User Mutation Path (Mission & Runtime Evolution)
+7. **Runtime Mandate (`RUNTIME.md`)**: The vision alters the baseline environment (hardware settings, model defaults) without mutating core traits.
+8. **Mission Protocol (`MISSIONS.md`)**: The vision demands new capabilities for workspace manipulation, artifact generation, or experience staging (modifying the `.aeon/` mutable state).
+9. **State Synthesis**: The updated rules trigger a fast-path compilation, evolving the `alpha-user` operational boundaries.
 
 ### 1c. Ephemeral Execution Path (Zero-Mutation)
-9. **Mission Protocol (`MISSIONS.md`)**: If the vision is a non-mutating inquiry or transient task, it is defined as an ephemeral protocol.
-10. **Mission Dispatch**: The intent is routed directly to Phase B (Swarm Synthesis) for immediate fulfillment, leaving the core genome and runtime environment untouched.
+10. **Query Protocol (`QUERIES.md`)**: If the vision is a non-mutating inquiry (e.g., identity check, transient analysis), it is defined as a stateless query.
+11. **Direct Dispatch**: The query is routed directly to the native engines for immediate fulfillment via `stdout`, bypassing the swarm blackboard and leaving all states untouched.
 
 ## 2. Phase A: Foundational Readiness (Continuous)
 
