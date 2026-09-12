@@ -38,9 +38,11 @@ impl AlphaSelf {
     pub const TESTS_MD: &'static str = include_str!("../../.agents/TESTS.md");
     pub const TOPOLOGY_MD: &'static str = include_str!("../../.agents/TOPOLOGY.md");
     pub const WORKFLOW_MD: &'static str = include_str!("../../.agents/WORKFLOW.md");
+    pub const MISSIONS_MD: &'static str = include_str!("../../.agents/MISSIONS.md");
 
     pub const RULES: &[AeonAxiomRule] = GEN_RULES;
     pub const WORKFLOW_STEPS: &[AeonAxiomRule] = GEN_WORKFLOW_STEPS;
+    pub const MISSION_PROTOCOLS: &[AeonAxiomRule] = GEN_MISSION_PROTOCOLS;
 
     // 5 Pillar Component Topology
     pub const AOA_COMPONENTS: &[AeonComponentSpec] = GEN_AOA_COMPONENTS;

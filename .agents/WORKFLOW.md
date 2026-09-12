@@ -1,6 +1,6 @@
 # AEON Operational Workflow
 
-* **Current Engine Version**: `v0.1.2022757`
+* **Current Engine Version**: `v0.1.2022758`
 
 This document defines the Meta-Workflow for substrate evolution and the Federated Parallelism logic of the active `aeon` engine.
 
@@ -20,8 +20,8 @@ This document defines the Meta-Workflow for substrate evolution and the Federate
 8. **Runtime Synthesis (`BUILD.md`)**: The updated runtime rules trigger a fast-path compilation, evolving the `alpha-user` state.
 
 ### 1c. Ephemeral Execution Path (Zero-Mutation)
-9. **Direct Execution**: If the vision is a non-mutating inquiry (e.g., health check, status report, simple query), it bypasses all architectural and runtime definitions.
-10. **Mission Dispatch**: The intent is routed directly to the existing swarm synthesis layer for immediate fulfillment, leaving the genome untouched.
+9. **Mission Protocol (`MISSIONS.md`)**: If the vision is a non-mutating inquiry or transient task, it is defined as an ephemeral protocol.
+10. **Mission Dispatch**: The intent is routed directly to Phase B (Swarm Synthesis) for immediate fulfillment, leaving the core genome and runtime environment untouched.
 
 ## 2. Phase A: Foundational Readiness (Continuous)
 

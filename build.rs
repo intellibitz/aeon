@@ -13,6 +13,7 @@ fn main() {
     let tests_md = fs::read_to_string(".agents/TESTS.md").expect("Missing TESTS.md");
     let topology_md = fs::read_to_string(".agents/TOPOLOGY.md").expect("Missing TOPOLOGY.md");
     let workflow_md = fs::read_to_string(".agents/WORKFLOW.md").expect("Missing WORKFLOW.md");
+    let missions_md = fs::read_to_string(".agents/MISSIONS.md").unwrap_or_default();
 
     let mut generated_code = String::new();
 
@@ -81,7 +82,16 @@ fn main() {
     }
     generated_code.push_str("];\n\n");
 
-    // 7. TOPOLOGY.md -> Pillar-based Components
+    // 7. MISSIONS.md -> GEN_MISSION_PROTOCOLS (100-119)
+    generated_code.push_str("pub const GEN_MISSION_PROTOCOLS: &[AeonAxiomRule] = &[\n");
+    for line in missions_md.lines() {
+        if let Some(rule) = parse_list_item(line) {
+            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 100, rule.1, rule.2));
+        }
+    }
+    generated_code.push_str("];\n\n");
+
+    // 8. TOPOLOGY.md -> Pillar-based Components
     let mut current_pillar = "";
     generated_code.push_str("pub const GEN_AOA_COMPONENTS: &[AeonComponentSpec] = &[\n");
     let mut agents = String::from("pub const GEN_AGENT_COMPONENTS: &[AeonComponentSpec] = &[\n");
@@ -180,6 +190,11 @@ fn main() {
             generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 80, rule.1, rule.2));
         }
     }
+    for line in missions_md.lines() {
+        if let Some(rule) = parse_list_item(line) {
+            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 100, rule.1, rule.2));
+        }
+    }
     generated_code.push_str("];\n");
 
     fs::write(&dest_path, generated_code).unwrap();
@@ -187,6 +202,7 @@ fn main() {
     println!("cargo:rerun-if-changed=.agents/AGENTS.md");
     println!("cargo:rerun-if-changed=.agents/ASPIRATIONS.md");
     println!("cargo:rerun-if-changed=.agents/BUILD.md");
+    println!("cargo:rerun-if-changed=.agents/MISSIONS.md");
     println!("cargo:rerun-if-changed=.agents/RUNTIME.md");
     println!("cargo:rerun-if-changed=.agents/TESTS.md");
     println!("cargo:rerun-if-changed=.agents/TOPOLOGY.md");
