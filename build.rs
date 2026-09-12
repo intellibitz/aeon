@@ -10,7 +10,7 @@ fn main() {
     let aspirations_md = fs::read_to_string(".agents/ASPIRATIONS.md").expect("Missing ASPIRATIONS.md");
     let build_md = fs::read_to_string(".agents/BUILD.md").expect("Missing BUILD.md");
     let runtime_md = fs::read_to_string(".agents/RUNTIME.md").expect("Missing RUNTIME.md");
-    let tests_md = fs::read_to_string(".agents/TESTS.md").expect("Missing TESTS.md");
+    let tests_md = fs::read_to_string(".agents/MOTIONS.md").expect("Missing MOTIONS.md");
     let topology_md = fs::read_to_string(".agents/TOPOLOGY.md").expect("Missing TOPOLOGY.md");
     let workflow_md = fs::read_to_string(".agents/WORKFLOW.md").expect("Missing WORKFLOW.md");
     let missions_md = fs::read_to_string(".agents/MISSIONS.md").unwrap_or_default();
@@ -64,8 +64,8 @@ fn main() {
     }
     generated_code.push_str("];\n\n");
 
-    // 5. TESTS.md -> GEN_TEST_PROTOCOLS (60-79)
-    generated_code.push_str("pub const GEN_TEST_PROTOCOLS: &[AeonAxiomRule] = &[\n");
+    // 5. MOTIONS.md -> GEN_MOTION_PROTOCOLS (60-79)
+    generated_code.push_str("pub const GEN_MOTION_PROTOCOLS: &[AeonAxiomRule] = &[\n");
     for line in tests_md.lines() {
         if let Some(rule) = parse_list_item(line) {
             generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 60, rule.1, rule.2));
@@ -204,7 +204,7 @@ fn main() {
     println!("cargo:rerun-if-changed=.agents/BUILD.md");
     println!("cargo:rerun-if-changed=.agents/MISSIONS.md");
     println!("cargo:rerun-if-changed=.agents/RUNTIME.md");
-    println!("cargo:rerun-if-changed=.agents/TESTS.md");
+    println!("cargo:rerun-if-changed=.agents/MOTIONS.md");
     println!("cargo:rerun-if-changed=.agents/TOPOLOGY.md");
     println!("cargo:rerun-if-changed=.agents/WORKFLOW.md");
 }

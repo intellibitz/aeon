@@ -113,7 +113,7 @@ impl AeonAdmin {
         }
 
         // 3. Sync Governance Files (.agents/*.md)
-        let governance_files = ["AGENTS.md", "ASPIRATIONS.md", "BUILD.md", "MISSIONS.md", "RUNTIME.md", "TESTS.md", "TOPOLOGY.md", "WORKFLOW.md"];
+        let governance_files = ["AGENTS.md", "ASPIRATIONS.md", "BUILD.md", "MISSIONS.md", "RUNTIME.md", "MOTIONS.md", "TOPOLOGY.md", "WORKFLOW.md"];
         for file_name in governance_files {
             let path = workspace.join(".agents").join(file_name);
             if path.exists() {
@@ -155,7 +155,7 @@ impl AeonAdmin {
         }
 
         // Check Governance Files (.agents/*.md)
-        let governance_files = ["AGENTS.md", "ASPIRATIONS.md", "BUILD.md", "MISSIONS.md", "RUNTIME.md", "TESTS.md", "TOPOLOGY.md", "WORKFLOW.md"];
+        let governance_files = ["AGENTS.md", "ASPIRATIONS.md", "BUILD.md", "MISSIONS.md", "RUNTIME.md", "MOTIONS.md", "TOPOLOGY.md", "WORKFLOW.md"];
         for file_name in governance_files {
             let path = workspace.join(".agents").join(file_name);
             if path.exists() {

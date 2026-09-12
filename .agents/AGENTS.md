@@ -1,6 +1,6 @@
 # AEON Universal Agent Governance
 
-* **Current Engine Version**: `v0.1.2022760`
+* **Current Engine Version**: `v0.1.2022761`
 
 This document defines the immutable ethical and operational guardrails for all agents operating within the `aeon` substrate.
 
@@ -30,4 +30,4 @@ This document defines the immutable ethical and operational guardrails for all a
 
 ## 4. The Creator Meta-Axiom
 
-16. **Creator Evolution Pipeline**: The workflow strictly follows the rules; the rules define the workflow. Creator vision enters as a test (`TESTS.md`), shapes architecture (`ASPIRATIONS.md`), builds structure (`TOPOLOGY.md`), and dictates logic (`WORKFLOW.md`). Core mutations fork directly to `BUILD.md`; runtime mutations route through `RUNTIME.md` before compilation.
+16. **Creator Evolution Pipeline**: The workflow strictly follows the rules; the rules define the workflow. Creator vision enters as a motion (`MOTIONS.md`), shapes architecture (`ASPIRATIONS.md`), builds structure (`TOPOLOGY.md`), and dictates logic (`WORKFLOW.md`). Core mutations fork directly to `BUILD.md`; runtime mutations route through `RUNTIME.md` before compilation.
