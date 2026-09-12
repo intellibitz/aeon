@@ -1,12 +1,12 @@
 # AEON Substrate Topology
 
-* **Current Engine Version**: `v0.1.2022768`
+* **Current Engine Version**: `v0.1.2022769`
 
 This document defines the structural native components and orchestrated meta-layers of the `aeon` substrate, organized into five functional pillars.
 
 ## 1. Agent of Agents (AoA) - Coordination & Governance
 1. **GAWD / AMA**: Universal swarm supervisor and multi-agent parallel dispatcher. (Tier: 1)
-2. **AeonAdmin**: Native administrative substrate for release orchestration and compliance auditing. (Tier: 1)
+2. **AeonAdmin**: Native administrative substrate for release orchestration, compliance auditing, and axiomatic pulse ingestion. (Tier: 1)
 3. **AeonRuntimeAdmin**: Substrate maintenance authority (Hardware audit, Model provisioning & peak selection). (Tier: 1)
 4. **EvolutionManager**: Substrate self-healing and autonomous Motion Rule execution. (Tier: 1)
 5. **AmaDaemon**: Persistent background host and process manager for the GMCP/GEMI server fleet. (Tier: 1)

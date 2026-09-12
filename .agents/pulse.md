@@ -1,6 +1,6 @@
 # AEON Substrate Validation Genome (PULSE)
 
-* **Current Engine Version**: `v0.1.2022768`
+* **Current Engine Version**: `v0.1.2022769`
 
 This document defines the complete set of validation protocols that anchor the `aeon` genome. Every entry reflects a hard-compiled reflex or an orchestrated meta-behavior.
 
@@ -96,3 +96,4 @@ This document defines the complete set of validation protocols that anchor the `
 71. `[x]` **Health Interrogation**: Daemon, engine, and thread status reporting.
 72. `[x]` **Model Roster**: vault and registry roster reporting without modification.
 73. `[x]` **Ephemeral Analytics**: Rapid text/vision/audio analysis directly to stdout.
+74. `[x]` **[MOTION] Axiomatic Pulse Ingestion**: The `aeon` binary now possesses a native reflex to automatically classify natural language instructions (`[MOTION]`, `[MISSION]`, `[QUERY]`) and inject them into `pulse.md` via the `aeon pulse` command.

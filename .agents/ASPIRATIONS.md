@@ -1,6 +1,6 @@
 # AEON Architectural Aspirations
 
-* **Current Engine Version**: `v0.1.2022768`
+* **Current Engine Version**: `v0.1.2022769`
 
 This document defines the structural roadmap and evolution goals of the `aeon` substrate.
 
@@ -79,3 +79,8 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 
 ### [Aspiration 16] Unified Natural Language Evolution
 * **Core Paradigm**: The "Speak-to-Evolve" mandate. Every human instruction is automatically mapped to a verifiable `[MOTION]`, `[MISSION]`, or `[QUERY]` test entry in `pulse.md`. This anchors the substrate's entire lifecycle in a singular, natural language verification loop.
+
+---
+
+### [Aspiration 17] Axiomatic Intent-to-Pulse Ingestion
+* **Core Paradigm**: The "Autonomous Ingestion" mandate. The `aeon` binary must possess a native neural reflex to classify any natural language instruction into its appropriate epistemic category (`[MOTION]`, `[MISSION]`, or `[QUERY]`) and automatically commit the entry to `pulse.md`.

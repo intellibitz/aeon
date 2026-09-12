@@ -202,6 +202,66 @@ impl AeonAdmin {
         Ok("Release sequence verified. Tests, Missions, and Audits passed. Substrate is ready for deployment.".into())
     }
 
+    /// Ingest a natural language intent and automatically inject it into pulse.md
+    pub fn ingest_natural_intent(workspace: &Path, intent: &str) -> EaiResult<String> {
+        let pulse_path = workspace.join(".agents/pulse.md");
+        if !pulse_path.exists() {
+            return Err(EaiError::Config("pulse.md not found".into()));
+        }
+
+        // 1. Classify Intent
+        let lower_intent = intent.to_lowercase();
+        let (prefix, _category) = if lower_intent.contains("motion") || lower_intent.contains("core") || lower_intent.contains("architecture") || lower_intent.contains("binary") {
+            ("[MOTION]", "Architectural Evolution")
+        } else if lower_intent.contains("query") || lower_intent.contains("status") || lower_intent.contains("identity") || lower_intent.contains("check") {
+            ("[QUERY]", "Zero-Mutation Interrogation")
+        } else {
+            ("[MISSION]", "Dynamic Task Fulfillment")
+        };
+
+        // 2. Read pulse.md and find the last index in section 2
+        let content = fs::read_to_string(&pulse_path)?;
+        let mut lines: Vec<String> = content.lines().map(|s| s.to_string()).collect();
+
+        let last_index = lines.iter()
+            .filter_map(|l| {
+                let trimmed = l.trim();
+                if trimmed.is_empty() || !trimmed.chars().next().unwrap().is_digit(10) { return None; }
+                trimmed.split('.').next()?.parse::<usize>().ok()
+            })
+            .max()
+            .unwrap_or(0);
+
+        let new_index = last_index + 1;
+        let entry = format!("{}. [ ] **{}**: {}", new_index, prefix, intent);
+
+        // 3. Inject into Section 1 (Pending)
+        let mut section1_start = None;
+        for (i, line) in lines.iter().enumerate() {
+            if line.contains("## 1. Pending Failing Pulse") {
+                section1_start = Some(i);
+                break;
+            }
+        }
+
+        if let Some(start) = section1_start {
+             // Find insertion point (after header, before next section)
+             let mut insert_pos = start + 1;
+             while insert_pos < lines.len() && (lines[insert_pos].trim().is_empty() || lines[insert_pos].trim().starts_with("(No pending")) {
+                 if lines[insert_pos].trim().starts_with("(No pending") {
+                     lines.remove(insert_pos);
+                     continue;
+                 }
+                 insert_pos += 1;
+             }
+             lines.insert(insert_pos, format!("* `{}`", entry));
+        }
+
+        fs::write(&pulse_path, lines.join("\n") + "\n")?;
+
+        Ok(format!("Intent ingested successfully as {} into pulse.md", prefix))
+    }
+
     pub fn execute_autonomous_evolution_cycle(workspace: &Path) -> EaiResult<String> {
         let res = crate::daemon::evolution::EvolutionManager::evolve_substrate(workspace)?;
         let _ = Self::execute_release(workspace)?;

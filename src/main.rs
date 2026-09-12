@@ -123,6 +123,17 @@ fn main() {
             let cfg = crate::sandbox::manager::AeonConfig::load(&global_dir);
             GemiServer::start_http_server(cwd.clone(), cfg.gemi_port);
         }
+        "pulse" => {
+            let intent = args.get(1..).map(|s| s.join(" ")).unwrap_or_default();
+            if intent.is_empty() {
+                println!("Usage: aeon pulse <natural language instruction>");
+            } else {
+                match crate::daemon::admin::AeonAdmin::ingest_natural_intent(&cwd, &intent) {
+                    Ok(msg) => println!("{}", msg),
+                    Err(e) => eprintln!("Pulse ingestion failed: {}", e),
+                }
+            }
+        }
         "audit" => {
             match crate::daemon::admin::AeonAdmin::audit_compliance(&cwd, None) {
                 Ok(report) => println!("{}", report),
@@ -141,7 +152,18 @@ fn main() {
                         Err(e) => eprintln!("Sync failed: {}", e),
                     }
                 }
-                "audit" => {
+                "pulse" => {
+            let intent = args.get(1..).map(|s| s.join(" ")).unwrap_or_default();
+            if intent.is_empty() {
+                println!("Usage: aeon pulse <natural language instruction>");
+            } else {
+                match crate::daemon::admin::AeonAdmin::ingest_natural_intent(&cwd, &intent) {
+                    Ok(msg) => println!("{}", msg),
+                    Err(e) => eprintln!("Pulse ingestion failed: {}", e),
+                }
+            }
+        }
+        "audit" => {
                     match crate::daemon::admin::AeonAdmin::audit_compliance(&cwd, None) {
                         Ok(report) => println!("{}", report),
                         Err(e) => {
