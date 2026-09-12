@@ -1,44 +1,57 @@
-# aeon
+# aeon: Exponential Intelligence for Any AI (EAI)
 
-![AEON Version](https://img.shields.io/badge/version-v0.1.2022748-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
+![AEON Version](https://img.shields.io/badge/version-v0.1.2022749-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
 
-**aeon** is a Rust-based local-first AI execution engine. It provides a sub-2ms CLI launcher that proxies commands to a persistent background daemon for zero-latency tool execution and agent orchestration.
+**aeon** is a local-first, native Rust AI execution engine designed for high-throughput, hardware-saturated agent orchestration. It transforms static AI interactions into a dynamic, self-evolving intelligence substrate.
 
-## Architecture
+## The 5 Pillars of aeon
 
-* **Binary Core**: Immutable system rules and agent definitions are compiled directly into the binary.
-* **Model Routing**: Prioritizes local runtimes (Candle tensor substrates) before falling back to cloud inference.
-* **Hardware-Aware Selection**: Automatically profiles system RAM, VRAM, and GPU acceleration to identify and default to the best-suited local model.
-* **Capabilities**: MCP (Model Context Protocol) integration, file I/O, system command execution, and autonomous task looping.
+The substrate is organized into five functional pillars that ensure substrate purity and absolute model-agnosticism:
+
+1.  **Agent of Agents (AoA)**: The coordination and governance layer (`GAWD / AMA`) that recruits and supervises parallel agent swarms.
+2.  **Agents**: Functional execution units (Safety, Context, Specialist) synthesized dynamically to fulfill mission goals.
+3.  **Engines**: Hardware-saturated inference substrates (`GEMI`, `Reflex`, `Vision`, `Audio`) providing low-latency compute logic.
+4.  **Models**: Absolute model-agnosticism. Ingests any weights (GGUF, Safetensors, ONNX) from any global repository.
+5.  **MCPs**: The interoperability bus (Model Context Protocol) connecting aeon to any external tool or data source.
+
+## Architectural Innovations
+
+### 1. Hard-Compiled Genome (Alpha-Self)
+Unlike traditional AI frameworks, `aeon` hard-compiles its entire governance genome (`.agents/*.md`) into its binary. This ensures that the engine's core ethics, aspirations, and structural topology are immutable binary reflexes, not mutable prompts.
+
+### 2. Substrate Ingestion Motion
+`aeon` is a closed-loop intelligence system. It autonomously distills successful reasoning from its mutable interaction history into its own **Native Tier 2 Reasoning Model**, effectively migrating experience into hard-compiled logic.
+
+### 3. Federated Parallelism
+Agents run in parallel, coordinating via a shared, high-density **Mission Blackboard**. This allows for "Explosive Swarm Dispatch" where multiple specialists converge on a "Chain of Truth" simultaneously.
+
+### 4. Autonomous Drift Detection
+The substrate independently audits its own capability surface. When architectural gaps are detected, the **Motion Rule** triggers autonomous synthesis and testing of native Rust traits to heal and expand the engine.
 
 ## Installation
 
-### Platform-Independent One-Liner (Linux / macOS / Windows / WSL)
+### Universal One-Liner (Linux / macOS / Windows / WSL)
 ```bash
 curl -sSfL https://raw.githubusercontent.com/intellibitz/aeon/main/install.sh | sh
 ```
 
-## Configuration
-
-`aeon` is designed to be zero-config, but you can customize its behavior via environment variables or a local `.env` file in `~/.aeon/env`.
-
-* **AEON_REPO**: Custom GitHub repository for binary updates (defaults to `intellibitz/aeon`).
-
 ## Usage
 
-Execute commands or natural language tasks directly:
+Interact with the substrate using natural language or system commands:
+
 ```bash
-aeon "read BUILD.md and agents.md"
-aeon "list installed Android Studio versions"
-aeon status
-aeon mcp
+# Identity Report: Inspect the hard-compiled genome
+aeon identity
+
+# Native Logic: Execute a mission with an explosive swarm
+aeon "analyze this workspace and propose an optimization plan"
+
+# Multimodal: Unified vision/text analysis
+aeon "analyze visual/image.png and describe its intent"
+
+# Administration: Atomic genome synchronization
+aeon admin sync
 ```
-
-## Maintainers
-
-* IntelliBitz
-* Muthu Ramadoss
-* Gemini (Google AI)
 
 ## License
 
