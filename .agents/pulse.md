@@ -1,13 +1,13 @@
 # AEON Substrate Validation Genome (PULSE)
 
-* **Current Engine Version**: `v0.1.2022769`
+* **Current Engine Version**: `v0.1.2022770`
 
 This document defines the complete set of validation protocols that anchor the `aeon` genome. Every entry reflects a hard-compiled reflex or an orchestrated meta-behavior.
 
 ## 1. Pending Failing Pulse
 
-(No pending pulse. Substrate is optimal.)
 
+* `75. [x] **[MISSION]**: Synced CREATORS.md command syntax with the new Axiomatic Pulse Ingestion engine
 ## 2. Ingested & Resolved Pulse (The Realized Genome)
 
 ### 2.1 Core Governance & Epistemic Integrity [MOTION]

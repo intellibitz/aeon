@@ -1,6 +1,6 @@
 # AEON Runtime Mandates
 
-* **Current Engine Version**: `v0.1.2022769`
+* **Current Engine Version**: `v0.1.2022770`
 
 This document defines the operational directives for environment establishment, maintenance, and safety across both the `alpha-self` (core host) and `alpha-user` (mutable workspace) boundaries.
 
