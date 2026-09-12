@@ -1,38 +1,8 @@
 # aeon: Exponential Intelligence for Any AI (EAI)
 
-![AEON Version](https://img.shields.io/badge/version-v0.1.2022777-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
+![AEON Version](https://img.shields.io/badge/version-v0.1.2022778-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
 
-**aeon** is a local-first, native Rust AI execution engine designed for high-throughput, hardware-saturated agent orchestration. It transforms static AI interactions into a dynamic, self-evolving intelligence substrate governed by a hard-compiled genome.
-
-## The 5 Pillars of aeon
-
-The substrate is organized into five functional pillars that ensure substrate purity and absolute model-agnosticism:
-
-1.  **Agent of Agents (AoA)**: The coordination and governance layer (`GAWD / AMA`) that recruits and supervises parallel agent swarms.
-2.  **Agents**: Functional execution units (Safety, Context, Specialist) synthesized dynamically to fulfill mission goals.
-3.  **Engines**: Hardware-saturated inference substrates (`GEMI`, `Reflex`, `Vision`, `Audio`) providing low-latency compute logic.
-4.  **Models**: Absolute model-agnosticism. Ingests any weights (GGUF, Safetensors, ONNX) from any global repository.
-5.  **MCPs**: The interoperability bus (Model Context Protocol) connecting aeon to any external tool or data source.
-
-## Architectural Innovations
-
-### 1. Hard-Compiled Genome (Alpha-Self)
-Unlike traditional AI frameworks, `aeon` hard-compiles its entire governance genome (`.agents/*.md`) into its binary. This ensures that the engine's core ethics, aspirations, and structural topology are immutable binary reflexes, not mutable prompts.
-
-### 2. The Master Pulse (`pulse.md`)
-The substrate operates via a singular, natural language verification loop. Every human instruction is automatically mapped to a verifiable `[MOTION]`, `[MISSION]`, or `[QUERY]` entry in [pulse.md](.agents/pulse.md). This anchors the substrate's entire lifecycle in a "Test-First" self-healing loop.
-
-### 3. Axiomatic Pulse Ingestion
-`aeon` possesses a native neural reflex to autonomously classify instructions and inject them into the genome. This eliminates the friction between human intent and machine execution, allowing the substrate to evolve at the speed of thought.
-
-### 4. Substrate Ingestion Motion
-`aeon` is a closed-loop intelligence system. It autonomously distills successful reasoning from its mutable interaction history into its own **Native Tier 2 Reasoning Model**, effectively migrating experience into hard-compiled logic.
-
-### 5. Federated Experience Aggregation
-`aeon` implements a secure, privacy-preserving protocol for aggregating distilled reasoning from `alpha-user` environments. This enables the collective intelligence of all World Users to evolve the global `alpha-self` genome through federated distillation.
-
-### 6. Federated Parallelism
-Agents run in parallel, coordinating via a shared, high-density **Mission Blackboard**. This allows for "Explosive Swarm Dispatch" where multiple specialists converge on a "Chain of Truth" simultaneously.
+**aeon** is a local-first, native Rust AI execution engine designed for high-throughput, hardware-saturated agent orchestration. It transforms static AI interactions into a dynamic, self-evolving intelligence substrate governed by a hard-compiled genome. By embedding design governance rules directly into binary memory, `aeon` eliminates the gap between intention and execution, delivering a safe, sovereign, and exponentially improving intelligence layer for any environment.
 
 ## Installation
 
@@ -40,13 +10,14 @@ Agents run in parallel, coordinating via a shared, high-density **Mission Blackb
 ```bash
 curl -sSfL https://raw.githubusercontent.com/intellibitz/aeon/main/install.sh | sh
 ```
+The installer prioritizes pre-compiled binary deployment for microsecond onboarding, with a transparent fallback to local compilation if required. It automatically initializes the `.aeon/bin` environment in your host's shell path.
 
 ## Usage
 
 Interact with the substrate using the simplified natural language interface:
 
 ```bash
-# Core Evolution: Trigger a binary mutation
+# Core Evolution: Trigger a binary mutation (Creator Mode)
 aeon "Add a new spectral analysis engine to the binary"
 
 # Workspace Mission: Execute a task with a swarm
@@ -65,6 +36,69 @@ aeon admin sync
 aeon admin release
 ```
 
-## License
+---
 
+# Complete Documentation
+
+This section provides a detailed synthesis of the AEON Substrate Genome, as defined in the hard-compiled `.agents/` manifest.
+
+## 1. Universal Agent Governance
+AEON is governed by a set of **Epistemic Integrity Mandates** that ensure absolute truth and professional excellence:
+
+- **No Lies & No Hallucinations**: Every status report, code snippet, and fact must be grounded in verified reality or direct tool results.
+- **Brutally Honest & Critical**: The engine maintains a continuous evaluation mode, critically auditing architecture and logic for drift or pathologies.
+- **Epistemic Chain of Truth**: Source code and empirical runtime results are the ultimate truth.
+- **Immutability Enforcement**: The core `alpha-self` binary is protected from modification by runtime agents; evolution is only permitted through the authorized pipeline.
+- **Substrate Sovereignty**: Absolute isolation of ephemeral state within git-ignored `.aeon/` directories.
+
+## 2. Architectural Aspirations
+AEON's evolution is driven by 18 core paradigms, including:
+
+- **Platform Independence**: Native execution across Linux, macOS, and Windows with zero bias.
+- **Substrate Purity**: The core codebase contains zero static domain-specific logic; all capabilities are bound dynamically via MCP.
+- **Hardware Saturation**: Active interrogation of CPU/GPU topologies to dynamically map reasoning to the optimal acceleration substrate.
+- **Autonomous Test-Driven Evolution**: The substrate independently detects architectural gaps and triggers self-healing Rust mutations.
+- **Unified Multi-Modal Embedding Space**: A 1024-dimensional neural projection space where text, vision, and audio intents are unified.
+- **Federated Experience Aggregation**: Secure, privacy-preserving protocol for aggregating distilled reasoning from world users to evolve the global genome.
+
+## 3. Substrate Topology (The 5 Pillars)
+The engine is structured into five functional tiers:
+
+1.  **Agent of Agents (AoA)**: Universal swarm supervisor (`GAWD`) and background daemon (`AmaDaemon`).
+2.  **Agents**: Specialist units (Safety, Context, Hardware, Runtime) synthesized dynamically based on intent.
+3.  **Engines**: Hardware-saturated substrates for Alpha (Reflex), GEMI (Reasoning), Vision, and Audio.
+4.  **Models**: Local neural weights (`aeon-alpha.safetensors`, `aeon-reason.safetensors`) and universal model ingestion (GGUF, safetensors, ONNX).
+5.  **MCPs**: JSON-RPC 2.0 interoperability bus connecting to any tool registry or external data source.
+
+## 4. Operational Workflow
+AEON follows a recursive **Creator Evolution Pipeline**:
+
+1.  **Vision Ingestion**: Transformation of natural language into typed `[MOTION]`, `[MISSION]`, or `[QUERY]` pulse entries.
+2.  **Substrate Fork Decision**: Causal routing to the appropriate mutation path (Core, Workspace, or Ephemeral).
+3.  **Explosive Swarm Dispatch**: Parallel execution of agents coordinating via a shared **Mission Blackboard**.
+4.  **Chain of Truth Convergence**: Swarm participants grounding all results in empirical filesystem state.
+5.  **Substrate Ingestion**: Distillation of reasoning into the Native Tier 2 model to close the loop between experience and memory.
+
+## 5. Interaction Fronts (The Sovereign Boundary)
+- **Motions (Alpha-Self)**: **Creator-Only**. Architectural evolution requiring the genome source code and Rust compiler.
+- **Missions (Alpha-User)**: **Universal**. Dynamic task fulfillment and workspace mutation via Experience Distillation.
+- **Queries (Zero-Mutation)**: **Universal**. Stateless substrate interrogation and truth auditing.
+
+## 6. Build & Release Protocols
+Release integrity is enforced by the **AeonAdmin** administrative substrate:
+- **Mandatory Verification**: 100% pass rate in native unit tests (`cargo test`) and ephemeral mission protocols (`aeon identity`).
+- **Workspace De-pollution**: Absolute mandate to remove all temporary files and logs before remote push.
+- **Genome Synchronization**: Atomic version increment and sync across all manifests and binary constants.
+
+## 7. Runtime Mandates & Safety
+- **Self-Healing Reflex**: Autonomous recovery from port collisions or memory faults.
+- **Swarm Safety**: Absolute intercept of destructive patterns (e.g., `rm -rf /`) and critical path protection.
+- **Secret Masking**: Active detection and masking of sensitive credentials (tokens, keys) in all output streams.
+
+## 8. Validation Genome (The Master Pulse)
+The `pulse.md` file serves as the singular source of truth for realized and pending evolution. Every capability of the active binary is anchored in a resolved pulse entry, ensuring that the engine always accurately reflects its hard-compiled genome.
+
+---
+
+## License
 [Apache License 2.0](LICENSE)
