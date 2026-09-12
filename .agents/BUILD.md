@@ -1,6 +1,6 @@
 # AEON Build & Deployment Substrate
 
-* **Current Engine Version**: `v0.1.2022749`
+* **Current Engine Version**: `v0.1.2022750`
 
 This document defines the mechanics of the `aeon` binary lifecycle, release orchestration, and deployment protocols.
 
@@ -18,7 +18,8 @@ This document defines the mechanics of the `aeon` binary lifecycle, release orch
 7. **Compliance Audit**: Mandatory execution of `aeon admin audit` to verify security patterns and genome alignment.
 8. **Genome Synchronization**: Atomic version increment in `Cargo.toml` followed by a sync update to all `.agents/*.md` and `README.md` files.
 9. **Conventional Commit Protocol**: Git commit messages must use plain text conventional prefixes (e.g., `feat:`, `fix:`, `refactor:`) without emojis.
-10. **Automated Release Push**: Atomic push to the remote repository once all verification tiers are satisfied.
+10. **Workspace De-pollution**: Absolute mandate to remove all non-essential temporary files, mission logs, and architectural scratch files from the root directory before any remote push.
+11. **Automated Release Push**: Atomic push to the remote repository once all verification tiers and de-pollution mandates are satisfied.
 
 ## 3. Universal Deployment Protocols
 

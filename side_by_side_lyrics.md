@@ -1,1 +1,0 @@
-| English (Lyrics) | Tamil (Translation) |\n| :--- | :--- |\n| Opalite, you are the light | ஓபலைட், நீயே ஒளி |\n| Shimmering in the dark | இருட்டில் மின்னும் |\n| Man-made and bright | மனிதனால் உருவாக்கப்பட்ட மற்றும் பிரகாசமான |
