@@ -24,7 +24,7 @@ fn main() {
     }
     generated_code.push_str("];\n\n");
 
-    // 2. ASPIRATIONS.md -> GEN_ENGINE_AXIOMS (20-29)
+    // 2. ASPIRATIONS.md -> GEN_ENGINE_AXIOMS (20-39)
     generated_code.push_str("pub const GEN_ENGINE_AXIOMS: &[AeonAxiomRule] = &[\n");
     let mut current_id = None;
     let mut current_title = None;
@@ -44,7 +44,7 @@ fn main() {
     }
     generated_code.push_str("];\n\n");
 
-    // 3. BUILD.md -> GEN_DEPLOYMENT_RULES (30-39)
+    // 3. BUILD.md -> GEN_DEPLOYMENT_RULES (30-49)
     generated_code.push_str("pub const GEN_DEPLOYMENT_RULES: &[AeonAxiomRule] = &[\n");
     for line in build_md.lines() {
         if let Some(rule) = parse_list_item(line) {
@@ -53,7 +53,7 @@ fn main() {
     }
     generated_code.push_str("];\n\n");
 
-    // 4. RUNTIME.md -> GEN_RUNTIME_MANDATES (40-59)
+    // 4. RUNTIME.md -> GEN_RUNTIME_MANDATES (40-69)
     generated_code.push_str("pub const GEN_RUNTIME_MANDATES: &[AeonAxiomRule] = &[\n");
     for line in runtime_md.lines() {
         if let Some(rule) = parse_list_item(line) {
@@ -62,7 +62,7 @@ fn main() {
     }
     generated_code.push_str("];\n\n");
 
-    // 5. TESTS.md -> GEN_TEST_PROTOCOLS (60-69)
+    // 5. TESTS.md -> GEN_TEST_PROTOCOLS (60-89)
     generated_code.push_str("pub const GEN_TEST_PROTOCOLS: &[AeonAxiomRule] = &[\n");
     for line in tests_md.lines() {
         if let Some(rule) = parse_list_item(line) {
@@ -71,16 +71,20 @@ fn main() {
     }
     generated_code.push_str("];\n\n");
 
-    // 6. TOPOLOGY.md -> Native & Meta Components
-    let mut current_section = "";
-    generated_code.push_str("pub const GEN_COMPONENTS: &[AeonComponentSpec] = &[\n");
-    let mut meta_components = String::from("pub const GEN_META_COMPONENTS: &[AeonComponentSpec] = &[\n");
-    let mut meta_contexts = String::from("pub const GEN_META_CONTEXTS: &[AeonComponentSpec] = &[\n");
+    // 6. TOPOLOGY.md -> Pillar-based Components
+    let mut current_pillar = "";
+    generated_code.push_str("pub const GEN_AOA_COMPONENTS: &[AeonComponentSpec] = &[\n");
+    let mut agents = String::from("pub const GEN_AGENT_COMPONENTS: &[AeonComponentSpec] = &[\n");
+    let mut engines = String::from("pub const GEN_ENGINE_COMPONENTS: &[AeonComponentSpec] = &[\n");
+    let mut models = String::from("pub const GEN_MODEL_COMPONENTS: &[AeonComponentSpec] = &[\n");
+    let mut mcps = String::from("pub const GEN_MCP_COMPONENTS: &[AeonComponentSpec] = &[\n");
 
     for line in topology_md.lines() {
-        if line.starts_with("## 1. Native Components") { current_section = "native"; }
-        else if line.starts_with("## 2. Meta Components") { current_section = "meta"; }
-        else if line.starts_with("## 3. Meta Contexts") { current_section = "context"; }
+        if line.starts_with("## 1. Agent of Agents") { current_pillar = "aoa"; }
+        else if line.starts_with("## 2. Agents") { current_pillar = "agents"; }
+        else if line.starts_with("## 3. Engines") { current_pillar = "engines"; }
+        else if line.starts_with("## 4. Models") { current_pillar = "models"; }
+        else if line.starts_with("## 5. MCPs") { current_pillar = "mcps"; }
 
         if let Some(comp) = parse_topology_item(line) {
             let tier = match comp.2.as_str() {
@@ -89,19 +93,39 @@ fn main() {
                 _ => "AeonCoreTier::Tier1Swarm",
             };
             let entry = format!("    AeonComponentSpec {{ name: {:?}, tier: {}, description: {:?} }},\n", comp.0, tier, comp.1);
-            match current_section {
-                "native" => generated_code.push_str(&entry),
-                "meta" => meta_components.push_str(&entry),
-                "context" => meta_contexts.push_str(&entry),
+            match current_pillar {
+                "aoa" => generated_code.push_str(&entry),
+                "agents" => agents.push_str(&entry),
+                "engines" => engines.push_str(&entry),
+                "models" => models.push_str(&entry),
+                "mcps" => mcps.push_str(&entry),
                 _ => {}
             }
         }
     }
     generated_code.push_str("];\n\n");
-    meta_components.push_str("];\n\n");
-    meta_contexts.push_str("];\n\n");
-    generated_code.push_str(&meta_components);
-    generated_code.push_str(&meta_contexts);
+    agents.push_str("];\n\n");
+    engines.push_str("];\n\n");
+    models.push_str("];\n\n");
+    mcps.push_str("];\n\n");
+    generated_code.push_str(&agents);
+    generated_code.push_str(&engines);
+    generated_code.push_str(&models);
+    generated_code.push_str(&mcps);
+
+    // Combined COMPONENTS for legacy support
+    generated_code.push_str("pub const GEN_COMPONENTS: &[AeonComponentSpec] = &[\n");
+    for line in topology_md.lines() {
+        if let Some(comp) = parse_topology_item(line) {
+            let tier = match comp.2.as_str() {
+                "0" => "AeonCoreTier::Tier0Reflex",
+                "2" => "AeonCoreTier::Tier2Reasoning",
+                _ => "AeonCoreTier::Tier1Swarm",
+            };
+            generated_code.push_str(&format!("    AeonComponentSpec {{ name: {:?}, tier: {}, description: {:?} }},\n", comp.0, tier, comp.1));
+        }
+    }
+    generated_code.push_str("];\n\n");
 
     // 7. Unified RULES List
     generated_code.push_str("pub const GEN_RULES: &[AeonAxiomRule] = &[\n");
@@ -160,12 +184,25 @@ fn parse_list_item(line: &str) -> Option<(usize, String, String)> {
     if parts.len() < 2 { return None; }
     let id: usize = parts[0].parse().ok()?;
     let content = parts[1].trim();
-    if !content.starts_with("**") { return None; }
+
+    // Check if it's a rule item with bold title
+    if content.starts_with("**") {
+        let sub_parts: Vec<&str> = content.splitn(2, ':').collect();
+        if sub_parts.len() < 2 { return None; }
+        let title = sub_parts[0].trim_matches('*').trim();
+        let imperative = sub_parts[1].trim();
+        return Some((id, title.to_string(), imperative.to_string()));
+    }
+
+    // Check if it's a validation protocol item with simple title
     let sub_parts: Vec<&str> = content.splitn(2, ':').collect();
-    if sub_parts.len() < 2 { return None; }
-    let title = sub_parts[0].trim_matches('*').trim();
-    let imperative = sub_parts[1].trim();
-    Some((id, title.to_string(), imperative.to_string()))
+    if sub_parts.len() >= 2 {
+        let title = sub_parts[0].trim();
+        let imperative = sub_parts[1].trim();
+        return Some((id, title.to_string(), imperative.to_string()));
+    }
+
+    None
 }
 
 fn parse_aspiration_header(line: &str) -> Option<(usize, String)> {

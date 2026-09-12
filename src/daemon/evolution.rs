@@ -36,6 +36,9 @@ impl EvolutionManager {
              // Synthesis driven by test failure
              let res = ReflexSynthesizer::distill_native_reflex(&intent_to_heal, workspace)?;
 
+             // Substrate Ingestion: Retrain Tier 2 model if experience buffer is full
+             let _ = crate::gawd::reason_trainer::ReasoningTrainer::audit_reasoning_substrate(workspace);
+
              return Ok(format!("# AEON Motion Rule Triggered\n\n\
                 Test-Driven Evolution has detected a substrate failure and autonomously synthesis a repair.\n\n\
                 - **Target**: {}\n\

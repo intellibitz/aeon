@@ -92,7 +92,11 @@ impl ToolRegistry {
             report.push_str(&format!("- Version: {}\\n", crate::gawd::self_core::AlphaSelf::VERSION));
             report.push_str(&format!("- Core Paradigm: {}\\n", crate::gawd::self_core::AlphaSelf::CORE_PARADIGM));
             report.push_str(&format!("- Axiom Rules: {}\\n", crate::gawd::self_core::AlphaSelf::RULES.len()));
-            report.push_str(&format!("- Baked Components: {}\\n\\n", crate::gawd::self_core::AlphaSelf::COMPONENTS.len()));
+            report.push_str(&format!("- AoA Pillar: {}\\n", crate::gawd::self_core::AlphaSelf::AOA_COMPONENTS.len()));
+            report.push_str(&format!("- Agents Pillar: {}\\n", crate::gawd::self_core::AlphaSelf::AGENT_COMPONENTS.len()));
+            report.push_str(&format!("- Engines Pillar: {}\\n", crate::gawd::self_core::AlphaSelf::ENGINE_COMPONENTS.len()));
+            report.push_str(&format!("- Models Pillar: {}\\n", crate::gawd::self_core::AlphaSelf::MODEL_COMPONENTS.len()));
+            report.push_str(&format!("- MCPs Pillar: {}\\n\\n", crate::gawd::self_core::AlphaSelf::MCP_COMPONENTS.len()));
             report.push_str("## 2. SYSTEM ENVIRONMENT\\n");
             report.push_str(&format!("- CPUs: {}\\n- RAM: {}GB\\n- Workspace: {}\\n", brain.system_cpus, brain.system_ram_gb, brain.workspace_path.display()));
             Ok(report)

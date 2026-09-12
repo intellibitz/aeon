@@ -1,30 +1,30 @@
 # AEON Substrate Topology
 
-* **Current Engine Version**: `v0.1.2022737`
+* **Current Engine Version**: `v0.1.2022738`
 
-This document defines the structural native components and orchestrated meta-layers of the `aeon` substrate.
+This document defines the structural native components and orchestrated meta-layers of the `aeon` substrate, organized into five functional pillars.
 
-## 1. Native Components (Tier 0 & 1)
+## 1. Agent of Agents (AoA) - Coordination & Governance
+1. **GAWD / AMA**: Universal swarm supervisor and multi-agent parallel dispatcher. (Tier: 1)
+2. **AeonAdmin**: Native administrative substrate for release orchestration and compliance auditing. (Tier: 1)
+3. **EvolutionManager**: Substrate self-healing and autonomous Motion Rule execution. (Tier: 1)
 
-1. **AEON-Alpha**: Microsecond intent classification and deterministic neural reflex engine. (Tier: 0)
-2. **ReflexSynthesizer**: Native Rust code distillation and neural reflex generation for distilled intents. (Tier: 0)
-3. **GAWD / AMA**: Universal swarm supervisor, multi-agent parallel dispatcher, and governance auditor. (Tier: 1)
-4. **GMCP Substrate**: MCP JSON-RPC 2.0 protocol interop bus and Meta ToolRegistry executor. (Tier: 1)
-5. **AmaDaemon**: Persistent background host ensuring permanent availability and background recovery. (Tier: 1)
-6. **AeonRuntimeAgent**: Autonomous environment preparation agent (Weight provisioning & Tool linking). (Tier: 1)
-7. **EvolutionManager**: Substrate self-healing and autonomous Motion Rule evolution executor. (Tier: 1)
-8. **AeonAdmin**: Administrative substrate for version synchronization, release orchestration, and compliance auditing. (Tier: 1)
-9. **SandboxManager**: High-density state isolation, neural checkpointing, and mission persistence. (Tier: 1)
-10. **GEMI**: Deep reasoning bridge, local neural tensor execution, and unified cloud provider racing. (Tier: 2)
+## 2. Agents - Functional Execution Units
+4. **AeonRuntimeAgent**: Autonomous environment preparation agent (Weights & Tools). (Tier: 1)
+5. **SafetyAgent**: Governance auditor and destructive command interceptor. (Tier: 1)
+6. **ContextAgent**: High-density context manager and workspace analyzer. (Tier: 1)
 
-## 2. Meta Components (External Orchestration)
+## 3. Engines - Execution & Inference Substrates
+7. **AEON-Alpha**: Microsecond intent classification and deterministic neural reflex engine. (Tier: 0)
+8. **ReflexSynthesizer**: Native Rust code distillation and reflex generation for distilled intents. (Tier: 0)
+9. **GEMI**: Deep reasoning bridge and unified cloud provider inference racing. (Tier: 2)
 
-11. **MetaModelSubstrate**: External reasoning models (Local GGUF vaults, Candle tensors, REST cloud endpoints). (Tier: 2)
-12. **MetaMcpServer**: External MCP servers connected via stdio or TCP JSON-RPC. (Tier: 1)
-13. **MetaExecutablePlugin**: External script plugins and distilled WebAssembly reflex binaries. (Tier: 1)
+## 4. Models - Neural Intelligence & Weights
+10. **NativeAlphaModel**: Local neural weights (`aeon-alpha.safetensors`) for deterministic reflex. (Tier: 0)
+11. **NativeReasoningModel**: Distilled reasoning weights (`aeon-reason.safetensors`) for deep logic. (Tier: 2)
+12. **MetaModelSubstrate**: External reasoning models (Local GGUF vaults, Candle tensors, Cloud API). (Tier: 2)
 
-## 3. Meta Contexts (Dynamic State)
-
-14. **MetaSystemEnvironment**: Dynamic host CPU, RAM, GPU acceleration, and hardware profile. (Tier: 0)
-15. **MetaUserEnvironment**: Dynamic workspace path, active engine, default model, and environment keys. (Tier: 1)
-16. **MetaExecutionContext**: Dynamic mission blackboard, neural checkpoints, session memory, and swarm logs. (Tier: 1)
+## 5. MCPs - Interoperability & Tooling
+13. **GMCP Substrate**: JSON-RPC 2.0 protocol interop bus and Meta ToolRegistry executor. (Tier: 1)
+14. **MetaMcpServer**: External Model Context Protocol servers connected via stdio or TCP. (Tier: 1)
+15. **MetaExecutionContext**: Dynamic mission blackboard and orchestrated session memory. (Tier: 1)

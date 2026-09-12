@@ -205,6 +205,21 @@ impl AeonMemory {
             use std::io::Write;
             let _ = writeln!(f, "{}", entry);
         }
+
+        // Substrate Ingestion Motion: Stage successful reasoning for distillation
+        if outcome.len() > 50 && !outcome.contains("[FAIL]") {
+            let exp_file = workspace.join(".aeon/reasoning_experience.jsonl");
+            let exp_entry = serde_json::json!({
+                "intent": intent,
+                "blackboard_context": "converged", // Placeholder for actual BB state if available
+                "successful_outcome": outcome,
+                "timestamp": std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0),
+            });
+            if let Ok(mut f) = fs::OpenOptions::new().create(true).append(true).open(exp_file) {
+                use std::io::Write;
+                let _ = writeln!(f, "{}", exp_entry);
+            }
+        }
     }
 }
 

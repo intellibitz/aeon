@@ -38,27 +38,28 @@ impl AlphaSelf {
     pub const TESTS_MD: &'static str = include_str!("../../.agents/TESTS.md");
     pub const TOPOLOGY_MD: &'static str = include_str!("../../.agents/TOPOLOGY.md");
 
-    pub const AGENT_RULES: &[AeonAxiomRule] = GEN_AGENT_RULES;
-    pub const ENGINE_AXIOMS: &[AeonAxiomRule] = GEN_ENGINE_AXIOMS;
-    pub const DEPLOYMENT_RULES: &[AeonAxiomRule] = GEN_DEPLOYMENT_RULES;
-    pub const RUNTIME_MANDATES: &[AeonAxiomRule] = GEN_RUNTIME_MANDATES;
-    pub const TEST_PROTOCOLS: &[AeonAxiomRule] = GEN_TEST_PROTOCOLS;
     pub const RULES: &[AeonAxiomRule] = GEN_RULES;
 
+    // 5 Pillar Component Topology
+    pub const AOA_COMPONENTS: &[AeonComponentSpec] = GEN_AOA_COMPONENTS;
+    pub const AGENT_COMPONENTS: &[AeonComponentSpec] = GEN_AGENT_COMPONENTS;
+    pub const ENGINE_COMPONENTS: &[AeonComponentSpec] = GEN_ENGINE_COMPONENTS;
+    pub const MODEL_COMPONENTS: &[AeonComponentSpec] = GEN_MODEL_COMPONENTS;
+    pub const MCP_COMPONENTS: &[AeonComponentSpec] = GEN_MCP_COMPONENTS;
     pub const COMPONENTS: &[AeonComponentSpec] = GEN_COMPONENTS;
-    pub const META_COMPONENTS: &[AeonComponentSpec] = GEN_META_COMPONENTS;
-    pub const META_CONTEXTS: &[AeonComponentSpec] = GEN_META_CONTEXTS;
 
     #[allow(dead_code)]
     pub fn inspect_compiled_binary_instructions() -> String {
         format!(
-            "AEON Substrate Compiled Binary Instructions:\n- Version: {}\n- Paradigm: {}\n- Hardcoded Axiom Rules: {}\n- Baked Native Components: {}\n- Orchestrated Meta Components: {}\n- Orchestrated Meta Contexts: {}",
+            "AEON Substrate Compiled Binary Instructions:\n- Version: {}\n- Paradigm: {}\n- Hardcoded Axiom Rules: {}\n- AoA Pillar: {}\n- Agents Pillar: {}\n- Engines Pillar: {}\n- Models Pillar: {}\n- MCPs Pillar: {}",
             Self::VERSION,
             Self::CORE_PARADIGM,
             Self::RULES.len(),
-            Self::COMPONENTS.len(),
-            Self::META_COMPONENTS.len(),
-            Self::META_CONTEXTS.len()
+            Self::AOA_COMPONENTS.len(),
+            Self::AGENT_COMPONENTS.len(),
+            Self::ENGINE_COMPONENTS.len(),
+            Self::MODEL_COMPONENTS.len(),
+            Self::MCP_COMPONENTS.len()
         )
     }
 }

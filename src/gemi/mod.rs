@@ -1,4 +1,5 @@
 pub mod alpha;
+pub mod reasoning;
 pub mod engine;
 pub mod hardware;
 pub mod models;

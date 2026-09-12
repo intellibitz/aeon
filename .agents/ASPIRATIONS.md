@@ -1,6 +1,6 @@
 # AEON Architectural Aspirations
 
-* **Current Engine Version**: `v0.1.2022737`
+* **Current Engine Version**: `v0.1.2022738`
 
 This document defines the structural roadmap and evolution goals of the `aeon` substrate.
 
@@ -58,3 +58,8 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 
 ### [Aspiration 11] Autonomous Runtime Substrate Preparation
 * **Core Paradigm**: Deployment of the `AeonRuntimeAgent` to establish the optimal execution environment (Weights & Tools) strictly in the mutable `alpha-user` space.
+
+---
+
+### [Aspiration 12] Substrate Ingestion Motion
+* **Core Paradigm**: The "Closed-Loop Intelligence" mandate. `aeon` autonomously distills its own learned interactions and mission blackboards into a **Native Tier 2 Reasoning Model**, effectively migrating mutable `alpha-user` experience into immutable `alpha-self` binary reflexes.
