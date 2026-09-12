@@ -171,18 +171,35 @@ impl AeonAdmin {
     }
 
     pub fn execute_release(workspace: &Path) -> EaiResult<String> {
+        eprintln!("[Release Gatekeeper] 1. Executing Compliance Audit...");
         let _ = Self::audit_compliance(workspace, Some("release"))?;
 
+        eprintln!("[Release Gatekeeper] 2. Executing Native Test Harness...");
         let output = Command::new("cargo")
             .arg("test")
             .current_dir(workspace)
             .output()?;
 
         if !output.status.success() {
-            return Err(EaiError::Protocol("Release aborted: Tests failed.".into()));
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            return Err(EaiError::Protocol(format!("Release aborted: Native tests failed.\n{}", stderr)));
         }
 
-        Ok("Release sequence verified. Substrate is ready for deployment.".into())
+        eprintln!("[Release Gatekeeper] 3. Verifying Ephemeral Mission Protocols...");
+        let missions = ["identity", "status", "models"];
+        for mission in missions {
+            let mission_out = Command::new("cargo")
+                .args(&["run", "--quiet", "--", mission])
+                .current_dir(workspace)
+                .output()?;
+
+            if !mission_out.status.success() {
+                let stderr = String::from_utf8_lossy(&mission_out.stderr);
+                return Err(EaiError::Protocol(format!("Release aborted: Ephemeral mission '{}' failed.\n{}", mission, stderr)));
+            }
+        }
+
+        Ok("Release sequence verified. Tests, Missions, and Audits passed. Substrate is ready for deployment.".into())
     }
 
     pub fn execute_autonomous_evolution_cycle(workspace: &Path) -> EaiResult<String> {

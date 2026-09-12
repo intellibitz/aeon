@@ -1,6 +1,6 @@
 # AEON Build & Deployment Substrate
 
-* **Current Engine Version**: `v0.1.2022758`
+* **Current Engine Version**: `v0.1.2022759`
 
 This document defines the mechanics of the `aeon` binary lifecycle, release orchestration, and deployment protocols.
 
@@ -14,15 +14,16 @@ This document defines the mechanics of the `aeon` binary lifecycle, release orch
 ## 2. Substrate Evolution Release Sequence (The Motion Rule)
 
 5. **Clean Build Verification**: Mandatory pass of `cargo check` with zero errors or warnings before any deployment.
-6. **Native Test Harness Pass**: Mandatory 100% pass rate across the unit and integration test suite (`cargo test`).
-7. **Compliance Audit**: Mandatory execution of `aeon admin audit` to verify security patterns and genome alignment.
-8. **Genome Synchronization**: Atomic version increment in `Cargo.toml` followed by a sync update to all `.agents/*.md` and `README.md` files.
-9. **Conventional Commit Protocol**: Git commit messages must use plain text conventional prefixes (e.g., `feat:`, `fix:`, `refactor:`) without emojis.
-10. **Workspace De-pollution**: Absolute mandate to remove all non-essential temporary files, mission logs, and architectural scratch files from the root directory before any remote push.
-11. **Automated Release Push**: Atomic push to the remote repository once all verification tiers and de-pollution mandates are satisfied.
+6. **Native Test & Mission Verification**: Mandatory 100% pass rate across the native unit tests (`cargo test`) AND successful execution of ephemeral mission protocols (`aeon identity`, `aeon status`, `aeon models`).
+7. **Release Gatekeeper**: Absolute mandate to execute `aeon admin release` to automatically enforce tests, mission verification, and the compliance audit prior to pushing.
+8. **Compliance Audit**: Embedded within the release gatekeeper to verify security patterns and genome alignment.
+9. **Genome Synchronization**: Atomic version increment in `Cargo.toml` followed by a sync update to all `.agents/*.md` and `README.md` files via `aeon admin sync`.
+10. **Conventional Commit Protocol**: Git commit messages must use plain text conventional prefixes (e.g., `feat:`, `fix:`, `refactor:`) without emojis.
+11. **Workspace De-pollution**: Absolute mandate to remove all non-essential temporary files, mission logs, and architectural scratch files from the root directory before any remote push.
+12. **Automated Release Push**: Atomic push to the remote repository once all verification tiers and de-pollution mandates are satisfied.
 
 ## 3. Universal Deployment Protocols
 
-11. **One-Line Installation**: The only authorized installation method for all platforms is: `curl -sSfL https://raw.githubusercontent.com/intellibitz/aeon/main/install.sh | sh`.
-12. **Binary download vs. Build Fallback**: The installer must prioritize pre-compiled binary deployment for microsecond onboarding, with a transparent fallback to local compilation.
-13. **Auto-Path Initialization**: Mandatory injection of `.aeon/bin` into the host's shell path environment (`.bashrc`, `.zshrc`, etc.) during installation.
+13. **One-Line Installation**: The only authorized installation method for all platforms is: `curl -sSfL https://raw.githubusercontent.com/intellibitz/aeon/main/install.sh | sh`.
+14. **Binary download vs. Build Fallback**: The installer must prioritize pre-compiled binary deployment for microsecond onboarding, with a transparent fallback to local compilation.
+15. **Auto-Path Initialization**: Mandatory injection of `.aeon/bin` into the host's shell path environment (`.bashrc`, `.zshrc`, etc.) during installation.

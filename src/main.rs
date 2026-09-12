@@ -159,7 +159,16 @@ fn main() {
                         }
                     }
                 }
-                _ => println!("Admin commands: sync, audit, verify"),
+                "release" => {
+                    match crate::daemon::admin::AeonAdmin::execute_release(&cwd) {
+                        Ok(msg) => println!("{}", msg),
+                        Err(e) => {
+                            eprintln!("{}", e);
+                            std::process::exit(1);
+                        }
+                    }
+                }
+                _ => println!("Admin commands: sync, audit, verify, release"),
             }
         }
         "clean" => {
