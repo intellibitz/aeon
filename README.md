@@ -1,6 +1,6 @@
 # aeon
 
-![AEON Version](https://img.shields.io/badge/version-v0.1.2022729-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
+![AEON Version](https://img.shields.io/badge/version-v0.1.2022730-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
 
 **aeon** is a Rust-based local-first AI execution engine. It provides a sub-2ms CLI launcher that proxies commands to a persistent background daemon for zero-latency tool execution and agent orchestration.
 
@@ -33,7 +33,7 @@ iwr -useb https://raw.githubusercontent.com/intellibitz/aeon/main/install.ps1 | 
 
 Execute commands or natural language tasks directly:
 ```bash
-aeon "read projects.md and agents.md"
+aeon "read BUILD.md and agents.md"
 aeon "list installed Android Studio versions"
 aeon status
 aeon mcp

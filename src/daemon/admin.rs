@@ -112,19 +112,22 @@ impl AeonAdmin {
             fs::write(&readme_path, updated.join("\n") + "\n")?;
         }
 
-        // 3. Sync PROJECTS.md System Info
-        let projects_path = workspace.join(".agents/PROJECTS.md");
-        if projects_path.exists() {
-            let projects_content = fs::read_to_string(&projects_path)?;
-            let mut updated = Vec::new();
-            for line in projects_content.lines() {
-                if line.trim().starts_with("* **Current Engine Version**: `v") {
-                    updated.push(format!("* **Current Engine Version**: `v{}`", version));
-                } else {
-                    updated.push(line.to_string());
+        // 3. Sync Governance Files (.agents/*.md)
+        let governance_files = ["AGENTS.md", "ASPIRATIONS.md", "BUILD.md", "RUNTIME.md", "TESTS.md", "TOPOLOGY.md"];
+        for file_name in governance_files {
+            let path = workspace.join(".agents").join(file_name);
+            if path.exists() {
+                let content = fs::read_to_string(&path)?;
+                let mut updated = Vec::new();
+                for line in content.lines() {
+                    if line.trim().starts_with("* **Current Engine Version**: `v") {
+                        updated.push(format!("* **Current Engine Version**: `v{}`", version));
+                    } else {
+                        updated.push(line.to_string());
+                    }
                 }
+                fs::write(&path, updated.join("\n") + "\n")?;
             }
-            fs::write(&projects_path, updated.join("\n") + "\n")?;
         }
 
         Ok(version.to_string())
@@ -151,13 +154,16 @@ impl AeonAdmin {
             }
         }
 
-        // Check PROJECTS.md
-        let projects_path = workspace.join(".agents/PROJECTS.md");
-        if projects_path.exists() {
-            let projects_content = fs::read_to_string(&projects_path)?;
-            let expected_line = format!("* **Current Engine Version**: `v{}`", version);
-            if !projects_content.contains(&expected_line) {
-                return Err(EaiError::Config(format!("PROJECTS.md version is out of sync with Cargo.toml (v{}). Run 'aeon admin sync'.", version)));
+        // Check Governance Files (.agents/*.md)
+        let governance_files = ["AGENTS.md", "ASPIRATIONS.md", "BUILD.md", "RUNTIME.md", "TESTS.md", "TOPOLOGY.md"];
+        for file_name in governance_files {
+            let path = workspace.join(".agents").join(file_name);
+            if path.exists() {
+                let content = fs::read_to_string(&path)?;
+                let expected_line = format!("* **Current Engine Version**: `v{}`", version);
+                if !content.contains(&expected_line) {
+                    return Err(EaiError::Config(format!("{}: version is out of sync with Cargo.toml (v{}). Run 'aeon admin sync'.", file_name, version)));
+                }
             }
         }
 

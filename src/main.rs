@@ -150,7 +150,16 @@ fn main() {
                         }
                     }
                 }
-                _ => println!("Admin commands: sync, audit"),
+                "verify" => {
+                    match crate::daemon::admin::AeonAdmin::verify_version_alignment(&cwd) {
+                        Ok(_) => println!("Version alignment verified."),
+                        Err(e) => {
+                            eprintln!("{}", e);
+                            std::process::exit(1);
+                        }
+                    }
+                }
+                _ => println!("Admin commands: sync, audit, verify"),
             }
         }
         "clean" => {
