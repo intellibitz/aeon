@@ -6,16 +6,51 @@ fn main() {
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("generated_axioms.rs");
 
-    let agents_md = fs::read_to_string(".agents/AGENTS.md").expect("Missing AGENTS.md");
-    let aspirations_md = fs::read_to_string(".agents/ASPIRATIONS.md").expect("Missing ASPIRATIONS.md");
-    let build_md = fs::read_to_string(".agents/BUILD.md").expect("Missing BUILD.md");
-    let runtime_md = fs::read_to_string(".agents/RUNTIME.md").expect("Missing RUNTIME.md");
-    let pulse_md = fs::read_to_string(".agents/pulse.md").expect("Missing pulse.md");
-    let topology_md = fs::read_to_string(".agents/TOPOLOGY.md").expect("Missing TOPOLOGY.md");
-    let workflow_md = fs::read_to_string(".agents/WORKFLOW.md").expect("Missing WORKFLOW.md");
-    let missions_md = fs::read_to_string(".agents/MISSIONS.md").unwrap_or_default();
-    let queries_md = fs::read_to_string(".agents/QUERIES.md").unwrap_or_default();
-    let creators_md = fs::read_to_string(".agents/CREATORS.md").unwrap_or_default();
+    let agents_md_raw = fs::read_to_string(".agents/AGENTS.md").expect("Missing AGENTS.md");
+    let aspirations_md_raw = fs::read_to_string(".agents/ASPIRATIONS.md").expect("Missing ASPIRATIONS.md");
+    let build_md_raw = fs::read_to_string(".agents/BUILD.md").expect("Missing BUILD.md");
+    let runtime_md_raw = fs::read_to_string(".agents/RUNTIME.md").expect("Missing RUNTIME.md");
+    let pulse_md_raw = fs::read_to_string(".agents/pulse.md").expect("Missing pulse.md");
+    let topology_md_raw = fs::read_to_string(".agents/TOPOLOGY.md").expect("Missing TOPOLOGY.md");
+    let workflow_md_raw = fs::read_to_string(".agents/WORKFLOW.md").expect("Missing WORKFLOW.md");
+    let missions_md_raw = fs::read_to_string(".agents/MISSIONS.md").unwrap_or_default();
+    let queries_md_raw = fs::read_to_string(".agents/QUERIES.md").unwrap_or_default();
+    let creators_md_raw = fs::read_to_string(".agents/CREATORS.md").unwrap_or_default();
+    let readme_md_raw = fs::read_to_string("README.md").unwrap_or_default();
+
+    // AEON Version Synchronization Hook (Aspiration 1)
+    let cargo_toml = fs::read_to_string("Cargo.toml").expect("Missing Cargo.toml");
+    let version = cargo_toml.lines()
+        .find(|l| l.trim().starts_with("version = \""))
+        .and_then(|l| l.split('"').nth(1))
+        .expect("Could not find version in Cargo.toml");
+
+    let agents_md = sync_version(".agents/AGENTS.md", &agents_md_raw, version);
+    let aspirations_md = sync_version(".agents/ASPIRATIONS.md", &aspirations_md_raw, version);
+    let build_md = sync_version(".agents/BUILD.md", &build_md_raw, version);
+    let runtime_md = sync_version(".agents/RUNTIME.md", &runtime_md_raw, version);
+    let pulse_md = sync_version(".agents/pulse.md", &pulse_md_raw, version);
+    let topology_md = sync_version(".agents/TOPOLOGY.md", &topology_md_raw, version);
+    let workflow_md = sync_version(".agents/WORKFLOW.md", &workflow_md_raw, version);
+    let missions_md = sync_version(".agents/MISSIONS.md", &missions_md_raw, version);
+    let queries_md = sync_version(".agents/QUERIES.md", &queries_md_raw, version);
+    let creators_md = sync_version(".agents/CREATORS.md", &creators_md_raw, version);
+
+    // Sync README badge
+    if readme_md_raw.contains("https://img.shields.io/badge/version-v") {
+        let mut updated = Vec::new();
+        for line in readme_md_raw.lines() {
+            if line.contains("https://img.shields.io/badge/version-v") {
+                updated.push(format!("![AEON Version](https://img.shields.io/badge/version-v{}-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)", version));
+            } else {
+                updated.push(line.to_string());
+            }
+        }
+        let new_readme = updated.join("\n") + "\n";
+        if new_readme != readme_md_raw {
+            fs::write("README.md", new_readme).ok();
+        }
+    }
 
     let mut generated_code = String::new();
 
@@ -290,4 +325,27 @@ fn parse_topology_item(line: &str) -> Option<(String, String, String)> {
     let description = desc_tier[0].trim();
     let tier = if desc_tier.len() > 1 { desc_tier[1].trim_end_matches(')').trim() } else { "1" };
     Some((name.to_string(), description.to_string(), tier.to_string()))
+}
+
+fn sync_version(path: &str, content: &str, version: &str) -> String {
+    let mut updated = Vec::new();
+    let mut changed = false;
+    for line in content.lines() {
+        if line.trim().starts_with("* **Current Engine Version**: `v") {
+            let new_line = format!("* **Current Engine Version**: `v{}`", version);
+            if new_line != line.trim() {
+                updated.push(new_line);
+                changed = true;
+            } else {
+                updated.push(line.to_string());
+            }
+        } else {
+            updated.push(line.to_string());
+        }
+    }
+    let result = updated.join("\n") + "\n";
+    if changed {
+        fs::write(path, &result).ok();
+    }
+    result
 }
