@@ -1,6 +1,6 @@
 # AEON Architectural Aspirations
 
-* **Current Engine Version**: `v0.1.2022746`
+* **Current Engine Version**: `v0.1.2022747`
 
 This document defines the structural roadmap and evolution goals of the `aeon` substrate.
 
@@ -26,8 +26,8 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 
 ---
 
-### [Aspiration 5] Hardware-Saturated Inference Routing
-* **Core Paradigm**: Active interrogation of CPU/GPU topologies using the Candle tensor framework. Deployment of the `HardwareAgent` to dynamically map reasoning to the optimal acceleration substrate based on live hardware profile.
+### [Aspiration 5] Hardware-Saturated Inference Substrate
+* **Core Paradigm**: Active interrogation of CPU/GPU topologies using the Candle tensor framework. Deployment of the `AeonRuntimeAdmin` to dynamically map reasoning to the optimal acceleration substrate and peak param ladder based on live hardware profile.
 
 ---
 
@@ -56,8 +56,8 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 
 ---
 
-### [Aspiration 11] Autonomous Runtime Substrate Preparation
-* **Core Paradigm**: Deployment of the `AeonRuntimeAgent` to establish the optimal execution environment (Weights & Tools) strictly in the mutable `alpha-user` space.
+### [Aspiration 11] Autonomous Substrate Administration
+* **Core Paradigm**: Deployment of the `AeonRuntimeAdmin` to establish and maintain the optimal execution environment (Weights & Hardware Tuning) strictly in the mutable `alpha-user` space.
 
 ---
 

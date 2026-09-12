@@ -1,6 +1,6 @@
 # AEON Validation Protocols
 
-* **Current Engine Version**: `v0.1.2022746`
+* **Current Engine Version**: `v0.1.2022747`
 
 This document defines the procedures for verifying the architectural integrity and operational safety of the `aeon` substrate.
 
@@ -20,4 +20,4 @@ This document defines the procedures for verifying the architectural integrity a
 14. **Hardware-Saturated Audio**: Verify that `AeonAudioEngine` correctly interrogates and utilizes GPU acceleration for acoustic spectral distillation.
 15. **Neural Agent Synthesis**: Verify that the `NeuralAgentFactory` can autonomously generate a new specialist profile when a capability gap is detected. (Ref: Aspiration 13)
 16. **Autonomous Drift Detection**: Verify that the `EvolutionManager` can detect a high-frequency gap from audit logs and trigger a background repair cycle. (Ref: Aspiration 7)
-17. **Hardware Saturation Audit**: Verify that the `HardwareAgent` correctly reports hardware topologies and compute saturation levels during a mission. (Ref: Aspiration 5)
+17. **Hardware Saturation Audit**: Verify that the `AeonRuntimeAdmin` correctly reports hardware topologies and compute saturation levels. (Ref: Aspiration 5)

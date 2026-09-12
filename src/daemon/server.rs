@@ -86,8 +86,8 @@ impl AmaDaemon {
 
         let cfg = crate::sandbox::manager::AeonConfig::load(&global_dir);
 
-        // High-Priority Hardware-Bounded Model Auto-Provisioning (Background Thread)
-        crate::gemi::models::ModelManager::spawn_background_hardware_model_provisioner(&workspace);
+        // Substrate Administration & Hardware Optimization (Pillar 1)
+        crate::daemon::runtime_admin::AeonRuntimeAdmin::start_administration_cycle(&workspace);
 
         let workspace_gemi = workspace.clone();
         let gemi_port = cfg.gemi_port;
@@ -116,16 +116,7 @@ impl AmaDaemon {
             Self::start_udp_discovery_server(udp_port, gmcp_port);
         });
 
-        // 5. Autonomous Evolution & Drift Detection Loop (Aspiration 7)
-        let workspace_evo = workspace.clone();
-        thread::spawn(move || {
-            loop {
-                thread::sleep(Duration::from_secs(3600)); // Audit every hour
-                let _ = crate::daemon::evolution::EvolutionManager::perform_autonomous_drift_audit(&workspace_evo);
-            }
-        });
-
-        // 6. Keep main daemon thread alive
+        // 5. Keep main daemon thread alive
         loop {
             thread::sleep(Duration::from_secs(86400));
         }
