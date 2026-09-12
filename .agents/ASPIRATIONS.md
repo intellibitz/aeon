@@ -1,6 +1,6 @@
 # AEON Architectural Aspirations
 
-* **Current Engine Version**: `v0.1.2022775`
+* **Current Engine Version**: `v0.1.2022776`
 
 This document defines the structural roadmap and evolution goals of the `aeon` substrate.
 
@@ -82,5 +82,5 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 
 ---
 
-### [Aspiration 17] Axiomatic Intent-to-Pulse Ingestion
-* **Core Paradigm**: The "Autonomous Ingestion" mandate. The `aeon` binary must possess a native neural reflex to classify any natural language instruction into its appropriate epistemic category (`[MOTION]`, `[MISSION]`, or `[QUERY]`) and automatically commit the entry to `pulse.md`.
+### [Aspiration 18] Federated Experience Aggregation
+* **Core Paradigm**: The "Global Intelligence" mandate. AEON must implement a secure, privacy-preserving protocol for aggregating distilled reasoning experience from World Users into a centralized Knowledge Vault. This enables the collective intelligence of all `alpha-user` environments to evolve the master `alpha-self` genome.

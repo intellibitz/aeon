@@ -1,6 +1,6 @@
 # AEON Substrate Validation Genome (PULSE)
 
-* **Current Engine Version**: `v0.1.2022775`
+* **Current Engine Version**: `v0.1.2022776`
 
 This document defines the complete set of validation protocols that anchor the `aeon` genome. Every entry reflects a hard-compiled reflex or an orchestrated meta-behavior.
 
@@ -101,3 +101,4 @@ This document defines the complete set of validation protocols that anchor the `
 77. [x] **CLI Unification**: Unified aeon CLI usage; natural language intents now automatically trigger pulse ingestion.
 78. [x] **Sovereign Ingestion**: Enabled Substrate-Sovereign Pulse Ingestion; binary now synthesizes pulse.md in .aeon/ if source is missing.
 79. [x] **Sovereign Boundary**: Formalized Sovereign Boundary; Motions are Creator-Only, World Users evolve via Substrate Ingestion.
+80. [x] **Federated Merge**: Formalized Federated Contribution Reflex and Aspiration 18 for Global Intelligence.
