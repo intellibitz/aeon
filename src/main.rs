@@ -243,7 +243,19 @@ fn main() {
                         }
                     }
                 }
-                _ => println!("Admin commands: sync, audit, verify, release"),
+                "lint" => {
+                    match aeon_engine::daemon::admin::AeonAdmin::run_lint(&cwd) {
+                        Ok(report) => println!("{}", report),
+                        Err(e) => eprintln!("Lint failed: {}", e),
+                    }
+                }
+                "audit-deps" => {
+                    match aeon_engine::daemon::admin::AeonAdmin::run_audit(&cwd) {
+                        Ok(report) => println!("{}", report),
+                        Err(e) => eprintln!("Audit failed: {}", e),
+                    }
+                }
+                _ => println!("Admin commands: sync, audit, verify, release, lint, audit-deps"),
             }
         }
         "clean" => {

@@ -231,7 +231,17 @@ impl AeonAdmin {
             return Err(EaiError::Process(format!("Release aborted: Native tests failed.\n{}", stderr)));
         }
 
-        eprintln!("[Release Gatekeeper] 3. Verifying Ephemeral Mission Protocols...");
+        eprintln!("[Release Gatekeeper] 3. Executing Static Analysis (Clippy)...");
+        let clippy = Command::new("cargo")
+            .args(&["clippy", "--all-targets", "--all-features", "--", "-D", "warnings"])
+            .current_dir(workspace)
+            .output()?;
+        if !clippy.status.success() {
+            let stderr = String::from_utf8_lossy(&clippy.stderr);
+            return Err(EaiError::Process(format!("Release aborted: Linting failed.\n{}", stderr)));
+        }
+
+        eprintln!("[Release Gatekeeper] 4. Verifying Ephemeral Mission Protocols...");
         let missions = ["identity", "status", "models"];
         for mission in missions {
             let mission_out = Command::new("cargo")
@@ -245,7 +255,7 @@ impl AeonAdmin {
             }
         }
 
-        Ok("Release sequence verified. Tests, Missions, and Audits passed. Substrate is ready for deployment.".into())
+        Ok("Release sequence verified. Tests, Audits, and Lints passed. Substrate is ready for deployment.".into())
     }
 
     /// Ingest a natural language intent and automatically inject it into pulse.md
@@ -328,6 +338,22 @@ impl AeonAdmin {
         let res = crate::daemon::evolution::EvolutionManager::evolve_substrate(workspace)?;
         let _ = Self::execute_release(workspace)?;
         Ok(res)
+    }
+
+    pub fn run_lint(workspace: &Path) -> EaiResult<String> {
+        let out = Command::new("cargo")
+            .args(&["clippy", "--all-targets", "--all-features"])
+            .current_dir(workspace)
+            .output()?;
+        Ok(String::from_utf8_lossy(&out.stdout).to_string())
+    }
+
+    pub fn run_audit(workspace: &Path) -> EaiResult<String> {
+        let out = Command::new("cargo")
+            .arg("audit")
+            .current_dir(workspace)
+            .output()?;
+        Ok(String::from_utf8_lossy(&out.stdout).to_string())
     }
 }
 

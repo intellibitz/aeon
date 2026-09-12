@@ -1,6 +1,6 @@
 # AEON Substrate Validation Genome (PULSE)
 
-* **Current Engine Version**: `v0.1.2022784`
+* **Current Engine Version**: `v0.1.2022785`
 
 This document defines the complete set of validation protocols that anchor the `aeon` genome. Every entry reflects a hard-compiled reflex or an orchestrated meta-behavior.
 
@@ -70,6 +70,7 @@ This document defines the complete set of validation protocols that anchor the `
 51. `[x]` **Conventional Commit**: Plain text technical commit prefixes are enforced.
 52. `[x]` **De-pollution Mandate**: Automated removal of mission logs before remote push.
 53. `[x]` **One-Line Install**: curl-based binary deployment and auto-path initialization.
+54. `[x]` **Diagnostic Orchestration**: Integrated Clippy and Audit into the administrative release gatekeeper.
 
 ### 2.5 Runtime Mandates & Swarm Safety [MISSION]
 54. `[x]` **Daemon Persistence**: Background resiliency and port binding (9090-9093) is sustained.

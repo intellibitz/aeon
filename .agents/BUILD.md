@@ -1,6 +1,6 @@
 # AEON Build & Deployment Substrate
 
-* **Current Engine Version**: `v0.1.2022784`
+* **Current Engine Version**: `v0.1.2022785`
 
 This document defines the mechanics of the `aeon` binary lifecycle, release orchestration, and deployment protocols.
 
@@ -22,8 +22,15 @@ This document defines the mechanics of the `aeon` binary lifecycle, release orch
 11. **Workspace De-pollution**: Absolute mandate to remove all non-essential temporary files, mission logs, and architectural scratch files from the root directory before any remote push.
 12. **Automated Release Push**: Atomic push to the remote repository once all verification tiers and de-pollution mandates are satisfied.
 
-## 3. Universal Deployment Protocols
+## 3. Diagnostic & Evolution Tools
 
-13. **One-Line Installation**: The only authorized installation method for all platforms is: `curl -sSfL https://raw.githubusercontent.com/intellibitz/aeon/main/install.sh | sh`.
+13. **Linting**: Mandatory use of `cargo clippy --all-targets --all-features` to ensure zero technical debt.
+14. **Security Auditing**: Mandatory use of `cargo audit` to identify and mitigate dependency vulnerabilities.
+15. **Fuzz Testing**: Use of `cargo fuzz run <target>` for deep stateful analytics and edge-case discovery.
+16. **Async Debugging**: Use of `RUSTFLAGS="--cfg tokio_unstable" cargo run` with `tokio-console` for high-density asynchronous orchestration tracking.
+
+## 4. Universal Deployment Protocols
+
+17. **One-Line Installation**: The only authorized installation method for all platforms is: `curl -sSfL https://raw.githubusercontent.com/intellibitz/aeon/main/install.sh | sh`.
 14. **Binary download vs. Build Fallback**: The installer must prioritize pre-compiled binary deployment for microsecond onboarding, with a transparent fallback to local compilation.
 15. **Auto-Path Initialization**: Mandatory injection of `.aeon/bin` into the host's shell path environment (`.bashrc`, `.zshrc`, etc.) during installation.
