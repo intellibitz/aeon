@@ -153,6 +153,25 @@ impl GawdAgent for AeonRuntimeAgent {
     }
 }
 
+/// Hardware Optimization Agent (Aspiration 5)
+/// Autonomously interrogates host hardware and saturates compute resources.
+pub struct HardwareAgent;
+
+impl GawdAgent for HardwareAgent {
+    fn name(&self) -> String { "HardwareAgent".into() }
+    fn rank(&self) -> f32 { 1.0 }
+    fn execute(&self, _goal: &str, _workspace: &Path, _blackboard: &MissionBlackboard) -> EaiResult<String> {
+        let profile = crate::gemi::hardware::HardwareProfiler::get_profile();
+
+        let report = format!(
+            "Hardware Saturated: {} CPUs ({}) | {}GB RAM | {}. Acceleration: {}.",
+            profile.cpus, profile.cpu_brand, profile.ram_gb, profile.gpu_info, profile.native_acceleration
+        );
+
+        Ok(report)
+    }
+}
+
 pub struct AgentMetaRegistry {
     agents: Arc<Mutex<Vec<AgentProfile>>>,
 }
@@ -307,6 +326,7 @@ impl GawdAgentFleet {
 
         // 1. Mandatory Substrate Guards & Preparation
         fleet.push(Arc::new(AeonRuntimeAgent));
+        fleet.push(Arc::new(HardwareAgent));
         fleet.push(Arc::new(DynamicAgent {
             agent_name: "SafetyAgent".into(),
             mission_profile: "Governance and destruction detection.".into(),

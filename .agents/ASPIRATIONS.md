@@ -1,6 +1,6 @@
 # AEON Architectural Aspirations
 
-* **Current Engine Version**: `v0.1.2022745`
+* **Current Engine Version**: `v0.1.2022746`
 
 This document defines the structural roadmap and evolution goals of the `aeon` substrate.
 
@@ -27,7 +27,7 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 ---
 
 ### [Aspiration 5] Hardware-Saturated Inference Routing
-* **Core Paradigm**: Active interrogation of CPU/GPU topologies using the Candle tensor framework. The engine dynamically maps reasoning to the optimal acceleration substrate based on live hardware profile.
+* **Core Paradigm**: Active interrogation of CPU/GPU topologies using the Candle tensor framework. Deployment of the `HardwareAgent` to dynamically map reasoning to the optimal acceleration substrate based on live hardware profile.
 
 ---
 

@@ -1,13 +1,13 @@
 # AEON Runtime Mandates
 
-* **Current Engine Version**: `v0.1.2022745`
+* **Current Engine Version**: `v0.1.2022746`
 
 This document defines the operational directives for environment establishment, maintenance, and safety within the `alpha-user` space.
 
 ## 1. Environment Synthesis Mandates
 
 1. **Substrate Priming**: Autonomously provision missing neural weights (`aeon-alpha.safetensors`) via the configured `alpha_weights_url`.
-2. **Hardware Interrogation**: Continuously audit CPU/GPU topologies and system RAM to ensure 100% hardware saturation during inference.
+2. **Hardware Interrogation**: Deployment of the `HardwareAgent` to continuously audit CPU/GPU topologies and system RAM, ensuring 100% hardware saturation during inference.
 3. **Protocol Linking**: Dynamically bind essential MCP servers (Database, Search, VCS) and registry-discovered tools.
 4. **Zero-Config Guarantee**: Adapt to host environment variables and local constraints without manual user intervention.
 5. **Self-Healing Reflex**: Automatically recover from runtime environment pathologies via protocol-based provisioning and hardware tuning.
