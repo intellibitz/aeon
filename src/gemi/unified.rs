@@ -2,7 +2,6 @@
 // 100% Rust implementation for Aspiration 14: Unified Multi-Modal Embedding Space
 
 use anyhow::Result;
-use candle_core::{Tensor, Device};
 use std::path::Path;
 
 /// Unified Intelligence Substrate (DIM: 1024)

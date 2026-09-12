@@ -375,7 +375,28 @@ impl ModelManager {
         HardwareProfiler::get_progressive_model_ladder().last().cloned().unwrap()
     }
 
-    pub fn ensure_hardware_optimal_models(_workspace: &Path) -> EaiResult<String> { Ok("Verified".into()) }
+    pub fn ensure_hardware_optimal_models(_workspace: &Path) -> EaiResult<String> {
+        let ladder = HardwareProfiler::get_progressive_model_ladder();
+        if let Some(best_step) = ladder.last() {
+            let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
+            let models_dir = home.join(".aeon/models");
+            let model_path = models_dir.join(best_step.hf_file);
+            let tokenizer_path = models_dir.join("tokenizer.json");
+
+            if !model_path.exists() {
+                eprintln!("[Model Manager] Best-fit model missing. Provisioning {}...", best_step.hf_file);
+                let url = format!("https://huggingface.co/{}/resolve/main/{}", best_step.hf_repo, best_step.hf_file);
+                Self::install_model(&url);
+            }
+
+            if !tokenizer_path.exists() {
+                eprintln!("[Model Manager] Tokenizer missing. Provisioning standard EAI tokenizer...");
+                let url = format!("https://huggingface.co/{}/resolve/main/tokenizer.json", best_step.hf_repo);
+                Self::install_model(&url);
+            }
+        }
+        Ok("Substrate optimal".into())
+    }
 }
 
 #[cfg(test)]
