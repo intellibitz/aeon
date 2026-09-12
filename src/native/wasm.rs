@@ -8,6 +8,8 @@ use crate::error::{EaiError, EaiResult};
 
 pub struct WasmHost;
 
+// SAFETY: This is a placeholder for the stack probing function required by some Rust targets.
+// It is empty because the Wasm runtime handles stack overflows.
 #[unsafe(no_mangle)]
 pub extern "C" fn __rust_probestack() {}
 

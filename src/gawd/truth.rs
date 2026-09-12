@@ -42,7 +42,7 @@ impl AeonTruthAgent {
         }
 
         if !violations.is_empty() {
-            let error_msg = format!("TRUTH_VIOLATION: {}\\nSTRUCTURED_FEEDBACK: Please grounded your response in the physical workspace state. Ensure files are actually written before reporting success.", violations.join(" | "));
+            let error_msg = format!("TRUTH_VIOLATION: {}\nSTRUCTURED_FEEDBACK: Please grounded your response in the physical workspace state. Ensure files are actually written before reporting success.", violations.join(" | "));
             return Err(EaiError::Governance(error_msg));
         }
 

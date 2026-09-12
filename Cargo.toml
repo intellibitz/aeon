@@ -1,7 +1,7 @@
 [package]
 name = "aeon-engine"
 version = "0.1.2022779"
-edition = "2024"
+edition = "2021"
 authors = ["IntelliBitz", "Muthu Ramadoss", "AEON EAI Core"]
 description = "aeon-engine: EAI: Exponential Intelligence for Any AI. - GAWD, GEMI & GMCP Multi-Agent Engine"
 license = "Apache-2.0"
@@ -25,6 +25,11 @@ libc = "0.2"
 tiny_http = "0.12"
 image = "0.25"
 hound = "3.5"
+shlex = "1.3"
+signal-hook = "0.3"
+md5 = "0.7"
+log = "0.4"
+env_logger = "0.11"
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["fileapi", "winerror"] }
@@ -38,8 +43,8 @@ mkl = ["candle-core/mkl", "candle-nn/mkl", "candle-transformers/mkl"]
 
 [profile.release]
 opt-level = 3 # High performance
-lto = "thin" # Faster parallel LTO
-codegen-units = 256 # Saturate all 28 cores
+lto = true # Maximum optimization
+codegen-units = 1 # Maximum parallelism in generated code
 incremental = true # Speed up iterative builds
 panic = "abort"
 strip = true

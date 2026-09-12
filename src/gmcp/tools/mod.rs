@@ -2,7 +2,7 @@
 // 100% Pure Rust implementation for Dynamic MCP Server Proxying, Meta Tool Routing & Wasm Reflexes
 
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::{Path, PathBuf, Component};
 use std::process::Command;
 use std::sync::{Arc, Mutex, RwLock, OnceLock};
 use std::collections::HashMap;
@@ -53,6 +53,36 @@ impl AeonTool for MetaTool {
     }
 }
 
+/// Ensure path is normalized and contained within workspace
+fn secure_path(workspace: &Path, user_path: &str) -> EaiResult<PathBuf> {
+    let user_path = user_path.trim().trim_matches('"').trim_matches('\'');
+    let path = PathBuf::from(user_path);
+
+    if path.is_absolute() {
+        return Err(EaiError::Filesystem("Absolute paths not allowed".into()));
+    }
+
+    let canonical_workspace = workspace.canonicalize()
+        .map_err(|e| EaiError::Filesystem(format!("Workspace error: {}", e)))?;
+
+    let full_path = workspace.join(&path);
+    let canonical_path = full_path.canonicalize()
+        .ok()
+        .unwrap_or_else(|| full_path.clone());
+
+    if !canonical_path.starts_with(&canonical_workspace) {
+        return Err(EaiError::Filesystem(format!("Path escape attempt: {}", user_path)));
+    }
+
+    for component in path.components() {
+        if let Component::ParentDir = component {
+            return Err(EaiError::Filesystem("Parent directory traversal not allowed".into()));
+        }
+    }
+
+    Ok(canonical_path)
+}
+
 pub struct ToolRegistry {
     tools: RwLock<HashMap<String, Arc<dyn AeonTool>>>,
     locks: Arc<Mutex<HashMap<String, u64>>>,
@@ -78,49 +108,49 @@ impl ToolRegistry {
 
         Self::register_meta_tool(&mut tools, "status", "AEON Substrate status report", MetaCategory::SystemPrimitive, |_arg, _ws| {
             let hardware = HardwareProfiler::get_profile();
-            let mut out = format!("AEON Engine Version: {}\\n", crate::AEON_VERSION);
-            out.push_str(&format!("System Environment: {} CPUs | RAM: {}GB | {}\\n", hardware.cpus, hardware.ram_gb, hardware.gpu_info));
-            out.push_str("Status: Operational.\\n");
+            let mut out = format!("AEON Engine Version: {}\n", crate::AEON_VERSION);
+            out.push_str(&format!("System Environment: {} CPUs | RAM: {}GB | {}\n", hardware.cpus, hardware.ram_gb, hardware.gpu_info));
+            out.push_str("Status: Operational.\n");
             Ok(out)
         });
 
         Self::register_meta_tool(&mut tools, "identity", "AEON substrate identity report", MetaCategory::SystemPrimitive, |_arg, workspace| {
             let brain = crate::gawd::brain::AlphaBrainContext::initialize(workspace);
             let mut report = String::new();
-            report.push_str("# aeon Substrate - Identity Report\\n\\n");
-            report.push_str("## 1. CORE CONFIGURATION (Compiled Binary Axiomatic Core)\\n");
-            report.push_str(&format!("- Version: {}\\n", crate::gawd::self_core::AlphaSelf::VERSION));
-            report.push_str(&format!("- Core Paradigm: {}\\n", crate::gawd::self_core::AlphaSelf::CORE_PARADIGM));
-            report.push_str(&format!("- Axiom Rules: {}\\n", crate::gawd::self_core::AlphaSelf::RULES.len()));
-            report.push_str(&format!("- AoA Pillar: {}\\n", crate::gawd::self_core::AlphaSelf::AOA_COMPONENTS.len()));
-            report.push_str(&format!("- Agents Pillar: {}\\n", crate::gawd::self_core::AlphaSelf::AGENT_COMPONENTS.len()));
-            report.push_str(&format!("- Engines Pillar: {}\\n", crate::gawd::self_core::AlphaSelf::ENGINE_COMPONENTS.len()));
-            report.push_str(&format!("- Models Pillar: {}\\n", crate::gawd::self_core::AlphaSelf::MODEL_COMPONENTS.len()));
-            report.push_str(&format!("- MCPs Pillar: {}\\n\\n", crate::gawd::self_core::AlphaSelf::MCP_COMPONENTS.len()));
-            report.push_str("## 2. SYSTEM ENVIRONMENT\\n");
-            report.push_str(&format!("- CPUs: {}\\n- RAM: {}GB\\n- Workspace: {}\\n", brain.system_cpus, brain.system_ram_gb, brain.workspace_path.display()));
+            report.push_str("# aeon Substrate - Identity Report\n\n");
+            report.push_str("## 1. CORE CONFIGURATION (Compiled Binary Axiomatic Core)\n");
+            report.push_str(&format!("- Version: {}\n", crate::gawd::self_core::AlphaSelf::VERSION));
+            report.push_str(&format!("- Core Paradigm: {}\n", crate::gawd::self_core::AlphaSelf::CORE_PARADIGM));
+            report.push_str(&format!("- Axiom Rules: {}\n", crate::gawd::self_core::AlphaSelf::RULES.len()));
+            report.push_str(&format!("- AoA Pillar: {}\n", crate::gawd::self_core::AlphaSelf::AOA_COMPONENTS.len()));
+            report.push_str(&format!("- Agents Pillar: {}\n", crate::gawd::self_core::AlphaSelf::AGENT_COMPONENTS.len()));
+            report.push_str(&format!("- Engines Pillar: {}\n", crate::gawd::self_core::AlphaSelf::ENGINE_COMPONENTS.len()));
+            report.push_str(&format!("- Models Pillar: {}\n", crate::gawd::self_core::AlphaSelf::MODEL_COMPONENTS.len()));
+            report.push_str(&format!("- MCPs Pillar: {}\n\n", crate::gawd::self_core::AlphaSelf::MCP_COMPONENTS.len()));
+            report.push_str("## 2. SYSTEM ENVIRONMENT\n");
+            report.push_str(&format!("- CPUs: {}\n- RAM: {}GB\n- Workspace: {}\n", brain.system_cpus, brain.system_ram_gb, brain.workspace_path.display()));
             Ok(report)
         });
 
         Self::register_meta_tool(&mut tools, "distill_genome", "Distill the hard-compiled genome into the Tier 2 reasoning model", MetaCategory::SystemPrimitive, |_arg, workspace| {
             match crate::gawd::reason_trainer::ReasoningTrainer::audit_reasoning_substrate(workspace) {
-                Ok(report) => Ok(format!("# Genome Distillation Successful\\n\\n{}", report)),
-                Err(e) => Ok(format!("# Genome Distillation Failed\\n\\nError: {}", e)),
+                Ok(report) => Ok(format!("# Genome Distillation Successful\n\n{}", report)),
+                Err(e) => Ok(format!("# Genome Distillation Failed\n\nError: {}", e)),
             }
         });
 
         Self::register_meta_tool(&mut tools, "self_validate", "Execute autonomous substrate self-validation", MetaCategory::SystemPrimitive, |_arg, workspace| {
             match crate::daemon::runtime_admin::AeonRuntimeAdmin::execute_autonomous_self_validation(workspace) {
-                Ok(report) => Ok(format!("# Substrate Self-Validation Successful\\n\\n{}", report)),
-                Err(e) => Ok(format!("# Substrate Self-Validation Failed\\n\\nError: {}", e)),
+                Ok(report) => Ok(format!("# Substrate Self-Validation Successful\n\n{}", report)),
+                Err(e) => Ok(format!("# Substrate Self-Validation Failed\n\nError: {}", e)),
             }
         });
 
         Self::register_meta_tool(&mut tools, "list_models", "List available model substrates", MetaCategory::SystemPrimitive, |_arg, workspace| {
             let models = ModelManager::list_models(workspace);
-            let mut out = format!("Active Model Substrates (Count: {})\\n\\n", models.len());
+            let mut out = format!("Active Model Substrates (Count: {})\n\n", models.len());
             for m in &models {
-                out.push_str(&format!("- [{}] {} ({})\\n", if m.is_local { "LOCAL" } else { "CLOUD" }, m.name, m.model_id));
+                out.push_str(&format!("- [{}] {} ({})\n", if m.is_local { "LOCAL" } else { "CLOUD" }, m.name, m.model_id));
             }
             Ok(out)
         });
@@ -139,13 +169,8 @@ impl ToolRegistry {
         });
 
         Self::register_meta_tool(&mut tools, "read_file", "Read file content in workspace", MetaCategory::WorkspaceIo, |arg, workspace| {
-            let arg_s = arg.as_str().unwrap_or("");
-            let clean = arg_s.trim().trim_matches('"').trim_matches('\'');
-            if clean.is_empty() { return Err(EaiError::Protocol("Usage: read_file <file_path>".into())); }
-            let path = workspace.join(clean);
-            if !path.is_file() {
-                return Err(EaiError::Filesystem(format!("File not found: {}", path.display())));
-            }
+            let arg_s = arg.as_str().ok_or_else(|| EaiError::Protocol("Invalid argument type".into()))?;
+            let path = secure_path(workspace, arg_s)?;
             let content = fs::read_to_string(&path).map_err(|e| EaiError::Filesystem(e.to_string()))?;
             Ok(content)
         });
@@ -154,32 +179,34 @@ impl ToolRegistry {
             let path_s = arg.get("path").and_then(|v| v.as_str());
             let content_s = arg.get("content").and_then(|v| v.as_str());
 
-            if let (Some(path), Some(content)) = (path_s, content_s) {
-                let dest = workspace.join(path);
+            if let (Some(p), Some(content)) = (path_s, content_s) {
+                let dest = secure_path(workspace, p)?;
                 if let Some(parent) = dest.parent() { let _ = fs::create_dir_all(parent); }
                 fs::write(&dest, content).map_err(|e| EaiError::Filesystem(e.to_string()))?;
-                Ok(format!("Wrote to {}", path))
+                Ok(format!("Wrote to {}", p))
             } else {
-                // Fallback for flat string argument
-                let arg_s = arg.as_str().unwrap_or("");
-                let parts: Vec<&str> = arg_s.splitn(2, ' ').collect();
-                if parts.len() < 2 { return Err(EaiError::Protocol("Usage: write_file {path: <path>, content: <content>}".into())); }
-                let path = workspace.join(parts[0].trim());
-                if let Some(parent) = path.parent() { let _ = fs::create_dir_all(parent); }
-                fs::write(&path, parts[1]).map_err(|e| EaiError::Filesystem(e.to_string()))?;
-                Ok(format!("Wrote to {}", parts[0].trim()))
+                Err(EaiError::Protocol("Usage: write_file {path: <path>, content: <content>}".into()))
             }
         });
 
         Self::register_meta_tool(&mut tools, "exec_command", "Execute command in workspace", MetaCategory::WorkspaceIo, |arg, workspace| {
-            let arg_s = arg.as_str().unwrap_or("");
+            let arg_s = arg.as_str().ok_or_else(|| EaiError::Protocol("Invalid argument type".into()))?;
             let clean = arg_s.trim();
             if clean.is_empty() { return Err(EaiError::Protocol("Usage: exec_command <cmd>".into())); }
-            let out = Command::new("sh").args(["-c", clean]).current_dir(workspace).output().map_err(|e| EaiError::Process(e.to_string()))?;
+
+            let args = shlex::split(clean).ok_or_else(|| EaiError::Protocol("Invalid shell syntax".into()))?;
+            if args.is_empty() { return Err(EaiError::Protocol("Command cannot be empty".into())); }
+
+            let out = Command::new(&args[0])
+                .args(&args[1..])
+                .current_dir(workspace)
+                .output()
+                .map_err(|e| EaiError::Process(format!("Exec failed: {}", e)))?;
+
             let stdout = String::from_utf8_lossy(&out.stdout).to_string();
             let stderr = String::from_utf8_lossy(&out.stderr).to_string();
-            if !stderr.is_empty() && stdout.is_empty() {
-                Ok(stderr)
+            if !out.status.success() {
+                Err(EaiError::Process(stderr))
             } else {
                 Ok(stdout)
             }
@@ -187,9 +214,9 @@ impl ToolRegistry {
 
         Self::register_meta_tool(&mut tools, "mcp_registry", "List global MCP registry entries", MetaCategory::McpProxy, |_arg, _ws| {
             let entries = GmcpClient::fetch_global_registry();
-            let mut out = format!("Global MCP Server Registry (Count: {})\\n\\n", entries.len());
+            let mut out = format!("Global MCP Server Registry (Count: {})\n\n", entries.len());
             for e in &entries {
-                out.push_str(&format!("- [{}] {}: {}\\n  Package: {}\\n", e.category, e.name, e.description, e.package));
+                out.push_str(&format!("- [{}] {}: {}\n  Package: {}\n", e.category, e.name, e.description, e.package));
             }
             Ok(out)
         });
@@ -270,10 +297,10 @@ impl ToolRegistry {
 
         Self::register_meta_tool(&mut tools, "meta_scout_agents", "Discover agent capabilities from connected remotes", MetaCategory::IntelligenceBridge, |_arg, _ws| {
             let remotes = GmcpClient::list_external_tools();
-            let mut report = "Discovered Meta-Agent Capabilities:\\n\\n".to_string();
+            let mut report = "Discovered Meta-Agent Capabilities:\n\n".to_string();
             for r in remotes {
                 if r.name.contains("agent") || r.name.contains("swarm") {
-                    report.push_str(&format!("- [REMOTE] {}: {}\\n", r.name, r.description));
+                    report.push_str(&format!("- [REMOTE] {}: {}\n", r.name, r.description));
                 }
             }
             Ok(report)
@@ -282,9 +309,9 @@ impl ToolRegistry {
         Self::register_meta_tool(&mut tools, "meta_rank_agents", "Report current agent expertise hierarchy", MetaCategory::IntelligenceBridge, |_arg, _ws| {
             let registry = crate::gawd::agents::AgentMetaRegistry::global();
             let agents = registry.list_agents();
-            let mut report = "AEON Expertise Hierarchy:\\n\\n".to_string();
+            let mut report = "AEON Expertise Hierarchy:\n\n".to_string();
             for a in agents {
-                report.push_str(&format!("- [AGENT] {} (Base Rank: {:.2}): {}\\n", a.name, a.base_rank, a.description));
+                report.push_str(&format!("- [AGENT] {} (Base Rank: {:.2}): {}\n", a.name, a.base_rank, a.description));
             }
             Ok(report)
         });

@@ -3,12 +3,57 @@ use aeon_engine::gawd::ama::AmaMasterAgent;
 use aeon_engine::gemi::server::GemiServer;
 use aeon_engine::gmcp::server::GmcpServer;
 use aeon_engine::gmcp::tools::ToolRegistry;
-use aeon_engine::sandbox::manager::SandboxManager;
+use aeon_engine::sandbox::manager::{SandboxManager, AeonAuditLogger, LogLevel};
 use aeon_engine::AEON_VERSION;
 
 use std::env;
 use std::io::{self, Read, IsTerminal};
 use std::path::{Path, PathBuf};
+use log::{info, warn, error};
+
+const MAX_STDIN_SIZE: usize = 1_000_000;  // 1MB limit
+const STDIN_TIMEOUT_SECS: u64 = 30;
+
+fn read_stdin_bounded() -> io::Result<Option<String>> {
+    let stdin = io::stdin();
+
+    // Set read timeout on Unix
+    #[cfg(unix)]
+    {
+        use std::os::unix::io::AsRawFd;
+        let fd = stdin.as_raw_fd();
+        let timeout = libc::timeval {
+            tv_sec: STDIN_TIMEOUT_SECS as _,
+            tv_usec: 0,
+        };
+        unsafe {
+            libc::setsockopt(fd, libc::SOL_SOCKET, libc::SO_RCVTIMEO,
+                &timeout as *const _ as *const libc::c_void,
+                std::mem::size_of::<libc::timeval>() as u32);
+        }
+    }
+
+    let mut buffer = Vec::new();
+    let mut limited = stdin.take(MAX_STDIN_SIZE as u64);
+    limited.read_to_end(&mut buffer)?;
+
+    if buffer.len() >= MAX_STDIN_SIZE {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            format!("Input exceeds {} bytes limit", MAX_STDIN_SIZE)
+        ));
+    }
+
+    let content = String::from_utf8(buffer)
+        .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
+
+    let trimmed = content.trim();
+    Ok(if trimmed.is_empty() {
+        None
+    } else {
+        Some(trimmed.to_string())
+    })
+}
 
 fn get_home_dir() -> PathBuf {
     env::var_os("HOME")
@@ -62,6 +107,7 @@ fn run_install(global_dir: &Path) {
 }
 
 fn main() {
+    env_logger::init();
     let cwd = env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
     let home = get_home_dir();
     let global_dir = home.join(".aeon");
@@ -74,14 +120,21 @@ fn main() {
 
     if args.is_empty() {
         if !io::stdin().is_terminal() {
-            let mut buffer = String::new();
-            if io::stdin().read_to_string(&mut buffer).is_ok() {
-                let trimmed = buffer.trim();
-                if !trimmed.is_empty() {
+            match read_stdin_bounded() {
+                Ok(Some(input)) => {
                     let ama = AmaMasterAgent::new();
-                    let answer = ama.solve_clean(trimmed, &cwd, AEON_VERSION);
-                    print!("{}", answer);
+                    let answer = ama.solve_clean(&input, &cwd, AEON_VERSION);
+                    if !io::stdout().is_terminal() {
+                        print!("{}", answer);
+                    } else {
+                        println!("{}", answer);
+                    }
                     return;
+                }
+                Ok(None) => return,
+                Err(e) => {
+                    error!("stdin error: {}", e);
+                    std::process::exit(1);
                 }
             }
         }
@@ -226,8 +279,14 @@ fn main() {
 
             // Axiomatic Pulse Ingestion: Automatically anchor any natural language instruction into pulse.md
             match aeon_engine::daemon::admin::AeonAdmin::ingest_natural_intent(&cwd, &goal) {
-                Ok(msg) => println!("{}", msg),
-                Err(_) => {
+                Ok(msg) => {
+                    info!("Natural intent ingested successfully");
+                    println!("{}", msg);
+                }
+                Err(e) => {
+                    warn!("Natural intent ingestion failed: {}. Falling back to direct solving.", e);
+                    AeonAuditLogger::log(&global_dir, LogLevel::Warning, "INTENT_FALLBACK", &format!("Reason: {}", e));
+
                     // Fallback to direct solving if ingestion fails
                     let answer = ama.solve_clean(&goal, &cwd, AEON_VERSION);
                     if !io::stdout().is_terminal() {

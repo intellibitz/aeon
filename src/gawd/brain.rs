@@ -43,9 +43,9 @@ impl AlphaBrainContext {
     #[allow(dead_code)]
     pub fn inspect_tri_state(&self) -> String {
         format!(
-            "AEON Core Substrate Status:\\\n\
-             1. [CORE - Compiled System]: Version {}, {} Baked Rules, {} Baked Components\\\n\
-             2. [HARDWARE - System Environment]: {} CPUs | {} | {}GB RAM\\\n\
+            "AEON Core Substrate Status:\n\
+             1. [CORE - Compiled System]: Version {}, {} Baked Rules, {} Baked Components\n\
+             2. [HARDWARE - System Environment]: {} CPUs | {} | {}GB RAM\n\
              3. [DYNAMIC - Runtime Configuration]: Workspace: {} | Engine: {} | Model: {} | GMCP Port: {} | GEMI Port: {}",
             self.self_version,
             AlphaSelf::RULES.len(),

@@ -14,12 +14,48 @@ use std::os::unix::io::AsRawFd;
 #[cfg(windows)]
 use std::os::windows::io::AsRawHandle;
 
+use signal_hook::{consts::{SIGTERM, SIGINT}, iterator::Signals};
+use std::sync::{atomic::{AtomicBool, Ordering}, Arc};
+
+use crate::error::EaiError;
+use crate::sandbox::manager::AeonConfig;
 use crate::gemi::GemiServer;
 use crate::gmcp::server::GmcpServer;
 
 pub struct AmaDaemon;
 
-struct DaemonLock {
+pub struct DaemonContext {
+    pub shutdown_signal: Arc<AtomicBool>,
+    _lock: DaemonLock,
+}
+
+impl DaemonContext {
+    pub fn new(lock: DaemonLock) -> Self {
+        DaemonContext {
+            shutdown_signal: Arc::new(AtomicBool::new(false)),
+            _lock: lock,
+        }
+    }
+
+    pub fn setup_signal_handlers(&self) -> Result<(), EaiError> {
+        let shutdown = Arc::clone(&self.shutdown_signal);
+        thread::spawn(move || {
+            if let Ok(mut signals) = Signals::new(&[SIGTERM, SIGINT]) {
+                for sig in signals.forever() {
+                    eprintln!("[AmaDaemon] Received signal: {}", sig);
+                    shutdown.store(true, Ordering::Release);
+                }
+            }
+        });
+        Ok(())
+    }
+
+    pub fn is_shutdown_requested(&self) -> bool {
+        self.shutdown_signal.load(Ordering::Acquire)
+    }
+}
+
+pub struct DaemonLock {
     file: fs::File,
 }
 
@@ -34,6 +70,8 @@ impl DaemonLock {
 
         #[cfg(unix)]
         {
+            // SAFETY: We just opened the file, so fd is valid.
+            // flock doesn't access memory unsafely or take ownership.
             let ret = unsafe { libc::flock(file.as_raw_fd(), libc::LOCK_EX | libc::LOCK_NB) };
             if ret != 0 {
                 return Err("Locked by another process".into());
@@ -129,6 +167,27 @@ impl AmaDaemon {
         }
     }
 
+    fn is_process_alive(lock_file_path: &Path) -> bool {
+        if let Ok(content) = fs::read_to_string(lock_file_path) {
+            if let Ok(pid) = content.trim().parse::<u32>() {
+                #[cfg(unix)]
+                {
+                    return unsafe { libc::kill(pid as i32, 0) == 0 };
+                }
+                #[cfg(windows)]
+                {
+                    use std::process::Command;
+                    return Command::new("tasklist")
+                        .args(&["/FI", &format!("PID eq {}", pid)])
+                        .output()
+                        .map(|o| o.status.success())
+                        .unwrap_or(false);
+                }
+            }
+        }
+        false
+    }
+
     pub fn ensure_daemon_running(workspace: &Path, global_dir: &Path) {
         if Self::check_status(global_dir).is_some() {
             return;
@@ -168,54 +227,87 @@ impl AmaDaemon {
 
     pub fn run_daemon_loop(workspace: PathBuf, global_dir: PathBuf) {
         let lock_file_path = Self::get_lock_file(&global_dir);
+
+        // Ensure lock file is cleaned if stale (> 1 hour old and process is dead)
+        if let Ok(metadata) = std::fs::metadata(&lock_file_path) {
+            if let Ok(modified) = metadata.modified() {
+                if let Ok(age) = modified.elapsed() {
+                    if age.as_secs() > 3600 && !Self::is_process_alive(&lock_file_path) {
+                        let _ = std::fs::remove_file(&lock_file_path);
+                    }
+                }
+            }
+        }
+
         let mut lock = match DaemonLock::acquire(&lock_file_path) {
             Ok(l) => l,
-            Err(_) => {
-                eprintln!("[AmaDaemon] Failed to acquire lock. Daemon likely already running.");
+            Err(e) => {
+                eprintln!("[AmaDaemon] Failed to acquire lock: {}. Daemon likely already running.", e);
                 return;
             }
         };
 
         if let Err(e) = lock.write_pid() {
             eprintln!("[AmaDaemon] Failed to write PID to lock file: {}", e);
+            return;
         }
 
-        let cfg = crate::sandbox::manager::AeonConfig::load(&global_dir).expect("Fatal: Malformed configuration");
+        let ctx = DaemonContext::new(lock);
+        if let Err(e) = ctx.setup_signal_handlers() {
+            eprintln!("[AmaDaemon] Signal handler setup failed: {}", e);
+        }
+
+        let cfg = AeonConfig::load(&global_dir).expect("Fatal: Malformed configuration");
 
         // Substrate Administration & Hardware Optimization (Pillar 1)
         crate::daemon::runtime_admin::AeonRuntimeAdmin::start_administration_cycle(&workspace);
 
+        // Spawn services with panic handling
         let workspace_gemi = workspace.clone();
         let gemi_port = cfg.gemi_port;
-        // 1. Spawn GEMI HTTP REST Server Thread (Port 9091 / Dynamic)
         thread::spawn(move || {
-            GemiServer::start_http_server(workspace_gemi, gemi_port);
+            if let Err(e) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                GemiServer::start_http_server(workspace_gemi, gemi_port);
+            })) {
+                eprintln!("[GEMI] Thread panicked: {:?}", e);
+            }
         });
 
         let workspace_gmcp = workspace.clone();
         let gmcp_port = cfg.gmcp_port;
-        // 2. Spawn GMCP TCP Server Thread (Port 9090 / Dynamic)
         thread::spawn(move || {
-            GmcpServer::start_tcp_server(workspace_gmcp, gmcp_port, crate::AEON_VERSION.to_string());
+             if let Err(e) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                GmcpServer::start_tcp_server(workspace_gmcp, gmcp_port, crate::AEON_VERSION.to_string());
+            })) {
+                eprintln!("[GMCP TCP] Thread panicked: {:?}", e);
+            }
         });
 
         let workspace_gmcp_http = workspace.clone();
         let gmcp_http_port = cfg.gmcp_http_port;
-        // 3. Spawn GMCP HTTP/SSE Server Thread (Port 9093 / Dynamic)
         thread::spawn(move || {
-            GmcpServer::start_http_server(workspace_gmcp_http, gmcp_http_port);
+             if let Err(e) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                GmcpServer::start_http_server(workspace_gmcp_http, gmcp_http_port);
+            })) {
+                eprintln!("[GMCP HTTP] Thread panicked: {:?}", e);
+            }
         });
 
         let udp_port = cfg.udp_discovery_port;
-        // 4. Spawn A2A Cluster UDP Discovery Listener Thread (Port 9092 / Dynamic)
         thread::spawn(move || {
-            Self::start_udp_discovery_server(udp_port, gmcp_port);
+             if let Err(e) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                Self::start_udp_discovery_server(udp_port, gmcp_port);
+            })) {
+                eprintln!("[UDP] Thread panicked: {:?}", e);
+            }
         });
 
-        // 5. Keep main daemon thread alive
-        loop {
-            thread::sleep(Duration::from_secs(86400));
+        // Keep main daemon thread alive with graceful shutdown check
+        while !ctx.is_shutdown_requested() {
+            thread::sleep(Duration::from_secs(5));
         }
+
+        eprintln!("[AmaDaemon] Graceful shutdown initiated");
     }
 
     fn start_udp_discovery_server(port: u16, gmcp_port: u16) {

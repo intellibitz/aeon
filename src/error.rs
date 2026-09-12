@@ -1,7 +1,5 @@
-// AEON Unified Error Protocol
-// Categorized error handling for Exponential Intelligence Substrate
-
 use std::fmt;
+use std::error::Error as StdError;
 
 #[derive(Debug)]
 pub enum EaiError {
@@ -17,8 +15,9 @@ pub enum EaiError {
     Process(String),
     Authentication(String),
     Authorization(String),
-    #[allow(dead_code)]
     Internal(String),
+    #[allow(dead_code)]
+    Unknown(Box<dyn StdError + Send + Sync>),
 }
 
 impl fmt::Display for EaiError {
@@ -37,11 +36,19 @@ impl fmt::Display for EaiError {
             EaiError::Authentication(msg) => write!(f, "Authentication Error: {}", msg),
             EaiError::Authorization(msg) => write!(f, "Authorization Error: {}", msg),
             EaiError::Internal(msg) => write!(f, "Internal Engine Error: {}", msg),
+            EaiError::Unknown(e) => write!(f, "Unknown Error: {}", e),
         }
     }
 }
 
-impl std::error::Error for EaiError {}
+impl StdError for EaiError {
+    fn source(&self) -> Option<&(dyn StdError + 'static)> {
+        match self {
+            EaiError::Unknown(e) => Some(e.as_ref()),
+            _ => None,
+        }
+    }
+}
 
 impl From<std::io::Error> for EaiError {
     fn from(err: std::io::Error) -> Self {
@@ -49,9 +56,27 @@ impl From<std::io::Error> for EaiError {
     }
 }
 
+impl From<serde_json::Error> for EaiError {
+    fn from(err: serde_json::Error) -> Self {
+        EaiError::Config(format!("JSON error: {}", err))
+    }
+}
+
 impl From<candle_core::Error> for EaiError {
     fn from(err: candle_core::Error) -> Self {
         EaiError::Inference(err.to_string())
+    }
+}
+
+impl From<std::string::FromUtf8Error> for EaiError {
+    fn from(err: std::string::FromUtf8Error) -> Self {
+        EaiError::Protocol(format!("UTF-8 error: {}", err))
+    }
+}
+
+impl From<std::num::ParseIntError> for EaiError {
+    fn from(err: std::num::ParseIntError) -> Self {
+        EaiError::Protocol(format!("Parse error: {}", err))
     }
 }
 

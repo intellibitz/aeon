@@ -256,9 +256,10 @@ impl HardwareProfiler {
                 for line in content.lines() {
                     if line.starts_with("MemTotal:") {
                         let parts: Vec<&str> = line.split_whitespace().collect();
-                        if let Some(kb_str) = parts.get(1)
-                            && let Ok(kb) = kb_str.parse::<usize>() {
-                            return kb / (1024 * 1024);
+                        if let Some(kb_str) = parts.get(1) {
+                            if let Ok(kb) = kb_str.parse::<usize>() {
+                                return kb / (1024 * 1024);
+                            }
                         }
                     }
                 }
@@ -277,9 +278,10 @@ impl HardwareProfiler {
                 for line in content.lines() {
                     if line.starts_with("MemAvailable:") {
                         let parts: Vec<&str> = line.split_whitespace().collect();
-                        if let Some(kb_str) = parts.get(1)
-                            && let Ok(kb) = kb_str.parse::<usize>() {
-                            return kb / (1024 * 1024);
+                        if let Some(kb_str) = parts.get(1) {
+                            if let Ok(kb) = kb_str.parse::<usize>() {
+                                return kb / (1024 * 1024);
+                            }
                         }
                     }
                 }

@@ -44,6 +44,7 @@ impl AmaMasterAgent {
         let mut retry_count = 0;
         let mut current_goal = goal.to_string();
         let mut last_error = String::new();
+        let mut previous_errors = std::collections::HashSet::new();
 
         while retry_count < 3 {
             // 1. Pre-Execution Governance Audit & Substrate Preparation
@@ -81,37 +82,56 @@ impl AmaMasterAgent {
             };
 
             // 4. Axiomatic Alignment Check (Rule 15 Hardening)
-            let final_answer = match crate::gemi::engine::GemiEngine::verify_axiomatic_alignment(&final_answer, workspace) {
-                Ok(ans) => ans,
+            match crate::gemi::engine::GemiEngine::verify_axiomatic_alignment(&final_answer, workspace) {
+                Ok(ans) => {
+                     // 5. Reality Verification (Rule 15)
+                    match super::truth::TruthTransformer::verify_mission_reality(&current_goal, "AMA_SOLVE", &ans, workspace) {
+                        Ok(verified_answer) => {
+                            return Ok(AmaMissionReport {
+                                goal: goal.to_string(),
+                                status: "COMPLETE".to_string(),
+                                agents,
+                                interactions,
+                                final_answer: verified_answer,
+                            });
+                        }
+                        Err(e) if e.to_string().contains("TRUTH_VIOLATION") => {
+                            let error_str = e.to_string();
+                            let error_sig = format!("{:x}", md5::compute(error_str.as_bytes()));
+
+                            if previous_errors.contains(&error_sig) {
+                                crate::sandbox::manager::AeonAuditLogger::log_event(workspace, "RETRY_LOOP_DETECTED", &format!("Same error repeated: {}", error_str));
+                                return Err(e);
+                            }
+
+                            previous_errors.insert(error_sig);
+                            retry_count += 1;
+                            last_error = error_str;
+                            crate::sandbox::manager::AeonAuditLogger::log_event(workspace, "HALLUCINATION_DETECTED", &format!("Retry {}/3: {}", retry_count, last_error));
+
+                            current_goal = format!(
+                                "{}\n\n[CORRECTION ATTEMPT {}]: Previous response failed reality check.\n\
+                                Error detail: {}",
+                                goal, retry_count,
+                                last_error.chars().take(200).collect::<String>()
+                            );
+                        }
+                        Err(e) => return Err(e),
+                    }
+                }
                 Err(e) => {
                     retry_count += 1;
                     crate::sandbox::manager::AeonAuditLogger::log_event(workspace, "AXIOMATIC_VIOLATION", &e.to_string());
-                    current_goal = format!("{}\n\n[RECURSIVE_CORRECTION]: Your previous response violated substrate axioms: {}\nPlease ensure professional, real code that maintains substrate purity.", goal, e);
+
+                    current_goal = format!(
+                        "{}\n\n[CORRECTION ATTEMPT {}]: Response violated substrate axioms.\n\
+                        Violation: {}",
+                        goal, retry_count,
+                        e.to_string().chars().take(200).collect::<String>()
+                    );
                     continue;
                 }
             };
-
-            // 5. Reality Verification (Rule 15)
-            match super::truth::TruthTransformer::verify_mission_reality(&current_goal, "AMA_SOLVE", &final_answer, workspace) {
-                Ok(verified_answer) => {
-                    return Ok(AmaMissionReport {
-                        goal: goal.to_string(),
-                        status: "COMPLETE".to_string(),
-                        agents,
-                        interactions,
-                        final_answer: verified_answer,
-                    });
-                }
-                Err(e) if e.to_string().contains("TRUTH_VIOLATION") => {
-                    retry_count += 1;
-                    last_error = e.to_string();
-                    crate::sandbox::manager::AeonAuditLogger::log_event(workspace, "HALLUCINATION_DETECTED", &format!("Retry {}/3: {}", retry_count, last_error));
-
-                    // Feed the violation back into the next "thought"
-                    current_goal = format!("{}\n\n[RECURSIVE_CORRECTION]: Your previous response failed reality verification: {}\nPlease grounded your next attempt in verified workspace actions.", goal, last_error);
-                }
-                Err(e) => return Err(e),
-            }
         }
 
         Err(crate::error::EaiError::Governance(format!("Recursive reasoning failed after 3 attempts. Last violation: {}", last_error)))
