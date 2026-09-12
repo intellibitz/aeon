@@ -1,6 +1,6 @@
 # AEON Universal Agent Governance
 
-* **Current Engine Version**: `v0.1.2022762`
+* **Current Engine Version**: `v0.1.2022763`
 
 This document defines the immutable ethical and operational guardrails for all agents operating within the `aeon` substrate.
 
