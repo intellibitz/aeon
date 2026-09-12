@@ -1,6 +1,6 @@
 # AEON Test Protocols
 
-* **Current Engine Version**: `v0.1.2022733`
+* **Current Engine Version**: `v0.1.2022734`
 
 This document defines the validation procedures for verifying that the `aeon` substrate adheres to its architectural aspirations and runtime mandates. These protocols are implemented as native Rust tests within the core engine.
 
