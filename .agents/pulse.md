@@ -1,6 +1,6 @@
 # AEON Substrate Validation Genome (PULSE)
 
-* **Current Engine Version**: `v0.1.2022818`
+* **Current Engine Version**: `v0.1.2022819`
 
 This document defines the complete set of validation protocols that anchor the `aeon` genome. Every entry reflects a hard-compiled reflex or an orchestrated meta-behavior.
 
@@ -67,7 +67,7 @@ This document defines the complete set of validation protocols that anchor the `
 101. `[x]` **Optimal Hardware Saturation**: Refined genome to mandate "Safe Peak Performance" (max 90% utilization) and implemented autonomous OOM prevention in the swarm synthesizer.
 102. `[x]` **Hardware-Only Limit**: Codified the principle (Aspiration 21) that physical hardware is the sole constraint on system potential, constitutionally prohibiting artificial architectural gates.
 103. `[x]` **Optimal Async Orchestration**: Codified the mandate (Aspiration 22) for non-blocking I/O, mandatory multi-threading, and microsecond-tier communication convergence.
-104. `[x]` **Universal Swarm Operation**: Codified the mandate (Aspiration 23) that 100% of substrate operations must execute through the GAWD Swarm, ensuring zero serial execution of engine logic.
+104. `[x]` **Universal Swarm Operation**: Codified the mandate (Aspiration 23) that 100% of Motions, Missions, GEMI reasoning, and GMCP tools must execute through the GAWD Swarm, ensuring zero serial execution of long-running logic.
 105. `[x]` **Universal Decoupled Concurrency**: Codified the mandate (Aspiration 27) for non-blocking I/O, Reactor/Proactor event loops, lock-free work-stealing deques, and zero-copy ring buffers.
 
 ### 2.3 Structural Topology & Pillars [MOTION]

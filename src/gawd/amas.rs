@@ -447,3 +447,30 @@ impl AmaSupervisor {
         true
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_aspiration_23_universal_swarm_operation() {
+        use crate::gawd::agents::{GawdAgent, SafetyAgent, SecurityAgent, HighDensityContextStore};
+        let tmp_dir = std::env::temp_dir().join("aeon_swarm_test_asp23");
+        let _ = std::fs::create_dir_all(&tmp_dir);
+        let blackboard: MissionBlackboard = Arc::new(RwLock::new(HighDensityContextStore::new(10)));
+
+        let safety = SafetyAgent;
+        let security = SecurityAgent;
+
+        let res1 = safety.execute("admin mission: test aspiration 23", &tmp_dir, &blackboard);
+        let res2 = security.execute("admin mission: test aspiration 23", &tmp_dir, &blackboard);
+
+        assert!(res1.is_ok());
+        assert!(res2.is_ok());
+
+        let bb = blackboard.read().unwrap();
+        assert!(bb.contains_key("SafetyAgent"));
+        assert!(bb.contains_key("SecurityAgent"));
+        let _ = std::fs::remove_dir_all(&tmp_dir);
+    }
+}
