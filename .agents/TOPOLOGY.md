@@ -1,6 +1,6 @@
 # AEON Substrate Topology
 
-* **Current Engine Version**: `v0.1.2022807`
+* **Current Engine Version**: `v0.1.2022808`
 
 This document defines the structural native components and orchestrated meta-layers of the `aeon` substrate, organized into five functional pillars.
 
