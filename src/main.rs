@@ -297,13 +297,16 @@ fn main() {
                 }
             }
 
+            let is_creator = cwd.join(".agents").is_dir() || std::env::var("AEON_CREATOR_MODE").is_ok() || std::env::var("AEON_VERBOSE").is_ok();
             let ama = AmaMasterAgent::new();
 
             // Axiomatic Pulse Ingestion: Automatically anchor any natural language instruction into pulse.md
             match aeon_engine::daemon::admin::AeonAdmin::ingest_natural_intent(&cwd, &goal) {
                 Ok(msg) => {
                     info!("Natural intent ingested successfully");
-                    println!("{}", msg);
+                    if is_creator {
+                        println!("<thinking>\n{}\n</thinking>\n", msg);
+                    }
 
                     if msg.contains("[MISSION]") || msg.contains("[MOTION]") {
                         // Non-Blocking Swarm Orchestration (Aspiration 22 & <2ms Instant Reflex Mandate)

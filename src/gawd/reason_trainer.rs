@@ -22,9 +22,13 @@ impl ReasoningTrainer {
         } else { 0 };
 
         if existing_count < Self::DISTILLATION_THRESHOLD {
-            eprintln!("[Reasoning Trainer] Experience buffer low. Distilling Genome into synthetic wisdom...");
+            if workspace.join(".agents").is_dir() || std::env::var("AEON_VERBOSE").is_ok() {
+                eprintln!("[Reasoning Trainer] Experience buffer low. Distilling Genome into synthetic wisdom...");
+            }
             let distilled = GenomeDistiller::distill_genome_to_experience(workspace)?;
-            eprintln!("[Reasoning Trainer] Added {} genome-anchored samples.", distilled);
+            if workspace.join(".agents").is_dir() || std::env::var("AEON_VERBOSE").is_ok() {
+                eprintln!("[Reasoning Trainer] Added {} genome-anchored samples.", distilled);
+            }
         }
 
         if experience_file.exists() {
@@ -34,7 +38,9 @@ impl ReasoningTrainer {
             if count >= Self::DISTILLATION_THRESHOLD {
                 let archive_path = global_dir.join(format!("reasoning_archive_{}.jsonl", std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs()));
                 if std::fs::rename(&experience_file, &archive_path).is_ok() {
-                    eprintln!("[Reasoning Trainer] Experience threshold reached ({} samples). Initializing Substrate Ingestion Motion for 'aeon-reason' Tier 2 model...", count);
+                    if workspace.join(".agents").is_dir() || std::env::var("AEON_VERBOSE").is_ok() {
+                        eprintln!("[Reasoning Trainer] Experience threshold reached ({} samples). Initializing Substrate Ingestion Motion for 'aeon-reason' Tier 2 model...", count);
+                    }
                     if let Ok(exe) = std::env::current_exe() {
                         let mut cmd = std::process::Command::new(exe);
                         cmd.arg("--bg-train")

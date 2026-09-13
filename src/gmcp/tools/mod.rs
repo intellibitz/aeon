@@ -352,15 +352,13 @@ impl ToolRegistry {
         }
 
         if !essential_found {
-            eprintln!("[GMCP] No external tools configured. Auto-linking essential substrates (Registry count: {})...", registry.len());
-            // Link search and filesystem by default as they are foundational
+            if std::env::var("AEON_VERBOSE").is_ok() {
+                eprintln!("[GMCP] No external tools configured. Auto-linking essential substrates...");
+            }
             let essentials = ["brave_search", "filesystem", "google_search", "github", "google_maps"];
             for e in essentials {
                 if let Some(entry) = registry.iter().find(|r| r.name == e) {
-                    let res = GmcpClient::auto_configure_server(&entry.name, &entry.package);
-                    eprintln!("  - Linked {}: {}", e, res);
-                } else {
-                    eprintln!("  - Essential substrate '{}' not found in registry.", e);
+                    let _res = GmcpClient::auto_configure_server(&entry.name, &entry.package);
                 }
             }
         }
