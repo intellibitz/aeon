@@ -1,13 +1,11 @@
 # AEON Substrate Validation Genome (PULSE)
 
-* **Current Engine Version**: `v0.1.2022790`
+* **Current Engine Version**: `v0.1.2022791`
 
 This document defines the complete set of validation protocols that anchor the `aeon` genome. Every entry reflects a hard-compiled reflex or an orchestrated meta-behavior.
 
 ## 1. Pending Failing Pulse
 
-
-* `83. [ ] **[MISSION]**: models`
 ## 2. Ingested & Resolved Pulse (The Realized Genome)
 
 ### 2.1 Core Governance & Epistemic Integrity [MOTION]
@@ -106,3 +104,4 @@ This document defines the complete set of validation protocols that anchor the `
 80. `[x]` **Federated Merge**: Formalized Federated Contribution Reflex and Aspiration 18 for Global Intelligence.
 81. `[x]` **README Update**: Updated [README.md](file:///home/ramadoss/Projects/AI/aeon/README.md) to reflect Federated Experience Aggregation and Global Intelligence Aggregation.
 82. `[x]` **README Restructuring**: Restructured [README.md](file:///home/ramadoss/Projects/AI/aeon/README.md) to include expansive, detailed documentation synthesized from the full .agents genome.
+83. `[x]` **[MISSION]**: models: Local model discovery is optimized to avoid recursive full home folder scans, and correctly parses the active override configuration safely.

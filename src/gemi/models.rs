@@ -317,7 +317,8 @@ impl ModelManager {
         let cfg = crate::sandbox::manager::AeonConfig::load(&global_dir).expect("Fatal: Malformed configuration");
 
         if workspace.is_dir() { Self::recursive_scan_model_dir(workspace, &mut discovered, &mut visited); }
-        if home.is_dir() { Self::recursive_scan_model_dir(&home, &mut discovered, &mut visited); }
+        let global_models_dir = global_dir.join("models");
+        if global_models_dir.is_dir() { Self::recursive_scan_model_dir(&global_models_dir, &mut discovered, &mut visited); }
         for path_str in cfg.local_scan_paths {
             let p = PathBuf::from(path_str);
             if p.is_dir() { Self::recursive_scan_model_dir(&p, &mut discovered, &mut visited); }

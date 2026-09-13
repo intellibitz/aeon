@@ -187,6 +187,7 @@ impl AeonAdmin {
 
         let version = content.lines()
             .find(|l| l.trim().starts_with("version = \""))
+            .and_then(|l| l.split('"').nth(1))
             .ok_or_else(|| EaiError::config("Could not find version in Cargo.toml"))?;
 
         // Check README
