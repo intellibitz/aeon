@@ -1,6 +1,6 @@
 # AEON Build & Deployment Substrate
 
-* **Current Engine Version**: `v0.1.2022805`
+* **Current Engine Version**: `v0.1.2022806`
 
 This document defines the mechanics of the `aeon` binary lifecycle, release orchestration, and deployment protocols.
 
@@ -32,5 +32,5 @@ This document defines the mechanics of the `aeon` binary lifecycle, release orch
 ## 4. Universal Deployment Protocols
 
 17. **One-Line Installation**: The only authorized installation method for all platforms is: `curl -sSfL https://raw.githubusercontent.com/intellibitz/aeon/main/install.sh | sh`.
-14. **Binary download vs. Build Fallback**: The installer must prioritize pre-compiled binary deployment for microsecond onboarding, with a transparent fallback to local compilation.
-15. **Auto-Path Initialization**: Mandatory injection of `.aeon/bin` into the host's shell path environment (`.bashrc`, `.zshrc`, etc.) during installation.
+18. **Binary Download vs. Build Fallback**: The installer must prioritize pre-compiled binary deployment for microsecond onboarding, with a transparent fallback to local compilation.
+19. **Auto-Path Initialization**: Mandatory injection of `.aeon/bin` into the host's shell path environment (`.bashrc`, `.zshrc`, etc.) during installation.

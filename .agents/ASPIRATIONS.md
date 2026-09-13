@@ -1,6 +1,6 @@
 # AEON Architectural Aspirations
 
-* **Current Engine Version**: `v0.1.2022805`
+* **Current Engine Version**: `v0.1.2022806`
 
 This document defines the structural roadmap and evolution goals of the `aeon` substrate.
 
@@ -77,8 +77,20 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 
 ---
 
+### [Aspiration 15] Autonomous Self-Validation
+* **Status**: `REALIZED`
+* **Core Paradigm**: Empirical Self-Testing on Host Hardware. The `AeonRuntimeAdmin` continuously conducts autonomous self-validation tests on local CPU/GPU/RAM substrates to verify system health and guarantee optimal performance without manual intervention.
+
+---
+
 ### [Aspiration 16] Unified Natural Language Evolution
 * **Core Paradigm**: The "Speak-to-Evolve" mandate. Every human instruction is automatically mapped to a verifiable `[MOTION]`, `[MISSION]`, or `[QUERY]` test entry in `pulse.md`. This anchors the substrate's entire lifecycle in a singular, natural language verification loop.
+
+---
+
+### [Aspiration 17] Unified Interaction Protocol
+* **Status**: `REALIZED`
+* **Core Paradigm**: Unified Interaction Interface. Every human vision or system request is anchored in a verifiable typed test entry, establishing a singular, deterministic protocol across Motions, Missions, and Queries.
 
 ---
 

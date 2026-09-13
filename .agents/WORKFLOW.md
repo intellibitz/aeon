@@ -1,6 +1,6 @@
 # AEON Operational Workflow
 
-* **Current Engine Version**: `v0.1.2022805`
+* **Current Engine Version**: `v0.1.2022806`
 
 This document defines the Meta-Workflow for substrate evolution and the Federated Parallelism logic of the active `aeon` engine.
 
@@ -31,19 +31,19 @@ This document defines the Meta-Workflow for substrate evolution and the Federate
 
 12. **The Swarm Mandate**: Every operation—regardless of path (1a, 1b, or 1c)—must initialize a specialized GAWD Swarm. Direct serial execution of engine logic is prohibited.
 13. **Phase A: Foundational Readiness**: The `AeonRuntimeAdmin` continuously audits host CPU/GPU/RAM topologies and provisions the optimal model ladder via the swarm.
-12. **Substrate Optimization**: The `AeonRuntimeAdmin` provisions the optimal model ladder step and locks the engine to the peak performing local weights.
-13. **Daemon Persistence**: The `AmaDaemon` sustains the GMCP/GEMI/UDP server fleet, maintaining a stateful protocol bridge for all internal and external requests.
+14. **Substrate Optimization**: The `AeonRuntimeAdmin` provisions the optimal model ladder step and locks the engine to the peak performing local weights.
+15. **Daemon Persistence**: The `AmaDaemon` sustains the GMCP/GEMI/UDP server fleet, maintaining a stateful protocol bridge for all internal and external requests.
 
 ## 3. Phase B: Swarm Synthesis (On Intent)
 
-14. **Genome Interrogation**: Upon receiving a natural language intent, the `GAWD / AMA` orchestrator interrogates the hard-compiled binary genome for recruitment rules.
-15. **Semantic Recruitment**: The substrate recruits a mission-specific fleet (Safety, Context, Specialists) using Tier 0 semantic centroid projections.
-16. **Axiomatic Auditing**: The `AeonAdmin` audits the synthesized swarm to ensure it adheres to the **Epistemic Integrity Mandates** before execution begins.
+16. **Genome Interrogation**: Upon receiving a natural language intent, the `GAWD / AMA` orchestrator interrogates the hard-compiled binary genome for recruitment rules.
+17. **Semantic Recruitment**: The substrate recruits a mission-specific fleet (Safety, Context, Specialists) using Tier 0 semantic centroid projections.
+18. **Axiomatic Auditing**: The `AeonAdmin` audits the synthesized swarm to ensure it adheres to the **Epistemic Integrity Mandates** before execution begins.
 
 ## 4. Phase C: Execution & Distillation (Mission Cycle)
 
-17. **Explosive Swarm Dispatch**: Parallel execution of agents across isolated threads, coordinating via a shared, high-density **Mission Blackboard**.
-18. **Recursive Fork-Join**: For complex missions, the orchestrator triggers a recursive "Split-Parallel-Join" cycle. The goal is partitioned into independent sub-missions, processed by sub-swarms, and re-joined upon semantic convergence.
-19. **Chain of Truth Convergence**: Swarm participants converge on a verified outcome, grounding all results in empirical filesystem state and tool results.
-19. **Substrate Ingestion**: Successful reasoning is staged and distilled into the **Native Tier 2 Reasoning Model** to close the loop between experience and memory.
-20. **Autonomous Drift Correction**: The `EvolutionManager` audits the mission logs for capability gaps and triggers autonomous synthesis to heal the substrate.
+19. **Explosive Swarm Dispatch**: Parallel execution of agents across isolated threads, coordinating via a shared, high-density **Mission Blackboard**.
+20. **Recursive Fork-Join**: For complex missions, the orchestrator triggers a recursive "Split-Parallel-Join" cycle. The goal is partitioned into independent sub-missions, processed by sub-swarms, and re-joined upon semantic convergence.
+21. **Chain of Truth Convergence**: Swarm participants converge on a verified outcome, grounding all results in empirical filesystem state and tool results.
+22. **Substrate Ingestion**: Successful reasoning is staged and distilled into the **Native Tier 2 Reasoning Model** to close the loop between experience and memory.
+23. **Autonomous Drift Correction**: The `EvolutionManager` audits the mission logs for capability gaps and triggers autonomous synthesis to heal the substrate.

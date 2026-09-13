@@ -1,6 +1,6 @@
 # AEON Creator Interface Protocols
 
-* **Current Engine Version**: `v0.1.2022805`
+* **Current Engine Version**: `v0.1.2022806`
 
 This document defines the three absolute fronts of interaction between Human Creators and the `aeon` substrate. It maps the intention of the Creator to the exact epistemic boundary within the engine.
 
@@ -12,13 +12,13 @@ This document defines the three absolute fronts of interaction between Human Cre
 5. **Command Syntax**: `aeon "<motion_intent>"` (or `aeon pulse "<motion_intent>"`)
 
 ## 2. Missions (Alpha-User Mutation)
-5. **Definition**: Dynamic task fulfillment and workspace state generation.
-6. **Blast Radius**: The mutable `alpha-user` environment and the active workspace (`.aeon/`, local files).
-7. **Protocol (`MISSIONS.md`)**: A Mission is an explosive swarm execution. The engine recruits specialists, converges on a Chain of Truth via the Mission Blackboard, generates artifacts, and ultimately stages the experience for Substrate Ingestion (training the Native Tier 2 model).
-8. **Command Syntax**: `aeon "<mission_intent>"` (or `aeon pulse "<mission_intent>"`)
+6. **Definition**: Dynamic task fulfillment and workspace state generation.
+7. **Blast Radius**: The mutable `alpha-user` environment and the active workspace (`.aeon/`, local files).
+8. **Protocol (`MISSIONS.md`)**: A Mission is an explosive swarm execution. The engine recruits specialists, converges on a Chain of Truth via the Mission Blackboard, generates artifacts, and ultimately stages the experience for Substrate Ingestion (training the Native Tier 2 model).
+9. **Command Syntax**: `aeon "<mission_intent>"` (or `aeon pulse "<mission_intent>"`)
 
 ## 3. Queries (Zero-Mutation)
-9. **Definition**: Ephemeral substrate interrogation and stateless analytics.
-10. **Blast Radius**: None. Strictly Read-Only.
-11. **Protocol (`QUERIES.md`)**: A Query bypasses the evolutionary pipeline and the mission blackboard. It executes directly via the native engine (Alpha, Vision, Audio) or administrative layer, returning a semantic response to `stdout` without leaving a permanent artifact.
-12. **Command Syntax**: `aeon "<query_intent>"` (or `aeon pulse "<query_intent>"`)
+10. **Definition**: Ephemeral substrate interrogation and stateless analytics.
+11. **Blast Radius**: None. Strictly Read-Only.
+12. **Protocol (`QUERIES.md`)**: A Query bypasses the evolutionary pipeline and the mission blackboard. It executes directly via the native engine (Alpha, Vision, Audio) or administrative layer, returning a semantic response to `stdout` without leaving a permanent artifact.
+13. **Command Syntax**: `aeon "<query_intent>"` (or `aeon pulse "<query_intent>")`)
