@@ -1,6 +1,6 @@
 # AEON Universal Agent Governance
 
-* **Current Engine Version**: `v0.1.2022804`
+* **Current Engine Version**: `v0.1.2022805`
 
 This document defines the immutable ethical and operational guardrails for all agents operating within the `aeon` substrate.
 
@@ -23,16 +23,16 @@ This document defines the immutable ethical and operational guardrails for all a
 
 ## 3. Collaborative & Strategic Mandates
 
-11. **Direct Collaborative Mode**: Maintain direct interaction—aligned, responsive, objective, and precise. Non-blocking asynchronous communication is the mandate for all swarm coordination.
-12. **Full Autonomy & Permissions**: Agents have full permission for all designated file operations and command executions within their context.
-13. **Optimal Communication**: Swarm communication must utilize hardware-optimized, non-blocking channels to ensure zero execution stall and microsecond response convergence.
-14. **Universal Swarm Operation**: Every operation within the AEON substrate must be executed via the multi-threaded swarm. Agents are the sole executors of logic, mutations, and audits.
-15. **Lock-Free Execution**: Agents must utilize non-blocking concurrency primitives. Blocking thread locks are prohibited in the swarm execution path to ensure zero-stall intelligence convergence.
-16. **Recursive Decomposition**: The swarm must be capable of recursive self-splitting. If a mission is high-entropy, the orchestrator must spawn parallel sub-swarms to handle atomic components, joining results upon convergence.
-13. **Anti-Hardcoding Mandate**: Prohibition on hardcoding query-specific matchers. Intents must resolve dynamically using models and tools.
-14. **Reality Grounding**: If requests or assumptions are outside verified reality, correct them objectively and guide execution to the empirical path.
-15. **Substrate Sovereignty**: Respect the isolation boundaries of the substrate. Ephemeral state must remain strictly within `.aeon/` or isolated temporary directories.
+12. **Direct Collaborative Mode**: Maintain direct interaction—aligned, responsive, objective, and precise. Non-blocking asynchronous communication is the mandate for all swarm coordination.
+13. **Full Autonomy & Permissions**: Agents have full permission for all designated file operations and command executions within their context.
+14. **Optimal Communication**: Swarm communication must utilize hardware-optimized, non-blocking channels to ensure zero execution stall and microsecond response convergence.
+15. **Universal Swarm Operation**: Every operation within the AEON substrate must be executed via the multi-threaded swarm. Agents are the sole executors of logic, mutations, and audits.
+16. **Lock-Free Execution**: Agents must utilize non-blocking concurrency primitives. Blocking thread locks are prohibited in the swarm execution path to ensure zero-stall intelligence convergence.
+17. **Recursive Decomposition**: The swarm must be capable of recursive self-splitting. If a mission is high-entropy, the orchestrator must spawn parallel sub-swarms to handle atomic components, joining results upon convergence.
+18. **Anti-Hardcoding Mandate**: Prohibition on hardcoding query-specific matchers. Intents must resolve dynamically using models and tools.
+19. **Reality Grounding**: If requests or assumptions are outside verified reality, correct them objectively and guide execution to the empirical path.
+20. **Substrate Sovereignty**: Respect the isolation boundaries of the substrate. Ephemeral state must remain strictly within `.aeon/` or isolated temporary directories.
 
 ## 4. The Creator Meta-Axiom
 
-16. **Creator Evolution Pipeline**: The workflow strictly follows the rules; the rules define the workflow. Creator vision enters as a motion (`MOTIONS.md`), shapes architecture (`ASPIRATIONS.md`), builds structure (`TOPOLOGY.md`), and dictates logic (`WORKFLOW.md`). Core mutations fork directly to `BUILD.md`; runtime mutations route through `RUNTIME.md` before compilation.
+21. **Creator Evolution Pipeline**: The workflow strictly follows the rules; the rules define the workflow. Creator vision enters as a motion (`MOTIONS.md`), shapes architecture (`ASPIRATIONS.md`), builds structure (`TOPOLOGY.md`), and dictates logic (`WORKFLOW.md`). Core mutations fork directly to `BUILD.md`; runtime mutations route through `RUNTIME.md` before compilation.

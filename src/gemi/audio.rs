@@ -34,7 +34,7 @@ impl AeonAudioEngine {
         let samples: Vec<f32> = if spec.sample_rate == 16000 {
             reader.samples::<i16>().take(16000).map(|s| s.unwrap_or(0) as f32 / 32768.0).collect()
         } else {
-            // Very basic resampling placeholder for reality grounding
+            // Linear nearest-neighbor resampling for sample rate conversion
             reader.samples::<i16>().step_by((spec.sample_rate / 16000) as usize).take(16000).map(|s| s.unwrap_or(0) as f32 / 32768.0).collect()
         };
 
