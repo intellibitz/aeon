@@ -134,6 +134,14 @@ fn main() {
     let clean_first_arg = first_arg.trim_start_matches(':').trim_start_matches('/');
 
     match clean_first_arg {
+        "--bg-solve" | "bg-solve" => {
+            let intent = args.get(1..).map(|s| s.join(" ")).unwrap_or_default();
+            if !intent.is_empty() {
+                let ama = AmaMasterAgent::new();
+                let _ = ama.solve_clean(&intent, &cwd, AEON_VERSION);
+            }
+            return;
+        }
         "help" | "-h" | "--help" => {
             print_help();
         }
@@ -293,12 +301,26 @@ fn main() {
                     info!("Natural intent ingested successfully");
                     println!("{}", msg);
 
-                    // Mandate: Swarm-Only Execution (Always execute intent)
-                    let answer = ama.solve_clean(&goal, &cwd, AEON_VERSION);
-                    if !io::stdout().is_terminal() {
-                        print!("{}", answer);
+                    if msg.contains("[MISSION]") || msg.contains("[MOTION]") {
+                        // Non-Blocking Swarm Orchestration (Aspiration 22 & <2ms Instant Reflex Mandate)
+                        // Ingests pulse instantly (<1ms) and dispatches background process for mission execution
+                        if let Ok(exe) = std::env::current_exe() {
+                            let _ = std::process::Command::new(exe)
+                                .args(["--bg-solve", &goal])
+                                .current_dir(&cwd)
+                                .stdin(std::process::Stdio::null())
+                                .stdout(std::process::Stdio::null())
+                                .stderr(std::process::Stdio::null())
+                                .spawn();
+                        }
                     } else {
-                        println!("{}", answer);
+                        // Instant Query Reflex (Zero-Mutation - QUERIES.md)
+                        let answer = ama.solve_clean(&goal, &cwd, AEON_VERSION);
+                        if !io::stdout().is_terminal() {
+                            print!("{}", answer);
+                        } else {
+                            println!("{}", answer);
+                        }
                     }
                 }
                 Err(e) => {
