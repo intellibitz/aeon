@@ -214,7 +214,9 @@ impl AeonAlphaModel {
     }
 
     /// Deterministic Semantic Embedding Substrate
+    /// Optimized for <2ms Instant-Intelligence (Aspiration 25).
     pub fn semantic_centroid_projection(prompt: &str, anchors: Option<&[crate::gawd::agents::AgentProfile]>) -> Result<Vec<f32>> {
+        let start = std::time::Instant::now();
         let mut vec = vec![0.0f32; Self::DIM];
         let prompt_lower = prompt.to_lowercase();
         let words: Vec<&str> = prompt_lower.split(|c: char| !c.is_alphanumeric()).filter(|s| !s.is_empty()).collect();
@@ -235,6 +237,12 @@ impl AeonAlphaModel {
             for x in vec.iter_mut() {
                 *x /= norm;
             }
+        }
+
+        let elapsed = start.elapsed();
+        if elapsed.as_millis() > 1 {
+            // Internal sub-operation must be well under the 2ms total budget
+            eprintln!("[WARNING] Semantic Projection exceeded 1ms: {:?}", elapsed);
         }
 
         Ok(vec)

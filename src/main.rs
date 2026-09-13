@@ -1,14 +1,14 @@
+#![allow(unexpected_cfgs)]
 use aeon_engine::daemon::AmaDaemon;
 use aeon_engine::gawd::ama::AmaMasterAgent;
 use aeon_engine::gemi::server::GemiServer;
 use aeon_engine::gmcp::server::GmcpServer;
-use aeon_engine::gmcp::tools::ToolRegistry;
-use aeon_engine::sandbox::manager::{SandboxManager, AeonAuditLogger, LogLevel};
+
 use aeon_engine::AEON_VERSION;
 
 use std::env;
 use std::io::{self, Read, IsTerminal};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use log::{info, warn, error};
 
 const MAX_STDIN_SIZE: usize = 100 * 1024 * 1024;  // Fluid Scaling: 100MB baseline limit
@@ -90,24 +90,7 @@ fn print_help() {
     println!("  aeon scout_model <model_id> > model.json");
 }
 
-fn run_install(global_dir: &Path) {
-    println!("Initializing aeon runtime...");
-    let _ = SandboxManager::ensure_global_sandbox(global_dir);
-    let cfg = aeon_engine::sandbox::manager::AeonConfig::load(global_dir).unwrap_or_else(|e| {
-        eprintln!("FATAL: {}", e);
-        std::process::exit(1);
-    });
 
-    // Zero-Config Autonomous Model Provisioning (Rule 31)
-    if aeon_engine::gemi::models::ModelManager::get_selected_model().is_none() {
-        println!("No local reasoning substrate detected. Provisioning alpha weights...");
-        let res = aeon_engine::gemi::models::ModelManager::install_model(&cfg.alpha_weights_url);
-        println!("Provisioning status: {}", res);
-    }
-
-    AmaDaemon::ensure_daemon_running(global_dir, global_dir);
-    println!("aeon runtime initialized.");
-}
 
 fn main() {
     #[cfg(tokio_unstable)]
@@ -156,13 +139,6 @@ fn main() {
         }
         "version" | "-v" | "--version" => {
             println!("aeon v{}", AEON_VERSION);
-        }
-        "install" => {
-            run_install(&global_dir);
-        }
-        "uninstall" => {
-            let _ = std::fs::remove_dir_all(&global_dir);
-            println!("aeon runtime removed.");
         }
         "install" => {
             let ama = AmaMasterAgent::new();
@@ -284,8 +260,8 @@ fn main() {
             println!("Workspace build artifacts cleaned.");
         }
         _ => {
-            let cmd_name = clean_first_arg;
-            let cmd_arg = args.get(1..).map(|s| s.join(" ")).unwrap_or_default();
+            let _cmd_name = clean_first_arg;
+            let _cmd_arg = args.get(1..).map(|s| s.join(" ")).unwrap_or_default();
             let mut goal = args.join(" ");
 
             if !io::stdin().is_terminal() {

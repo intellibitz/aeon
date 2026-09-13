@@ -12,7 +12,7 @@ use crate::error::EaiResult;
 pub struct PagedKVStore {
     pages: Arc<RwLock<HashMap<u64, Vec<f32>>>>,
     lru: Arc<Mutex<Vec<u64>>>, // Track usage order
-    page_size: usize,
+    _page_size: usize,
     max_pages: usize,
 }
 
@@ -23,7 +23,7 @@ impl PagedKVStore {
             PagedKVStore {
                 pages: Arc::new(RwLock::new(HashMap::new())),
                 lru: Arc::new(Mutex::new(Vec::new())),
-                page_size: 4096, // 4KB Pages
+                _page_size: 4096, // 4KB Pages
                 max_pages: 1024 * 16, // 64MB Cache Limit
             }
         })

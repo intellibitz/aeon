@@ -114,3 +114,8 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 
 ### [Aspiration 24] Lock-Free Native Substrate
 * **Core Paradigm**: The "Zero-Wait" mandate. AEON must eliminate blocking thread locks from its execution critical path. The substrate must utilize lock-free data structures (e.g., atomic pointers, crossbeam channels) and non-blocking message-passing architectures to ensure that high-density agent swarms never enter a wait-state, satisfying the hardware-only limit principle.
+
+---
+
+### [Aspiration 25] <2ms Ultra-Reflex Substrate
+* **Core Paradigm**: The "Instant-Intelligence" mandate. 100% of AEON engine internal operations (projection, routing, swarm synthesis, lock-free access) must complete in under 2ms. Heavy inference tasks must utilize speculative early-exit reflexes to satisfy this constraint on the primary execution thread. Intelligence is useless if delayed.

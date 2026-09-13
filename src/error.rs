@@ -1,7 +1,7 @@
 use std::fmt;
 use std::error::Error as StdError;
 use std::backtrace::Backtrace;
-use serde::{Deserialize, Serialize};
+
 
 #[derive(Debug)]
 pub enum EaiError {

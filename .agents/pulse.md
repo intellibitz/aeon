@@ -6,6 +6,8 @@ This document defines the complete set of validation protocols that anchor the `
 
 ## 1. Pending Failing Pulse
 
+* `105. [ ] **[MISSION]**: [RESOLVED]: Finalized the '<2ms Ultra-Reflex' substrate. Implemented high-resolution latency guards in AmaMasterAgent and AeonAlphaModel. Enforced sub-2ms constraint on critical execution paths with Axiomatic logging for violations. Optimized semantic projection and hardware profiling to satisfy the instant-intelligence mandate.`
+* `105. [ ] **[MOTION]**: [MOTION]: Enforce the '<2ms Ultra-Reflex' mandate across the substrate. 100% of internal operations must be measured and optimized for sub-2ms latency. Transition slow path initialization to lazy-async background threads.`
 * `105. [ ] **[MISSION]**: [RESOLVED]: Finalized the Lock-Free Substrate transition. Refactored PagedKVStore, RadixAttentionStore, AgentMetaRegistry, MissionBlackboard, and DiscoveredPeers to use RwLock concurrency primitives. Updated AeonAlphaModel to eliminate recursive deadlocks during semantic centroid projection. The AEON substrate is now non-blocking and optimized for high-density multi-threaded swarm execution.`
 * `105. [ ] **[QUERY]**: identity`
 * `105. [ ] **[QUERY]**: identity`

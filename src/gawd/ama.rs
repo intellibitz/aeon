@@ -52,8 +52,21 @@ impl AmaMasterAgent {
     }
 
     /// Primary entry point for all natural language intents.
+    /// Enforces the <2ms Instant-Intelligence mandate (Aspiration 25).
     pub fn solve_clean(&self, goal: &str, workspace: &Path, version: &str) -> String {
+        let start = std::time::Instant::now();
         let res = self.solve(goal, workspace, version);
+        let elapsed = start.elapsed();
+
+        if elapsed.as_millis() > 2 {
+             crate::sandbox::manager::AeonAuditLogger::log(
+                 workspace,
+                 crate::sandbox::manager::LogLevel::Axiomatic,
+                 "LATENCY_VIOLATION",
+                 &format!("Reflex operation exceeded 2ms mandate: {:?} (Goal: {})", elapsed, goal)
+             );
+        }
+
         match res {
             Ok(report) => report.final_answer,
             Err(e) => format!("AMA Engine Error: {}", e),

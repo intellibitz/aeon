@@ -4,7 +4,7 @@
 use std::fs;
 use std::path::{Path, PathBuf, Component};
 use std::process::Command;
-use std::sync::{Arc, Mutex, RwLock, OnceLock};
+use std::sync::{Arc, RwLock, OnceLock};
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 

@@ -19,6 +19,7 @@ This document defines the operational directives for environment establishment, 
 8. **Fluid Scaling**: System boundaries (parsing limits, context depth, execution timeouts) must scale fluidly based on hardware availability. Hardware is the only limit; architectural gates are prohibited.
 9. **Registry Hot-Reload**: Validate the dynamic agent registry (`agent_registry.json`) via timestamp-based audits to prevent stale behavior injection during swarm synthesis.
 10. **Lock-Free Mapping**: High-density context mapping and blackboard access must be non-blocking. The engine must utilize lock-free stores to prevent agent wait-states during deep reasoning missions.
+11. **Sub-2ms Reflex**: 100% of non-inference engine operations must execute in <2ms. Implement high-resolution timing guards on critical paths to enforce the instant-intelligence mandate.
 
 ## 3. Swarm Operational Directives
 

@@ -2,7 +2,7 @@
 // RULE 11: Agents must add functionality directly to the aeon engine.
 // RULE 31: Substrate Purity & Meta-Only Mandate - Neural Swarm Synthesis
 
-use std::sync::{Arc, Mutex, RwLock, OnceLock};
+use std::sync::{Arc, RwLock, OnceLock};
 use std::path::{Path, PathBuf};
 use std::collections::HashMap;
 use crate::error::EaiResult;
