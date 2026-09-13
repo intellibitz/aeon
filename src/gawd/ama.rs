@@ -82,22 +82,28 @@ impl AmaMasterAgent {
             let model_name = crate::gemi::models::ModelManager::get_selected_model()
                 .unwrap_or_else(|| "aeon-alpha.safetensors".to_string());
 
-            // Check Mission Blackboard for stateful summary
-            let blackboard_summary = if let Some(cp) = crate::sandbox::manager::SandboxManager::check_interrupted_checkpoint(workspace) {
-                crate::gemi::engine::ContextSummarizer::compress_blackboard(&cp.blackboard)
+            let lower_goal = current_goal.to_lowercase();
+            let final_answer = if lower_goal.contains("admin mission") || lower_goal.contains("sync") || lower_goal.contains("audit") || lower_goal.contains("release") {
+                // Mandate: Zero-Stall Technical Convergence (Aspiration 22)
+                let data = AmaSupervisor::gather_weighted_wisdom(&interactions, &agents);
+                format!("AMA-Technical-Convergence ({}):\n\n{}", version, data)
             } else {
-                "NO_PREVIOUS_CONTEXT".to_string()
-            };
-
-            let final_answer = if interactions.is_empty() {
-                format!("AMA-Reflex ({}): No active agents responded to '{}'. Context: {}", version, current_goal, blackboard_summary)
-            } else {
-                let last_payload = &interactions.last().unwrap().payload;
-                if last_payload.len() > 10 {
-                    last_payload.clone()
+                let blackboard_summary = if let Some(cp) = crate::sandbox::manager::SandboxManager::check_interrupted_checkpoint(workspace) {
+                    crate::gemi::engine::ContextSummarizer::compress_blackboard(&cp.blackboard)
                 } else {
-                    format!("AMA-Synthesis ({} via {}):\n\nProcessed goal '{}' across {} active agents. Context: {}",
-                        version, model_name, current_goal, agents.len(), blackboard_summary)
+                    "NO_PREVIOUS_CONTEXT".to_string()
+                };
+
+                if interactions.is_empty() {
+                    format!("AMA-Reflex ({}): No active agents responded to '{}'. Context: {}", version, current_goal, blackboard_summary)
+                } else {
+                    let last_payload = &interactions.last().unwrap().payload;
+                    if last_payload.len() > 10 {
+                        last_payload.clone()
+                    } else {
+                        format!("AMA-Synthesis ({} via {}):\n\nProcessed goal '{}' across {} active agents. Context: {}",
+                            version, model_name, current_goal, agents.len(), blackboard_summary)
+                    }
                 }
             };
 

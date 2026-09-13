@@ -1,6 +1,6 @@
 # AEON Architectural Aspirations
 
-* **Current Engine Version**: `v0.1.2022796`
+* **Current Engine Version**: `v0.1.2022797`
 
 This document defines the structural roadmap and evolution goals of the `aeon` substrate.
 
@@ -104,3 +104,8 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 
 ### [Aspiration 22] Optimal Asynchronous Orchestration
 * **Core Paradigm**: The "Fluid Intelligence" mandate. AEON must ensure 100% non-blocking I/O and mandatory multi-threaded execution for all internal and external requests. The substrate must implement hardware-optimized IPC and user communication channels to ensure microsecond-tier response latency through direct-thread mapping and zero-copy data transfer.
+
+---
+
+### [Aspiration 23] Universal Swarm Operation
+* **Core Paradigm**: The "Swarm-Only" mandate. 100% of AEON substrate operations—ranging from core architectural mutations and global version synchronization to transient diagnostic audits—must be executed through the multi-threaded GAWD Swarm. Direct serial execution of engine logic is constitutionally prohibited, ensuring that every operation benefits from swarm-parallelism, safety auditing, and epistemic verification.

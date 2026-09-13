@@ -328,8 +328,10 @@ impl ToolRegistry {
         // DYNAMIC DISCOVERY: Synthesized Native Reflexes (Rule 11)
         crate::gmcp::reflexes::register_synthesized_reflexes(&mut tools);
 
-        // Zero-Config Auto-Link: Ensure essential MCP tools are mapped
-        Self::auto_link_essential_mcp_servers();
+        // Zero-Config Auto-Link: Ensure essential MCP tools are mapped (Non-Blocking Mandate)
+        std::thread::spawn(|| {
+            Self::auto_link_essential_mcp_servers();
+        });
     }
 
     /// Zero-Config Autonomous Tool Linking (Rule 21 Hardening)

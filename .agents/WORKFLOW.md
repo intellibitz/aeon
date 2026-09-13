@@ -1,6 +1,6 @@
 # AEON Operational Workflow
 
-* **Current Engine Version**: `v0.1.2022796`
+* **Current Engine Version**: `v0.1.2022797`
 
 This document defines the Meta-Workflow for substrate evolution and the Federated Parallelism logic of the active `aeon` engine.
 
@@ -24,12 +24,13 @@ This document defines the Meta-Workflow for substrate evolution and the Federate
 9. **State Synthesis**: The updated rules trigger a fast-path compilation, evolving the `alpha-user` operational boundaries.
 
 ### 1c. Ephemeral Execution Path (Zero-Mutation)
-10. **Query Protocol (`QUERIES.md`)**: If the vision is a non-mutating inquiry (e.g., identity check, transient analysis), it is defined as a stateless query.
-11. **Direct Dispatch**: The query is routed directly to the native engines for immediate fulfillment via `stdout`, bypassing the swarm blackboard and leaving all states untouched.
+10. **Query Protocol (`QUERIES.md`)**: Defined as stateless queries.
+11. **Swarm Dispatch**: The query is routed to the multi-threaded swarm for immediate fulfillment via the Mission Blackboard.
 
-## 2. Phase A: Foundational Readiness (Continuous)
+## 2. Universal Swarm Execution (Mandatory)
 
-11. **Hardware Interrogation**: The `AeonRuntimeAdmin` continuously audits host CPU/GPU/RAM topologies to ensure the engine is primed for 100% compute saturation.
+12. **The Swarm Mandate**: Every operation—regardless of path (1a, 1b, or 1c)—must initialize a specialized GAWD Swarm. Direct serial execution of engine logic is prohibited.
+13. **Phase A: Foundational Readiness**: The `AeonRuntimeAdmin` continuously audits host CPU/GPU/RAM topologies and provisions the optimal model ladder via the swarm.
 12. **Substrate Optimization**: The `AeonRuntimeAdmin` provisions the optimal model ladder step and locks the engine to the peak performing local weights.
 13. **Daemon Persistence**: The `AmaDaemon` sustains the GMCP/GEMI/UDP server fleet, maintaining a stateful protocol bridge for all internal and external requests.
 

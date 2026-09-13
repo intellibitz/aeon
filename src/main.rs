@@ -164,6 +164,16 @@ fn main() {
             let _ = std::fs::remove_dir_all(&global_dir);
             println!("aeon runtime removed.");
         }
+        "install" => {
+            let ama = AmaMasterAgent::new();
+            let answer = ama.solve_clean("admin mission: initialize sandboxed .aeon environment and provision weights", &cwd, AEON_VERSION);
+            println!("{}", answer);
+        }
+        "uninstall" => {
+            let ama = AmaMasterAgent::new();
+            let answer = ama.solve_clean("admin mission: remove and clean up sandboxed .aeon environment", &cwd, AEON_VERSION);
+            println!("{}", answer);
+        }
         "daemon-start" => {
             AmaDaemon::run_daemon_loop(global_dir.clone(), global_dir);
         }
@@ -178,30 +188,36 @@ fn main() {
             let server = tiny_http::Server::http(format!("0.0.0.0:{}", cfg.gemi_port)).expect("Failed to bind GEMI port");
             GemiServer::start_http_server(cwd.clone(), server);
         }
+        "status" => {
+            let ama = AmaMasterAgent::new();
+            let answer = ama.solve_clean("admin mission: report current substrate health and status", &cwd, AEON_VERSION);
+            println!("{}", answer);
+        }
         "models" => {
-            let res = aeon_engine::gmcp::GmcpHost::dispatch("list_models", &serde_json::json!(null).to_string(), &cwd);
-            println!("{}", res);
+            let ama = AmaMasterAgent::new();
+            let answer = ama.solve_clean("admin mission: list available model substrates and verify integrity", &cwd, AEON_VERSION);
+            println!("{}", answer);
         }
         "select-model" | "select_model" => {
             let model = args.get(1).map(|s| s.as_str()).unwrap_or("");
             if model.is_empty() {
                 println!("Usage: aeon select-model <model_name_or_id>");
             } else {
-                match aeon_engine::gemi::models::ModelManager::set_selected_model(model) {
-                    Ok(msg) => println!("{}", msg),
-                    Err(e) => eprintln!("Failed to select model: {}", e),
-                }
+                let ama = AmaMasterAgent::new();
+                let intent = format!("admin mission: select and override active model substrate to {}", model);
+                let answer = ama.solve_clean(&intent, &cwd, AEON_VERSION);
+                println!("{}", answer);
             }
         }
         "deep-scan" | "deep_scan" => {
-            match aeon_engine::gemi::models::ModelManager::deep_scan_home_and_register(&global_dir) {
-                Ok(msg) => println!("{}", msg),
-                Err(e) => eprintln!("Deep scan failed: {}", e),
-            }
+            let ama = AmaMasterAgent::new();
+            let answer = ama.solve_clean("admin mission: perform parallel deep-scan of user home for local models and register them", &cwd, AEON_VERSION);
+            println!("{}", answer);
         }
         "mcp-scout" | "mcp_scout" => {
-            let res = aeon_engine::gmcp::GmcpHost::dispatch("mcp_registry", &serde_json::json!(null).to_string(), &cwd);
-            println!("{}", res);
+            let ama = AmaMasterAgent::new();
+            let answer = ama.solve_clean("admin mission: perform autonomous web-scouting of open-source MCP servers and benchmark them", &cwd, AEON_VERSION);
+            println!("{}", answer);
         }
         "pulse" => {
             let intent = args.get(1..).map(|s| s.join(" ")).unwrap_or_default();
@@ -215,16 +231,13 @@ fn main() {
             }
         }
         "audit" => {
-            match aeon_engine::daemon::admin::AeonAdmin::audit_compliance(&cwd, None) {
-                Ok(report) => println!("{}", report),
-                Err(e) => {
-                    eprintln!("{}", e);
-                    std::process::exit(1);
-                }
-            }
+            let ama = AmaMasterAgent::new();
+            let answer = ama.solve_clean("admin mission: perform compliance audit and technical verification", &cwd, AEON_VERSION);
+            println!("{}", answer);
         }
         "admin" => {
             let sub_cmd = args.get(1).map(|s| s.as_str()).unwrap_or("help");
+            let ama = AmaMasterAgent::new();
             match sub_cmd {
                 "sync" => {
                     match aeon_engine::daemon::admin::AeonAdmin::enforce_version_consistency(&cwd) {
@@ -244,43 +257,24 @@ fn main() {
                     }
                 }
                 "audit" => {
-                    match aeon_engine::daemon::admin::AeonAdmin::audit_compliance(&cwd, None) {
-                        Ok(report) => println!("{}", report),
-                        Err(e) => {
-                            eprintln!("{}", e);
-                            std::process::exit(1);
-                        }
-                    }
+                    let answer = ama.solve_clean("admin mission: perform compliance audit and technical verification", &cwd, AEON_VERSION);
+                    println!("{}", answer);
                 }
                 "verify" => {
-                    match aeon_engine::daemon::admin::AeonAdmin::verify_version_alignment(&cwd) {
-                        Ok(_) => println!("Version alignment verified."),
-                        Err(e) => {
-                            eprintln!("{}", e);
-                            std::process::exit(1);
-                        }
-                    }
+                    let answer = ama.solve_clean("admin mission: verify version alignment across manifest and documents", &cwd, AEON_VERSION);
+                    println!("{}", answer);
                 }
                 "release" => {
-                    match aeon_engine::daemon::admin::AeonAdmin::execute_release(&cwd) {
-                        Ok(msg) => println!("{}", msg),
-                        Err(e) => {
-                            eprintln!("{}", e);
-                            std::process::exit(1);
-                        }
-                    }
+                    let answer = ama.solve_clean("admin mission: execute full release orchestration sequence", &cwd, AEON_VERSION);
+                    println!("{}", answer);
                 }
                 "lint" => {
-                    match aeon_engine::daemon::admin::AeonAdmin::run_lint(&cwd) {
-                        Ok(report) => println!("{}", report),
-                        Err(e) => eprintln!("Lint failed: {}", e),
-                    }
+                    let answer = ama.solve_clean("admin mission: run linting and static analysis (clippy)", &cwd, AEON_VERSION);
+                    println!("{}", answer);
                 }
                 "audit-deps" => {
-                    match aeon_engine::daemon::admin::AeonAdmin::run_audit(&cwd) {
-                        Ok(report) => println!("{}", report),
-                        Err(e) => eprintln!("Audit failed: {}", e),
-                    }
+                    let answer = ama.solve_clean("admin mission: run dependency security audit", &cwd, AEON_VERSION);
+                    println!("{}", answer);
                 }
                 _ => println!("Admin commands: sync, audit, verify, release, lint, audit-deps"),
             }
@@ -313,6 +307,7 @@ fn main() {
                     println!("{}", msg);
 
                     if msg.contains("[MISSION]") || msg.contains("[QUERY]") {
+                        // Mandate: Swarm-Only Execution
                         let answer = ama.solve_clean(&goal, &cwd, AEON_VERSION);
                         if !io::stdout().is_terminal() {
                             print!("{}", answer);
@@ -323,28 +318,10 @@ fn main() {
                     }
                 }
                 Err(e) => {
-                    warn!("Natural intent ingestion failed: {}. Falling back to direct dispatch.", e);
-                    AeonAuditLogger::log(&global_dir, LogLevel::Warning, "INTENT_FALLBACK", &format!("Reason: {}", e));
+                    warn!("Natural intent ingestion failed: {}. Falling back to direct swarm solving.", e);
+                    let answer = ama.solve_clean(&goal, &cwd, AEON_VERSION);
+                    println!("{}", answer);
                 }
-            }
-
-            // Unified Meta-Substrate Dispatch (Host -> ToolRegistry) - Fallback for direct tool calls or Motions
-            if ToolRegistry::exists(cmd_name) {
-                let res = aeon_engine::gmcp::GmcpHost::dispatch(cmd_name, &cmd_arg, &cwd);
-                if !io::stdout().is_terminal() {
-                    print!("{}", res);
-                } else {
-                    println!("{}", res);
-                }
-                return;
-            }
-
-            // Fallback for everything else
-            let answer = ama.solve_clean(&goal, &cwd, AEON_VERSION);
-            if !io::stdout().is_terminal() {
-                print!("{}", answer);
-            } else {
-                println!("{}", answer);
             }
         }
     }

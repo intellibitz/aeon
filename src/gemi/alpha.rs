@@ -23,6 +23,16 @@ pub struct AeonAlphaModel {
 impl AeonAlphaModel {
     pub const DIM: usize = 128;
 
+    pub fn global() -> &'static Self {
+        static MODEL: std::sync::OnceLock<AeonAlphaModel> = std::sync::OnceLock::new();
+        eprintln!("[Alpha] Accessing global...");
+        MODEL.get_or_init(|| {
+            eprintln!("[Alpha] Loading...");
+            let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
+            Self::load(&home.join(".aeon")).expect("Failed to load AEON-Alpha global substrate")
+        })
+    }
+
     pub fn load(global_dir: &Path) -> Result<Self> {
         let weights_path = global_dir.join("models/aeon-alpha.safetensors");
         if !weights_path.exists() {

@@ -29,44 +29,47 @@ pub struct HardwareProfiler;
 
 impl HardwareProfiler {
     pub fn get_profile() -> HardwareProfile {
-        let (cpus, _) = Self::profile();
-        let ram_gb = Self::determine_total_ram_gb();
-        let available_ram_gb = Self::determine_available_ram_gb();
-        let gpu_vram_gb = Self::determine_gpu_vram_gb();
-        let swap_gb = Self::determine_swap_gb();
-        let nvme_active = Self::is_nvme_active();
+        static CACHED_PROFILE: OnceLock<HardwareProfile> = OnceLock::new();
+        CACHED_PROFILE.get_or_init(|| {
+            let (cpus, _) = Self::profile();
+            let ram_gb = Self::determine_total_ram_gb();
+            let available_ram_gb = Self::determine_available_ram_gb();
+            let gpu_vram_gb = Self::determine_gpu_vram_gb();
+            let swap_gb = Self::determine_swap_gb();
+            let nvme_active = Self::is_nvme_active();
 
-        // 1. Direct Interrogation via Candle Substrate
-        let (native_accel, gpu_name) = Self::interrogate_native_acceleration();
+            // 1. Direct Interrogation via Candle Substrate
+            let (native_accel, gpu_name) = Self::interrogate_native_acceleration();
 
-        let acceleration_active = !native_accel.contains("None") && !native_accel.contains("Cpu");
-        let gpu_display = if acceleration_active {
-            format!("{} ({} | {}GB VRAM)", native_accel, gpu_name, gpu_vram_gb)
-        } else {
-            // 2. Fallback to Meta-Parsing for diagnostics if native probe is inactive
-            let (_, shell_gpu) = Self::profile();
-            shell_gpu
-        };
+            let acceleration_active = !native_accel.contains("None") && !native_accel.contains("Cpu");
+            let gpu_display = if acceleration_active {
+                format!("{} ({} | {}GB VRAM)", native_accel, gpu_name, gpu_vram_gb)
+            } else {
+                // 2. Fallback to Meta-Parsing for diagnostics if native probe is inactive
+                let (_, shell_gpu) = Self::profile();
+                shell_gpu
+            };
 
-        HardwareProfile {
-            cpus,
-            cpu_brand: Self::get_cpu_brand(),
-            gpu_info: gpu_display,
-            ram_gb,
-            available_ram_gb,
-            gpu_vram_gb,
-            swap_gb,
-            nvme_active,
-            acceleration_active,
-            native_acceleration: native_accel,
-            os_info: Self::get_os_info(),
-            arch: std::env::consts::ARCH.to_string(),
-            disk_gb: Self::determine_disk_gb(),
-            disk_usage_pct: Self::determine_disk_usage_pct(),
-            load_avg: Self::get_load_avg(),
-            uptime: Self::get_uptime(),
-            hostname: Self::get_hostname(),
-        }
+            HardwareProfile {
+                cpus,
+                cpu_brand: Self::get_cpu_brand(),
+                gpu_info: gpu_display,
+                ram_gb,
+                available_ram_gb,
+                gpu_vram_gb,
+                swap_gb,
+                nvme_active,
+                acceleration_active,
+                native_acceleration: native_accel,
+                os_info: Self::get_os_info(),
+                arch: std::env::consts::ARCH.to_string(),
+                disk_gb: Self::determine_disk_gb(),
+                disk_usage_pct: Self::determine_disk_usage_pct(),
+                load_avg: Self::get_load_avg(),
+                uptime: Self::get_uptime(),
+                hostname: Self::get_hostname(),
+            }
+        }).clone()
     }
 
     pub fn check_oom_critical() -> bool {

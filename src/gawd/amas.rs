@@ -137,6 +137,8 @@ impl AmaSupervisor {
             rank: a.rank()
         }).collect();
 
+        /*
+        /*
         // Cluster Consensus Protocol: Broadcast blackboard to high-tier peers
         let nodes = Self::rank_peers_for_goal(goal);
         for node in nodes.iter().take(2) {
@@ -144,6 +146,8 @@ impl AmaSupervisor {
                 let _ = Self::dispatch_peer_task(&node.address, "init_blackboard", goal);
             }
         }
+        */
+        */
 
         // 4. Exponential Swarm Execution (Converging on Blackboard)
         let swarm_logs = GawdAgentFleet::dispatch_explosive_swarm(goal.to_string(), workspace.to_path_buf(), Arc::clone(&blackboard));
@@ -221,6 +225,28 @@ impl AmaSupervisor {
         let _ = super::reflex_trainer::ReflexTrainer::audit_distillation_state(workspace);
 
         (a2a_logs, fleet_info)
+    }
+
+    pub fn gather_weighted_wisdom(interactions: &[A2AMessage], _agents: &[GawdAgentInfo]) -> String {
+        // Technical Mission Protocol: Prioritize AdminAgent and Specialized results
+        let mut admin_result = None;
+        let mut wisdom = Vec::new();
+        for msg in interactions {
+            if msg.sender == "AdminAgent" {
+                admin_result = Some(msg.payload.clone());
+            }
+            if !msg.payload.contains("FAILURE") && !msg.payload.contains("GAP") && !msg.payload.is_empty() {
+                wisdom.push(msg.payload.clone());
+            }
+        }
+
+        admin_result.unwrap_or_else(|| {
+            if wisdom.is_empty() {
+                "No valid wisdom gathered from swarm.".to_string()
+            } else {
+                wisdom.join("\n")
+            }
+        })
     }
 
     /// Reasoning Auction: Ranks peer nodes based on weighted hardware and trust scores.

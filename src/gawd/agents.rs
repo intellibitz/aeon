@@ -422,6 +422,60 @@ impl GawdAgent for LibraryScoutAgent {
     }
 }
 
+/// Administrative Substrate Agent (Aspiration 23)
+pub struct AdminAgent;
+
+impl GawdAgent for AdminAgent {
+    fn name(&self) -> String { "AdminAgent".into() }
+    fn rank(&self) -> f32 { 1.0 }
+    fn execute(&self, goal: &str, workspace: &Path, blackboard: &MissionBlackboard) -> EaiResult<String> {
+        let lower_goal = goal.to_lowercase();
+
+        let res = if lower_goal.contains("sync") {
+            crate::daemon::admin::AeonAdmin::enforce_version_consistency(workspace)
+        } else if lower_goal.contains("audit") {
+            crate::daemon::admin::AeonAdmin::audit_compliance(workspace, None)
+        } else if lower_goal.contains("verify") {
+            crate::daemon::admin::AeonAdmin::verify_version_alignment(workspace).map(|_| "Version alignment verified.".to_string())
+        } else if lower_goal.contains("release") {
+            crate::daemon::admin::AeonAdmin::execute_release(workspace)
+        } else if lower_goal.contains("status") || lower_goal.contains("health") {
+            let hw = crate::gemi::hardware::HardwareProfiler::get_profile();
+            Ok(format!("Substrate Status: v{} | Hardware: {} | CPUs: {} | RAM: {}GB | Status: Operational", crate::AEON_VERSION, hw.cpu_brand, hw.cpus, hw.ram_gb))
+        } else if lower_goal.contains("identity") {
+             let brain = crate::gawd::brain::AlphaBrainContext::initialize(workspace);
+             Ok(format!("# AEON Substrate Identity\n\n{}", brain.inspect_tri_state()))
+        } else if lower_goal.contains("list") && lower_goal.contains("models") {
+             let models = crate::gemi::models::ModelManager::list_models(workspace);
+             let mut out = format!("Active Model Substrates (Count: {})\n\n", models.len());
+             for m in &models {
+                 out.push_str(&format!("- [{}] {} ({})\n", if m.is_local { "LOCAL" } else { "CLOUD" }, m.name, m.model_id));
+             }
+             Ok(out)
+        } else if lower_goal.contains("deep-scan") {
+            let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
+            let global_dir = home.join(".aeon");
+            crate::gemi::models::ModelManager::deep_scan_home_and_register(&global_dir)
+        } else if lower_goal.contains("initialize") || lower_goal.contains("install") {
+            let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
+            let global_dir = home.join(".aeon");
+            crate::sandbox::manager::SandboxManager::ensure_global_sandbox(&global_dir)?;
+            Ok("AEON runtime initialized and sandboxed.".to_string())
+        } else if lower_goal.contains("remove") || lower_goal.contains("uninstall") {
+            let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
+            let global_dir = home.join(".aeon");
+            let _ = std::fs::remove_dir_all(&global_dir);
+            Ok("AEON runtime removed.".to_string())
+        } else {
+            Ok("AdminAgent: Monitoring technical intent...".to_string())
+        }?;
+
+        let mut bb = blackboard.lock().unwrap();
+        bb.insert(self.name(), res.clone());
+        Ok(res)
+    }
+}
+
 pub struct AgentMetaRegistry {
     agents: Arc<Mutex<Vec<AgentProfile>>>,
 }
@@ -598,12 +652,19 @@ impl GawdAgentFleet {
         fleet.push(Arc::new(SecurityAgent));
         fleet.push(Arc::new(EvolutionAgent));
 
+        let lower_goal = goal.to_lowercase();
+        if lower_goal.contains("admin") || lower_goal.contains("sync") || lower_goal.contains("audit") || lower_goal.contains("release") || lower_goal.contains("verify") || lower_goal.contains("deep-scan") || lower_goal.contains("install") || lower_goal.contains("uninstall") {
+             fleet.push(Arc::new(AdminAgent));
+        }
+
         // Aspiration 9: High-Throughput Reasoning Integration
-        fleet.push(Arc::new(VllmBridgeAgent));
-        fleet.push(Arc::new(SglangBridgeAgent));
-        fleet.push(Arc::new(LlamaCppBridgeAgent));
-        fleet.push(Arc::new(TensorRtBridgeAgent));
-        fleet.push(Arc::new(LmdeployBridgeAgent));
+        if !lower_goal.contains("admin") {
+            fleet.push(Arc::new(VllmBridgeAgent));
+            fleet.push(Arc::new(SglangBridgeAgent));
+            fleet.push(Arc::new(LlamaCppBridgeAgent));
+            fleet.push(Arc::new(TensorRtBridgeAgent));
+            fleet.push(Arc::new(LmdeployBridgeAgent));
+        }
 
         fleet.push(Arc::new(LibraryScoutAgent));
 
@@ -626,28 +687,30 @@ impl GawdAgentFleet {
         let mut max_global_similarity = 0.0f32;
 
         // Neural Semantic pass: identified via Tier 0 Vector space
-        if let Ok(goal_vec) = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(goal) {
-            for agent in available_agents {
-                if fleet.len() >= max_agents { break; }
+        if !lower_goal.contains("admin mission") {
+            if let Ok(goal_vec) = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(goal) {
+                for agent in available_agents {
+                    if fleet.len() >= max_agents { break; }
 
-                let mut max_similarity = 0.0f32;
+                    let mut max_similarity = 0.0f32;
 
-                let mut agent_corpus = agent.categories.join(" ");
-                agent_corpus.push_str(" ");
-                agent_corpus.push_str(&agent.description);
+                    let mut agent_corpus = agent.categories.join(" ");
+                    agent_corpus.push_str(" ");
+                    agent_corpus.push_str(&agent.description);
 
-                if let Ok(agent_vec) = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(&agent_corpus) {
-                    let dot_product: f32 = goal_vec.iter().zip(agent_vec.iter()).map(|(a, b)| a * b).sum();
-                    max_similarity = dot_product;
-                    if max_similarity > max_global_similarity { max_global_similarity = max_similarity; }
-                }
+                    if let Ok(agent_vec) = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(&agent_corpus) {
+                        let dot_product: f32 = goal_vec.iter().zip(agent_vec.iter()).map(|(a, b)| a * b).sum();
+                        max_similarity = dot_product;
+                        if max_similarity > max_global_similarity { max_global_similarity = max_similarity; }
+                    }
 
-                if max_similarity > 0.35 || agent.categories.iter().any(|c| goal.to_lowercase().contains(c)) {
-                    fleet.push(Arc::new(DynamicAgent {
-                        agent_name: agent.name,
-                        mission_profile: agent.description,
-                        agent_rank: agent.base_rank,
-                    }));
+                    if max_similarity > 0.35 || agent.categories.iter().any(|c| goal.to_lowercase().contains(c)) {
+                        fleet.push(Arc::new(DynamicAgent {
+                            agent_name: agent.name,
+                            mission_profile: agent.description,
+                            agent_rank: agent.base_rank,
+                        }));
+                    }
                 }
             }
         }
@@ -689,7 +752,15 @@ impl GawdAgentFleet {
             let bb = Arc::clone(&blackboard);
             handles.push(std::thread::spawn(move || {
                 let name = agent.name();
-                let res = agent.execute(&g, &w, &bb).unwrap_or_else(|e| format!("Agent Execution Failed: {}", e));
+                // Enforce a strict 60s execution lease per agent (Aspiration 22)
+                let (tx, rx) = std::sync::mpsc::channel();
+                std::thread::spawn(move || {
+                    let res = agent.execute(&g, &w, &bb).unwrap_or_else(|e| format!("Agent Execution Failed: {}", e));
+                    let _ = tx.send(res);
+                });
+
+                let res = rx.recv_timeout(std::time::Duration::from_secs(60))
+                    .unwrap_or_else(|_| "[TIMEOUT] Agent execution exceeded 60s lease.".to_string());
                 (name, res)
             }));
         }
