@@ -11,6 +11,7 @@ use crate::error::EaiResult;
 /// and enable high-density concurrent reasoning.
 pub struct PagedKVStore {
     pages: Arc<Mutex<HashMap<u64, Vec<f32>>>>,
+    lru: Arc<Mutex<Vec<u64>>>, // Track usage order
     page_size: usize,
     max_pages: usize,
 }
@@ -21,6 +22,7 @@ impl PagedKVStore {
         STORE.get_or_init(|| {
             PagedKVStore {
                 pages: Arc::new(Mutex::new(HashMap::new())),
+                lru: Arc::new(Mutex::new(Vec::new())),
                 page_size: 4096, // 4KB Pages
                 max_pages: 1024 * 16, // 64MB Cache Limit
             }
@@ -29,31 +31,48 @@ impl PagedKVStore {
 
     pub fn store_page(&self, page_id: u64, data: Vec<f32>) -> EaiResult<()> {
         let mut pages = self.pages.lock().unwrap();
+        let mut lru = self.lru.lock().unwrap();
+
         if pages.len() >= self.max_pages && !pages.contains_key(&page_id) {
-            // Simple LRU or random eviction for Aspiration 6 compliance
-            if let Some(first_key) = pages.keys().next().cloned() {
-                pages.remove(&first_key);
+            // Mandate: Strict LRU Eviction (Aspiration 6)
+            if !lru.is_empty() {
+                let victim = lru.remove(0);
+                pages.remove(&victim);
             }
         }
+
         pages.insert(page_id, data);
+        lru.push(page_id);
         Ok(())
     }
 
     pub fn get_page(&self, page_id: u64) -> Option<Vec<f32>> {
         let pages = self.pages.lock().unwrap();
-        pages.get(&page_id).cloned()
+        let mut lru = self.lru.lock().unwrap();
+
+        if let Some(data) = pages.get(&page_id) {
+            // Update LRU position on access
+            if let Some(pos) = lru.iter().position(|&id| id == page_id) {
+                lru.remove(pos);
+            }
+            lru.push(page_id);
+            return Some(data.clone());
+        }
+        None
     }
 
     pub fn clear(&self) {
         let mut pages = self.pages.lock().unwrap();
+        let mut lru = self.lru.lock().unwrap();
         pages.clear();
+        lru.clear();
     }
 }
 
 /// Radix Attention Store (Aspiration 6 & SGLang Parity)
-/// Implements prefix sharing across multi-turn reasoning chains.
+/// Implements high-efficiency prefix sharing across multi-turn reasoning chains.
 pub struct RadixAttentionStore {
-    nodes: Arc<Mutex<HashMap<Vec<u32>, u64>>>, // Maps token prefix to page ID
+    nodes: Arc<Mutex<HashMap<Vec<u32>, u64>>>,
 }
 
 impl RadixAttentionStore {
