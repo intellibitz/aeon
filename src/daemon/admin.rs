@@ -295,6 +295,28 @@ impl AeonAdmin {
         let content = fs::read_to_string(&pulse_path)?;
         let mut lines: Vec<String> = content.lines().map(|s| s.to_string()).collect();
 
+        // 2.5 Prevent Duplicate Intent Ingestion (Rule: pulse contains only unique entries)
+        let intent_trimmed = intent.trim().to_lowercase();
+        let is_duplicate = lines.iter().any(|l| {
+            let l_lower = l.to_lowercase();
+            if let Some(idx) = l_lower.find("**: ") {
+                let existing = l_lower[idx + 4..].trim_end_matches('`').trim();
+                existing == intent_trimmed
+            } else if let Some(idx) = l_lower.find("**: ") {
+                let existing = l_lower[idx + 4..].trim_end_matches('`').trim();
+                existing == intent_trimmed
+            } else if let Some(idx) = l_lower.find("**:") {
+                let existing = l_lower[idx + 3..].trim_end_matches('`').trim();
+                existing == intent_trimmed
+            } else {
+                false
+            }
+        });
+
+        if is_duplicate {
+            return Ok(format!("Intent '{}' is already present in pulse.md. Skipping duplicate ingestion.", intent));
+        }
+
         let last_index = lines.iter()
             .filter_map(|l| {
                 let trimmed = l.trim();

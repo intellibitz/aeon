@@ -1,6 +1,6 @@
 # AEON Substrate Validation Genome (PULSE)
 
-* **Current Engine Version**: `v0.1.2022801`
+* **Current Engine Version**: `v0.1.2022802`
 
 This document defines the complete set of validation protocols that anchor the `aeon` genome. Every entry reflects a hard-compiled reflex or an orchestrated meta-behavior.
 
@@ -134,32 +134,6 @@ This document defines the complete set of validation protocols that anchor the `
 108. `[x]` **MOTION**: Enforce the '<2ms Ultra-Reflex' mandate across the substrate. 100% of internal operations must be measured and optimized for sub-2ms latency. Transition slow path initialization to lazy-async background threads.
 109. `[x]` **MISSION**: Finalized the Lock-Free Substrate transition. Refactored PagedKVStore, RadixAttentionStore, AgentMetaRegistry, MissionBlackboard, and DiscoveredPeers to use RwLock concurrency primitives. Updated AeonAlphaModel to eliminate recursive deadlocks during semantic centroid projection. The AEON substrate is now non-blocking and optimized for high-density multi-threaded swarm execution.
 110. `[x]` **QUERY**: identity
-111. `[x]` **QUERY**: identity
-112. `[x]` **QUERY**: identity
-113. `[x]` **QUERY**: identity
-114. `[x]` **QUERY**: identity
-115. `[x]` **QUERY**: identity
-116. `[x]` **QUERY**: identity
-117. `[x]` **QUERY**: identity
 118. `[x]` **MOTION**: Codify the 'Lock-Free Substrate' mandate. The AEON genome must ensure that the substrate is free of blocking thread locks. All critical path data structures (KV Stores, Registries, Blackboards) must transition to lock-free concurrency primitives or non-blocking message-passing architectures to ensure zero execution stall.
-119. `[x]` **QUERY**: identity
 120. `[x]` **QUERY**: status
-121. `[x]` **QUERY**: status
-122. `[x]` **QUERY**: status
-123. `[x]` **QUERY**: status
-124. `[x]` **QUERY**: status
-125. `[x]` **QUERY**: status
-126. `[x]` **QUERY**: identity
-127. `[x]` **QUERY**: identity
-128. `[x]` **QUERY**: identity
-129. `[x]` **QUERY**: identity
-130. `[x]` **QUERY**: identity
-131. `[x]` **QUERY**: identity
-132. `[x]` **QUERY**: identity
-133. `[x]` **QUERY**: identity
-134. `[x]` **QUERY**: status
-135. `[x]` **QUERY**: status
-136. `[x]` **QUERY**: status
-137. `[x]` **QUERY**: identity
-138. `[x]` **QUERY**: status
 139. `[x]` **MISSION**: reason Hi
