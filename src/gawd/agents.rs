@@ -357,6 +357,44 @@ impl GawdAgent for TensorRtBridgeAgent {
     }
 }
 
+/// LMDeploy High-Throughput Bridge Agent (Aspiration 10)
+pub struct LmdeployBridgeAgent;
+
+impl GawdAgent for LmdeployBridgeAgent {
+    fn name(&self) -> String { "LmdeployBridgeAgent".into() }
+    fn rank(&self) -> f32 { 0.96 }
+    fn execute(&self, goal: &str, _workspace: &Path, _blackboard: &MissionBlackboard) -> EaiResult<String> {
+        // AWQ-Compressed Mission Delegation
+        let client = crate::gmcp::client::GmcpClient::scout_reasoning_remotes();
+        for remote_name in client {
+            if remote_name.to_lowercase().contains("lmdeploy") || remote_name.to_lowercase().contains("turbomind") {
+                let res = crate::gmcp::client::GmcpClient::execute_external_tool(&remote_name, "generate", goal);
+                if !res.contains("[FAIL]") {
+                    return Ok(format!("[LMDeploy Power-Tier]: {}", res));
+                }
+            }
+        }
+
+        // Local LMDeploy Proxy (OpenAI-compatible)
+        let lmdeploy_url = std::env::var("LMDEPLOY_API_BASE").unwrap_or_else(|_| "http://localhost:23333/v1".to_string());
+        let body = serde_json::json!({
+            "model": "aeon-turbomind",
+            "prompt": goal,
+            "max_tokens": 512,
+            "temperature": 0.0
+        });
+
+        match ureq::post(&format!("{}/completions", lmdeploy_url)).send_json(body) {
+            Ok(resp) => {
+                let json: serde_json::Value = resp.into_json().map_err(|e| crate::error::EaiError::inference(e.to_string()))?;
+                let text = json["choices"][0]["text"].as_str().unwrap_or("LMDeploy output empty").to_string();
+                Ok(format!("[LMDeploy Local Proxy]: {}", text))
+            }
+            Err(_) => Err(crate::error::EaiError::inference("LMDeploy/TurboMind remote or local proxy unreachable"))
+        }
+    }
+}
+
 pub struct AgentMetaRegistry {
     agents: Arc<Mutex<Vec<AgentProfile>>>,
 }
@@ -530,6 +568,7 @@ impl GawdAgentFleet {
         fleet.push(Arc::new(SglangBridgeAgent));
         fleet.push(Arc::new(LlamaCppBridgeAgent));
         fleet.push(Arc::new(TensorRtBridgeAgent));
+        fleet.push(Arc::new(LmdeployBridgeAgent));
 
         fleet.push(Arc::new(DynamicAgent {
             agent_name: "ContextAgent".into(),
