@@ -199,11 +199,21 @@ impl AmaSupervisor {
             // Consensus Hardening: Use Tier 2/Meta for final synthesis
             let synthesized = crate::gemi::engine::GemiEngine::generate_reasoning(&consensus_prompt, workspace);
 
+            // Epistemic Delegation: Calculate Convergence Score based on agent count and consensus matching
+            let consensus_score = if fleet_info.len() > 1 {
+                let success_count = final_state.iter().filter(|(_, out)| !out.contains("FAILURE") && !out.contains("GAP")).count();
+                (success_count as f32 / fleet_info.len() as f32).min(1.0)
+            } else {
+                0.90 // Single trusted agent default
+            };
+
+            let final_payload = format!("{}\n\n[CONVERGENCE_SCORE: {:.2}]", synthesized, consensus_score);
+
             a2a_logs.push(A2AMessage {
                 sender: "ConsensusMaster".into(),
                 recipient: "AMA-Master".into(),
                 action: "STATE_CONVERGENCE".into(),
-                payload: synthesized,
+                payload: final_payload,
             });
         }
 

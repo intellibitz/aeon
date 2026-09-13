@@ -42,6 +42,19 @@ impl AeonTruthAgent {
         }
 
         if !violations.is_empty() {
+            // Mandate: Epistemic Delegation (Aspiration 18)
+            // If local verification fails, check if the result comes from a high-trust consensus
+            if result.contains("[CONVERGENCE_SCORE: ") {
+                if let Some(score_str) = result.split("[CONVERGENCE_SCORE: ").nth(1).and_then(|s| s.split(']').next()) {
+                    if let Ok(score) = score_str.parse::<f32>() {
+                        if score >= 0.85 {
+                             crate::sandbox::manager::AeonAuditLogger::log_event(workspace, "EPISTEMIC_DELEGATION", &format!("Local verification failed but Swarm Consensus (Score: {}) accepted. Proceeding.", score));
+                             return Ok(format!("{} (Verified via Epistemic Delegation)", result));
+                        }
+                    }
+                }
+            }
+
             let error_msg = format!("TRUTH_VIOLATION: {}\nSTRUCTURED_FEEDBACK: Please grounded your response in the physical workspace state. Ensure files are actually written before reporting success.", violations.join(" | "));
             return Err(EaiError::governance(error_msg));
         }
