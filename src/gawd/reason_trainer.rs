@@ -33,15 +33,16 @@ impl ReasoningTrainer {
 
             if count >= Self::DISTILLATION_THRESHOLD {
                 eprintln!("[Reasoning Trainer] Experience threshold reached ({} samples). Initializing Substrate Ingestion Motion for 'aeon-reason' Tier 2 model...", count);
-                match AeonReasoningModel::train_from_experience(&global_dir) {
-                    Ok(report) => {
-                        // Archive experience to avoid redundant distillation
-                        let archive_path = global_dir.join(format!("reasoning_archive_{}.jsonl", std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs()));
-                        let _ = std::fs::rename(&experience_file, archive_path);
-                        return Ok(report);
-                    },
-                    Err(e) => return Ok(format!("Ingestion Failure: {}", e)),
-                }
+                let g_dir = global_dir.clone();
+                let exp_f = experience_file.clone();
+                std::thread::spawn(move || {
+                    if let Ok(report) = AeonReasoningModel::train_from_experience(&g_dir) {
+                        let archive_path = g_dir.join(format!("reasoning_archive_{}.jsonl", std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs()));
+                        let _ = std::fs::rename(&exp_f, archive_path);
+                        eprintln!("[Reasoning Trainer] Background Distillation Complete: {}", report);
+                    }
+                });
+                return Ok(format!("Substrate Ingestion Motion initialized in background ({} samples).", count));
             }
         }
 

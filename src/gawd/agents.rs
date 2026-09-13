@@ -509,7 +509,13 @@ impl AgentMetaRegistry {
             if let Ok(content) = std::fs::read_to_string(&registry_path) {
                 if let Ok(agents) = serde_json::from_str::<Vec<AgentProfile>>(&content) {
                     let mut registry = self.agents.write().unwrap();
-                    *registry = agents;
+                    let mut unique_agents = Vec::new();
+                    for a in agents {
+                        if !unique_agents.iter().any(|x: &AgentProfile| x.name == a.name) {
+                            unique_agents.push(a);
+                        }
+                    }
+                    *registry = unique_agents;
                     return;
                 }
             }
@@ -561,7 +567,9 @@ impl AgentMetaRegistry {
     pub fn register_agent(&self, profile: AgentProfile) {
         {
             let mut agents = self.agents.write().unwrap();
-            agents.push(profile);
+            if !agents.iter().any(|a| a.name == profile.name) {
+                agents.push(profile);
+            }
         }
         self.save();
     }
@@ -755,7 +763,6 @@ impl GawdAgentFleet {
                 // Enforce a strict 60s execution lease per agent (Aspiration 22)
                 let (tx, rx) = std::sync::mpsc::channel();
                 std::thread::spawn(move || {
-                    eprintln!("[DEBUG Swarm] Executing agent: {}", agent.name());
                     let res = agent.execute(&g, &w, &bb).unwrap_or_else(|e| format!("Agent Execution Failed: {}", e));
                     let _ = tx.send(res);
                 });
