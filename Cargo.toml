@@ -46,8 +46,8 @@ mkl = ["candle-core/mkl", "candle-nn/mkl", "candle-transformers/mkl"]
 
 [profile.release]
 opt-level = 3 # High performance
-lto = true # Maximum optimization
-codegen-units = 1 # Maximum parallelism in generated code
+lto = "thin" # Thin LTO: 10x faster compilation, low RAM overhead, eliminates link-time hangs
+codegen-units = 16 # Hardware-saturated parallel codegen
 incremental = true # Speed up iterative builds
 panic = "abort"
 strip = true

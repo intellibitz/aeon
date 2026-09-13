@@ -249,24 +249,25 @@ impl AmaDaemon {
             Err(e) => warn!("[AmaDaemon] Could not verify binary integrity: {}", e),
         }
 
-        if cfg!(target_os = "windows") {
-            let _ = Command::new(&bin_to_run)
-                .arg("daemon-start")
-                .arg(workspace.to_str().unwrap_or("."))
-                .stdin(Stdio::null())
-                .stdout(Stdio::null())
-                .stderr(Stdio::null())
-                .spawn();
-        } else {
-            let _ = Command::new("nohup")
-                .arg(bin_to_run)
-                .arg("daemon-start")
-                .arg(workspace.to_str().unwrap_or("."))
-                .stdin(Stdio::null())
-                .stdout(Stdio::null())
-                .stderr(Stdio::null())
-                .spawn();
+        let mut cmd = Command::new(&bin_to_run);
+        cmd.arg("daemon-start")
+            .arg(workspace.to_str().unwrap_or("."))
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null());
+
+        #[cfg(unix)]
+        {
+            use std::os::unix::process::CommandExt;
+            unsafe {
+                cmd.pre_exec(|| {
+                    libc::setsid();
+                    Ok(())
+                });
+            }
         }
+
+        let _ = cmd.spawn();
     }
 
     pub fn run_daemon_loop(workspace: PathBuf, global_dir: PathBuf) {

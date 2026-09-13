@@ -1,0 +1,8 @@
+# AEON Substrate Cargo Build Optimization
+# Prevents compiler hangs and saturates multi-core CPU hardware
+
+[build]
+rustflags = ["-C", "symbol-mangling-version=v0"]
+
+[env]
+CARGO_BUILD_JOBS = "28"

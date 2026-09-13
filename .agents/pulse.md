@@ -6,6 +6,7 @@ This document defines the complete set of validation protocols that anchor the `
 
 ## 1. Pending Failing Pulse
 
+* `144. [ ] **[MISSION]**: query: find dracula lyrics, translate to tamil, show side by side`
 ## 2. Ingested & Resolved Pulse (The Realized Genome)
 
 ### 2.1 Core Governance & Epistemic Integrity [MOTION]

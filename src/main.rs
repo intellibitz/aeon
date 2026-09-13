@@ -7,7 +7,7 @@ use aeon_engine::gmcp::server::GmcpServer;
 use aeon_engine::AEON_VERSION;
 
 use std::env;
-use std::io::{self, Read, IsTerminal};
+use std::io::{self, Read, Write, IsTerminal};
 use std::path::PathBuf;
 use log::{info, warn, error};
 
@@ -112,13 +112,9 @@ fn main() {
             match read_stdin_bounded() {
                 Ok(Some(input)) => {
                     let ama = AmaMasterAgent::new();
-                    let answer = ama.solve_clean(&input, &cwd, AEON_VERSION);
-                    if !io::stdout().is_terminal() {
-                        print!("{}", answer);
-                    } else {
-                        println!("{}", answer);
-                    }
-                    return;
+                    let _ = ama.solve_stream(&input, &cwd, AEON_VERSION);
+                    std::io::stdout().flush().ok();
+                    std::process::exit(0);
                 }
                 Ok(None) => return,
                 Err(e) => {
@@ -297,62 +293,21 @@ fn main() {
                 }
             }
 
-            let is_ide_agent = !io::stdout().is_terminal()
-                || std::env::var("ANDROID_STUDIO").is_ok()
-                || std::env::var("INTELLIJ_IDEA").is_ok()
-                || std::env::var("VSCODE_PID").is_ok()
-                || std::env::var("IDE_SERVER_PORT").is_ok();
-
-            let is_creator = cwd.join(".agents").is_dir() || std::env::var("AEON_CREATOR_MODE").is_ok() || std::env::var("AEON_VERBOSE").is_ok();
             let ama = AmaMasterAgent::new();
 
             // Axiomatic Pulse Ingestion: Automatically anchor any natural language instruction into pulse.md
             match aeon_engine::daemon::admin::AeonAdmin::ingest_natural_intent(&cwd, &goal) {
                 Ok(msg) => {
-                    info!("Natural intent ingested successfully");
-                    if is_creator {
-                        println!("<thinking>\n{}\n</thinking>\n", msg);
-                    }
-
-                    if msg.contains("[MISSION]") || msg.contains("[MOTION]") {
-                        // Non-Blocking Swarm Orchestration (Aspiration 22 & <2ms Instant Reflex Mandate)
-                        // Ingests pulse instantly (<1ms) and dispatches background process for mission execution
-                        if let Ok(exe) = std::env::current_exe() {
-                            let mut cmd = std::process::Command::new(exe);
-                            cmd.args(["--bg-solve", &goal])
-                                .current_dir(&cwd)
-                                .stdin(std::process::Stdio::null())
-                                .stdout(std::process::Stdio::null())
-                                .stderr(std::process::Stdio::null());
-
-                            #[cfg(unix)]
-                            {
-                                use std::os::unix::process::CommandExt;
-                                unsafe {
-                                    cmd.pre_exec(|| {
-                                        libc::setsid();
-                                        Ok(())
-                                    });
-                                }
-                            }
-
-                            let _ = cmd.spawn();
-                        }
-                    } else {
-                        // Instant Query Reflex (Zero-Mutation - QUERIES.md & Aspiration 2 Protocol)
-                        if let Ok(report) = ama.solve(&goal, &cwd, AEON_VERSION) {
-                            let formatted = report.to_protocol_format(is_ide_agent);
-                            println!("{}", formatted);
-                        } else {
-                            let answer = ama.solve_clean(&goal, &cwd, AEON_VERSION);
-                            println!("{}", answer);
-                        }
-                    }
+                    info!("Natural intent ingested successfully: {}", msg);
+                    let _ = ama.solve_stream(&goal, &cwd, AEON_VERSION);
+                    std::io::stdout().flush().ok();
+                    std::process::exit(0);
                 }
                 Err(e) => {
                     warn!("Natural intent ingestion failed: {}. Falling back to direct swarm solving.", e);
-                    let answer = ama.solve_clean(&goal, &cwd, AEON_VERSION);
-                    println!("{}", answer);
+                    let _ = ama.solve_stream(&goal, &cwd, AEON_VERSION);
+                    std::io::stdout().flush().ok();
+                    std::process::exit(0);
                 }
             }
         }

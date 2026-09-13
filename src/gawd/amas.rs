@@ -137,6 +137,12 @@ impl AmaSupervisor {
             rank: a.rank()
         }).collect();
 
+        use std::io::Write;
+        for agent in &fleet_info {
+            println!("- [Agent] {} ({})", agent.name, agent.provider);
+            let _ = std::io::stdout().flush();
+        }
+
         /*
         /*
         // Cluster Consensus Protocol: Broadcast blackboard to high-tier peers
@@ -195,13 +201,31 @@ impl AmaSupervisor {
                 }
             }
 
-            let consensus_prompt = format!(
-                "MISSION_GOAL: {}\n\n[WEIGHTED_WISDOM]:\n{}\n\n[INSTRUCTION]: Resolve conflicts using rank-weighted priority and synthesize a unified high-fidelity mission answer.",
-                goal, weighted_wisdom
-            );
+            let lower_goal = goal.to_lowercase();
+            let is_query = lower_goal.contains("identity") || lower_goal.contains("status") || lower_goal.contains("models") || lower_goal.contains("version");
+            let is_direct_synthesis = is_query || final_state.contains_key("TranslationAgent") || final_state.contains_key("SearchAgent");
 
-            // Consensus Hardening: Use Tier 2/Meta for final synthesis
-            let synthesized = crate::gemi::engine::GemiEngine::generate_reasoning(&consensus_prompt, workspace);
+            // Consensus Hardening: Include every model agent response in final results
+            let synthesized = if is_direct_synthesis {
+                let mut full_synthesis = String::new();
+                if let Some(search) = final_state.get("SearchAgent") {
+                    full_synthesis.push_str(&format!("### SearchAgent Output\n{}\n\n---\n\n", search));
+                }
+                if let Some(trans) = final_state.get("TranslationAgent") {
+                    full_synthesis.push_str(&format!("### TranslationAgent Output\n{}", trans));
+                }
+                if full_synthesis.is_empty() {
+                    weighted_wisdom.clone()
+                } else {
+                    full_synthesis
+                }
+            } else {
+                let consensus_prompt = format!(
+                    "MISSION_GOAL: {}\n\n[WEIGHTED_WISDOM]:\n{}\n\n[INSTRUCTION]: Resolve conflicts using rank-weighted priority and synthesize a unified high-fidelity mission answer.",
+                    goal, weighted_wisdom
+                );
+                crate::gemi::engine::GemiEngine::generate_reasoning(&consensus_prompt, workspace)
+            };
 
             // Epistemic Delegation: Calculate Convergence Score based on agent count and consensus matching
             let consensus_score = if fleet_info.len() > 1 {
@@ -222,7 +246,10 @@ impl AmaSupervisor {
         }
 
         // 6. Autonomous Substrate Distillation (Rule 23)
-        let _ = super::reflex_trainer::ReflexTrainer::audit_distillation_state(workspace);
+        let ws = workspace.to_path_buf();
+        std::thread::spawn(move || {
+            let _ = super::reflex_trainer::ReflexTrainer::audit_distillation_state(&ws);
+        });
 
         (a2a_logs, fleet_info)
     }

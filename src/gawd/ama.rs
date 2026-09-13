@@ -80,11 +80,43 @@ impl AmaMasterAgent {
     }
 
     /// Primary entry point for all natural language intents.
-    /// Enforces the <2ms Instant-Intelligence mandate (Aspiration 25).
+    /// Streams thinking and results back live in real-time.
     pub fn solve_clean(&self, goal: &str, workspace: &Path, version: &str) -> String {
+        self.solve_stream(goal, workspace, version)
+    }
+
+    pub fn solve_stream(&self, goal: &str, workspace: &Path, version: &str) -> String {
+        use std::io::Write;
+
+        let hw = crate::gemi::hardware::HardwareProfiler::get_profile();
+        let (engine_type, active_model_id) = crate::gemi::models::ModelManager::get_active_engine_and_model();
+        let model_path_str = crate::gemi::models::ModelManager::get_model_path(&active_model_id)
+            .map(|p| p.display().to_string())
+            .unwrap_or_else(|| "Internal Hard-Compiled Substrate Genome".to_string());
+        let device = crate::gemi::hardware::HardwareProfiler::get_candle_device();
+        let tools_count = crate::gmcp::tools::ToolRegistry::list_tools().len();
+        let local_models_count = crate::gemi::models::ModelManager::list_models(workspace).len();
+
+        println!("<thinking>");
+        println!("[AEON Substrate Swarm Active - Full Transparency Telemetry Mode]");
+        println!("- [Engine Version] v{}", version);
+        println!("- [Workspace Root] {}", workspace.display());
+        println!("- [GEMI Engine Substrate] {} (REST Port: 9091 | MCP Bus: 9090)", engine_type);
+        println!("- [Inference Host Device] Candle Native Rust ({:?})", device);
+        println!("- [Active Local Model ID] {}", active_model_id);
+        println!("- [Model Substrate Path] {}", model_path_str);
+        println!("- [Discovered Local Models] {}", local_models_count);
+        println!("- [Hardware Profile] {} CPUs ({}) | {}GB RAM | GPU: {}", hw.cpus, hw.cpu_brand, hw.ram_gb, hw.gpu_info);
+        println!("- [Substrate Surface] {} Meta-Tools Registered", tools_count);
+        println!("- [Goal Intent] {}", goal);
+        let _ = std::io::stdout().flush();
+
         let start = std::time::Instant::now();
         let res = self.solve(goal, workspace, version);
         let elapsed = start.elapsed();
+
+        println!("- [Swarm Execution Latency] {:?} (Aspiration 25 Guard Checked)", elapsed);
+        let _ = std::io::stdout().flush();
 
         if elapsed.as_millis() > 2 {
              crate::sandbox::manager::AeonAuditLogger::log(
@@ -96,8 +128,28 @@ impl AmaMasterAgent {
         }
 
         match res {
-            Ok(report) => report.final_answer,
-            Err(e) => format!("AMA Engine Error: {}", e),
+            Ok(report) => {
+                println!("</thinking>\n");
+                let _ = std::io::stdout().flush();
+
+                println!("<result>");
+                let _ = std::io::stdout().flush();
+                println!("{}", report.final_answer.trim());
+                println!("</result>");
+                let _ = std::io::stdout().flush();
+
+                report.final_answer
+            }
+            Err(e) => {
+                println!("</thinking>\n");
+                let _ = std::io::stdout().flush();
+
+                let err_msg = format!("AMA Engine Error: {}", e);
+                println!("<result>\n{}\n</result>", err_msg);
+                let _ = std::io::stdout().flush();
+
+                err_msg
+            }
         }
     }
 

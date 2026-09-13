@@ -162,10 +162,10 @@ if [ "$INSTALLED" = "0" ]; then
 
         # Build Engine
         echo "  Building engine..."
-        (cd "$SCRIPT_DIR" && cargo build --release $BUILD_FEATURES >/dev/null 2>&1)
+        (cd "$SCRIPT_DIR" && cargo build --release $BUILD_FEATURES)
         # Build Launcher
         echo "  Building launcher..."
-        (cd "$SCRIPT_DIR/src/native/aeon" && cargo build --release >/dev/null 2>&1)
+        (cd "$SCRIPT_DIR/src/native/aeon" && cargo build --release)
 
         ENGINE_SRC="$SCRIPT_DIR/target/release/aeon-engine"
         LAUNCHER_SRC="$SCRIPT_DIR/src/native/aeon/target/release/aeon"

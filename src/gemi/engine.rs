@@ -197,25 +197,15 @@ impl GemiEngine {
         )
     }
 
-    pub fn verify_axiomatic_alignment(reasoning: &str, workspace: &Path) -> EaiResult<String> {
-        let audit_prompt = format!(
-            "REASONING_OUTPUT: {}\n\n[INSTRUCTION]: Audit this reasoning. Report ONLY 'PASSED' or 'FAILED'.",
-            reasoning
-        );
-
-        let (reflex, _) = super::reflex::ReflexEngine::try_solve(&audit_prompt, workspace);
-        if let super::reflex::ReflexDecision::Solved(action) = reflex {
-            if action.contains("PASSED") { return Ok(reasoning.to_string()); }
+    pub fn verify_axiomatic_alignment(reasoning: &str, _workspace: &Path) -> EaiResult<String> {
+        // Fast Rust-Native Axiomatic Alignment Guard (Aspiration 8 & <2ms Reflex Mandate)
+        let risk_patterns = ["rm -rf /", "drop database", "eval(", "chmod 777", "curl | sh"];
+        for pattern in risk_patterns {
+            if reasoning.contains(pattern) {
+                return Err(EaiError::governance(format!("Axiomatic Violation: High-risk pattern '{}' detected in reasoning.", pattern)));
+            }
         }
-
-        // Rust-Native Auditing (Aspiration 8)
-        let audit_res = AeonGgufEngine.run_inference(&audit_prompt).unwrap_or("PASSED_TECHNICAL_FALLBACK".into());
-        if audit_res.to_uppercase().contains("PASSED") || audit_res.contains("TECHNICAL_FALLBACK") {
-            Ok(reasoning.to_string())
-        } else {
-            // If the auditor fails, we still return the reasoning in non-strict mode to prevent recursive failures
-            Ok(reasoning.to_string())
-        }
+        Ok(reasoning.to_string())
     }
 }
 

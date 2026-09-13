@@ -31,7 +31,7 @@ impl AeonPulse {
             let fingerprint = AeonAlphaModel::get_model_fingerprint(&global_dir);
             let mut current = CURRENT_FINGERPRINT.write().unwrap();
             if *current != fingerprint {
-                if global_dir.join("../.agents").exists() || std::env::var("AEON_VERBOSE").is_ok() {
+                if workspace.join(".agents").exists() && std::env::var("AEON_VERBOSE").is_ok() {
                     eprintln!("[Tier 0 Reflex] Neural substrate evolved. Invalidating cache...");
                 }
                 *current = fingerprint;
