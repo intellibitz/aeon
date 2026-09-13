@@ -150,33 +150,26 @@ impl AmaMasterAgent {
             // Parallel execution of Safety, Security, Runtime Setup and Mission specific agents
             let (interactions, agents) = AmaSupervisor::supervise_mission(&current_goal, workspace);
 
-            // 3. Context Compression & Reflex Result Distillation (Tier 2 Hardening)
-            let model_name = crate::gemi::models::ModelManager::get_selected_model()
-                .unwrap_or_else(|| "aeon-alpha.safetensors".to_string());
-
             let lower_goal = current_goal.to_lowercase();
-            let final_answer = if lower_goal.contains("admin mission") || lower_goal.contains("sync") || lower_goal.contains("audit") || lower_goal.contains("release") {
-                // Mandate: Zero-Stall Technical Convergence (Aspiration 22)
-                let data = AmaSupervisor::gather_weighted_wisdom(&interactions, &agents);
-                format!("AMA-Technical-Convergence ({}):\n\n{}", version, data)
-            } else {
-                let blackboard_summary = if let Some(cp) = crate::sandbox::manager::SandboxManager::check_interrupted_checkpoint(workspace) {
-                    crate::gemi::engine::ContextSummarizer::compress_blackboard(&cp.blackboard)
-                } else {
-                    "NO_PREVIOUS_CONTEXT".to_string()
-                };
+            let is_motion = lower_goal.contains("admin mission") || lower_goal.contains("motion") || lower_goal.contains("sync") || lower_goal.contains("audit") || lower_goal.contains("release");
 
-                if interactions.is_empty() {
-                    format!("AMA-Reflex ({}): No active agents responded to '{}'. Context: {}", version, current_goal, blackboard_summary)
-                } else {
-                    let last_payload = &interactions.last().unwrap().payload;
-                    if last_payload.len() > 10 {
-                        last_payload.clone()
-                    } else {
-                        format!("AMA-Synthesis ({} via {}):\n\nProcessed goal '{}' across {} active agents. Context: {}",
-                            version, model_name, current_goal, agents.len(), blackboard_summary)
-                    }
-                }
+            let final_answer = if is_motion {
+                // Tier 1 GAWD Swarm Dispatch for Motions & Core Workspace Mutations
+                let data = AmaSupervisor::gather_weighted_wisdom(&interactions, &agents);
+                format!("AMA-Motion-Convergence ({}):\n\n{}", version, data)
+            } else {
+                // Tier 2 Native Local Model Inference for Missions (GemiEngine + Local Swarm Context)
+                let model_name = crate::gemi::models::ModelManager::get_selected_model()
+                    .unwrap_or_else(|| "aeon-native-synthesis".to_string());
+
+                let swarm_context = AmaSupervisor::gather_weighted_wisdom(&interactions, &agents);
+                let reasoning_prompt = format!(
+                    "MISSION_GOAL: {}\n\nLOCAL_SWARM_CONTEXT:\n{}\n\n[INSTRUCTION]: Resolve this mission using native local model inference.",
+                    current_goal, swarm_context
+                );
+
+                let local_inference = crate::gemi::engine::GemiEngine::generate_reasoning_deep(&reasoning_prompt, workspace);
+                format!("AMA-Tier2-Mission-Synthesis ({} via {}):\n\n{}", version, model_name, local_inference)
             };
 
             // 4. Axiomatic Alignment Check (Rule 15 Hardening)
