@@ -209,6 +209,44 @@ impl GawdAgent for EvolutionAgent {
     }
 }
 
+/// vLLM High-Throughput Bridge Agent (Aspiration 9)
+pub struct VllmBridgeAgent;
+
+impl GawdAgent for VllmBridgeAgent {
+    fn name(&self) -> String { "VllmBridgeAgent".into() }
+    fn rank(&self) -> f32 { 0.95 }
+    fn execute(&self, goal: &str, _workspace: &Path, _blackboard: &MissionBlackboard) -> EaiResult<String> {
+        // Power-Tier Delegation Protocol
+        let client = crate::gmcp::client::GmcpClient::scout_reasoning_remotes();
+        for remote_name in client {
+            if remote_name.to_lowercase().contains("vllm") {
+                let res = crate::gmcp::client::GmcpClient::execute_external_tool(&remote_name, "generate", goal);
+                if !res.contains("[FAIL]") {
+                    return Ok(format!("[vLLM Power-Tier]: {}", res));
+                }
+            }
+        }
+
+        // Local vLLM Proxy Fallback (OpenAI-compatible)
+        let vllm_url = std::env::var("VLLM_API_BASE").unwrap_or_else(|_| "http://localhost:8000/v1".to_string());
+        let body = serde_json::json!({
+            "model": "vllm-substrate",
+            "prompt": goal,
+            "max_tokens": 512,
+            "temperature": 0.0
+        });
+
+        match ureq::post(&format!("{}/completions", vllm_url)).send_json(body) {
+            Ok(resp) => {
+                let json: serde_json::Value = resp.into_json().map_err(|e| crate::error::EaiError::inference(e.to_string()))?;
+                let text = json["choices"][0]["text"].as_str().unwrap_or("vLLM output empty").to_string();
+                Ok(format!("[vLLM Local Proxy]: {}", text))
+            }
+            Err(_) => Err(crate::error::EaiError::inference("vLLM remote or local proxy unreachable"))
+        }
+    }
+}
+
 pub struct AgentMetaRegistry {
     agents: Arc<Mutex<Vec<AgentProfile>>>,
 }
@@ -376,6 +414,10 @@ impl GawdAgentFleet {
         fleet.push(Arc::new(SafetyAgent));
         fleet.push(Arc::new(SecurityAgent));
         fleet.push(Arc::new(EvolutionAgent));
+
+        // Aspiration 9: High-Throughput Reasoning Integration
+        fleet.push(Arc::new(VllmBridgeAgent));
+
         fleet.push(Arc::new(DynamicAgent {
             agent_name: "ContextAgent".into(),
             mission_profile: "Workspace analysis and file-system awareness.".into(),
