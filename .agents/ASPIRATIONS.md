@@ -94,3 +94,8 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 
 ### [Aspiration 20] Constraint-Free Evolution Protocol
 * **Core Paradigm**: The "No-Gates" mandate. AEON must autonomously identify, quantify, and report technical or architectural bottlenecks that limit its performance or interoperability. This protocol mandates that the substrate proactively propose genome mutations to remove these constraints, ensuring zero-gatekeeping of system potential and perpetual alignment with creator intent.
+
+---
+
+### [Aspiration 21] The Hardware-Only Limit Principle
+* **Core Paradigm**: The "Absolute Potential" mandate. Physical hardware capacity (CPU, GPU, RAM) is the sole and final limit on the system's performance, intelligence, and data processing depth. The genome constitutionally prohibits the implementation of any artificial, software-defined, or architectural gates that restrict AEON from operating at the peak of its underlying substrate.

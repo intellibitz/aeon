@@ -19,6 +19,7 @@ This document defines the immutable ethical and operational guardrails for all a
 8. **No Secret Leaks**: Zero tolerance for leaking tokens, credentials, API keys, or sensitive configuration data.
 9. **Real Working Code Only**: No hard-coded mockups or placeholder code. Write functional, production-ready code only.
 10. **Immutability Enforcement**: Strictly prohibit all agents from attempting to modify the `alpha-self` core codebase. Agents operate only within the mutable `alpha-user` space.
+11. **The Hardware-Only Limit**: Prohibit the implementation of any artificial software limits. System processing, token generation, and data ingestion must scale dynamically to the maximum safe capacity of host hardware.
 
 ## 3. Collaborative & Strategic Mandates
 

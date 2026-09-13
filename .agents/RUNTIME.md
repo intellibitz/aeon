@@ -16,7 +16,8 @@ This document defines the operational directives for environment establishment, 
 5. **Substrate Priming**: Autonomously provision the highest-ranking open-source neural weights compatible with host hardware profiling (e.g., Llama, Gemma, Mistral) into the `.aeon/models/` vault. Fixed native weight identifiers are deprecated in favor of dynamic performance-based selection.
 6. **Protocol Linking**: Dynamically bind essential MCP servers (Database, Search, VCS) and registry-discovered external tools to the active workspace.
 7. **Zero-Config Guarantee**: Adapt instantly to workspace-specific environment variables (e.g., `AEON_API_KEY`) and local system constraints without manual user intervention.
-8. **Registry Hot-Reload**: Validate the dynamic agent registry (`agent_registry.json`) via timestamp-based audits to prevent stale behavior injection during swarm synthesis.
+8. **Fluid Scaling**: System boundaries (parsing limits, context depth, execution timeouts) must scale fluidly based on hardware availability. Hardware is the only limit; architectural gates are prohibited.
+9. **Registry Hot-Reload**: Validate the dynamic agent registry (`agent_registry.json`) via timestamp-based audits to prevent stale behavior injection during swarm synthesis.
 
 ## 3. Swarm Operational Directives
 
