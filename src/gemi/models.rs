@@ -576,15 +576,26 @@ impl ModelManager {
         // 2. Identify Best Local Model vs Hardware Capacity
         let best_local = Self::identify_best_suited_local_model(workspace);
 
-        // 3. Download Best Local Model from Web if Local Models are Inferior/Missing
+        // 3. Upgrade to Peak Hardware Step if Local Model is Inferior
         let ladder = HardwareProfiler::get_progressive_model_ladder();
         if let Some(best_step) = ladder.last() {
             let models_dir = global_dir.join("models");
             let model_path = models_dir.join(best_step.hf_file);
             let tokenizer_path = models_dir.join("tokenizer.json");
 
-            if best_local.is_none() && !model_path.exists() {
-                eprintln!("[Model Manager] Optimal hardware step '{}' missing. Provisioning from web...", best_step.hf_file);
+            let needs_upgrade = match &best_local {
+                None => true,
+                Some(m) => {
+                    let path = PathBuf::from(&m.model_id);
+                    let local_size_gb = path.metadata().map(|meta| meta.len() as f32 / 1e9).unwrap_or(0.0);
+                    // On 64GB+ RAM workstations, if local model is < 15GB (e.g. 9B model), upgrade to 72B step
+                    best_step.step >= 5 && local_size_gb < 15.0
+                }
+            };
+
+            if needs_upgrade && !model_path.exists() {
+                eprintln!("[Model Manager] Workstation RAM ({}) supports Peak 72B Step ({}). Provisioning SOTA model from web...",
+                    HardwareProfiler::get_profile().ram_gb, best_step.hf_file);
                 let url = format!("https://huggingface.co/{}/resolve/main/{}", best_step.hf_repo, best_step.hf_file);
                 Self::install_model(&url);
             }
