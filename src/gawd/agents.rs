@@ -554,13 +554,6 @@ impl AgentMetaRegistry {
                 semantic_anchors: vec!["tamil".into(), "hindi".into(), "french".into(), "translator".into()],
                 base_rank: 0.9,
             },
-            AgentProfile {
-                name: "AgriTechAgent".into(),
-                description: "Precision agriculture, soil science, and crop nutrient management.".into(),
-                categories: vec!["soil".into(), "crop".into(), "nutrient".into(), "agri".into()],
-                semantic_anchors: vec!["irrigation".into(), "fertilizer".into(), "harvest".into()],
-                base_rank: 0.85,
-            },
         ]
     }
 
@@ -790,16 +783,16 @@ mod tests {
     fn test_fleet_synthesis() {
         let registry = AgentMetaRegistry::global();
         registry.register_agent(AgentProfile {
-            name: "AgriTechAgent".into(),
-            description: "Precision agriculture, soil science, and crop nutrient management.".into(),
-            categories: vec!["soil".into(), "crop".into(), "nutrient".into(), "agri".into()],
-            semantic_anchors: vec!["irrigation".into(), "fertilizer".into(), "harvest".into()],
+            name: "CustomDomainAgent".into(),
+            description: "Custom domain analytics and specialist problem solving.".into(),
+            categories: vec!["custom".into(), "analytics".into(), "specialist".into()],
+            semantic_anchors: vec!["custom".into(), "domain".into()],
             base_rank: 0.85,
         });
 
-        let fleet = GawdAgentFleet::synthesize_fleet("soil crop agricultural DevOpsStatus build", Path::new("."));
+        let fleet = GawdAgentFleet::synthesize_fleet("custom domain analytics DevOpsStatus build", Path::new("."));
         assert!(!fleet.is_empty());
-        assert!(fleet.iter().any(|a| a.name() == "AgriTechAgent") ||
+        assert!(fleet.iter().any(|a| a.name() == "CustomDomainAgent") ||
                 fleet.iter().any(|a| a.name() == "UniversalReasoner"));
     }
 
