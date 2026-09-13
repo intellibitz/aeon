@@ -1,6 +1,6 @@
 # AEON Operational Workflow
 
-* **Current Engine Version**: `v0.1.2022825`
+* **Current Engine Version**: `v0.1.2022826`
 
 This document defines the Meta-Workflow for substrate evolution and the Federated Parallelism logic of the active `aeon` engine.
 
