@@ -55,7 +55,7 @@ impl AeonVisionEngine {
         }
 
         // Semantic Fusion: (Aspiration 8) Combining Visual Features with Text Intent
-        let text_vec = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(prompt)?;
+        let text_vec = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(prompt, None)?;
 
         // Simulating the "Axiomatic Alignment" of vision
         let similarity: f32 = feature_vec.iter().zip(text_vec.iter()).map(|(a, b)| a * b).sum();

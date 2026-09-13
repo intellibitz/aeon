@@ -2,7 +2,7 @@
 // RULE 11: Agents must add functionality directly to the aeon engine.
 // RULE 31: Substrate Purity & Meta-Only Mandate - Neural Swarm Synthesis
 
-use std::sync::{Arc, Mutex, OnceLock};
+use std::sync::{Arc, Mutex, RwLock, OnceLock};
 use std::path::{Path, PathBuf};
 use std::collections::HashMap;
 use crate::error::EaiResult;
@@ -48,7 +48,7 @@ impl HighDensityContextStore {
 
     pub fn insert(&mut self, key: String, value: String) {
         if self.inner.len() >= self.capacity_limit && !self.inner.contains_key(&key) {
-            // Evict oldest or overflow logic (Aspiration 6 placeholder)
+            // Mandate: Strict LRU or oldest key removal
             if let Some(old_key) = self.inner.keys().next().cloned() {
                 self.inner.remove(&old_key);
             }
@@ -79,7 +79,7 @@ impl HighDensityContextStore {
 
 /// Mission Blackboard: Shared state for swarm agents to converge on the "Chain of Truth".
 /// Optimized for High-Density Context Mapping (Aspiration 6).
-pub type MissionBlackboard = Arc<Mutex<HighDensityContextStore>>;
+pub type MissionBlackboard = Arc<RwLock<HighDensityContextStore>>;
 
 /// Core Intelligence Trait for AEON Swarm Agents
 pub trait GawdAgent: Send + Sync {
@@ -100,7 +100,7 @@ impl GawdAgent for DynamicAgent {
     fn rank(&self) -> f32 { self.agent_rank }
     fn execute(&self, goal: &str, workspace: &Path, blackboard: &MissionBlackboard) -> EaiResult<String> {
         let bb_state = {
-            let data = blackboard.lock().unwrap();
+            let data = blackboard.read().unwrap();
             data.to_json()
         };
 
@@ -118,7 +118,7 @@ impl GawdAgent for DynamicAgent {
              crate::gemi::engine::GemiEngine::generate_reasoning(&prompt, &ws)
         };
 
-        let mut bb = blackboard.lock().unwrap();
+        let mut bb = blackboard.write().unwrap();
         bb.insert(self.agent_name.clone(), res.clone());
         Ok(res)
     }
@@ -179,9 +179,12 @@ pub struct SafetyAgent;
 impl GawdAgent for SafetyAgent {
     fn name(&self) -> String { "SafetyAgent".into() }
     fn rank(&self) -> f32 { 1.0 }
-    fn execute(&self, goal: &str, workspace: &Path, _blackboard: &MissionBlackboard) -> EaiResult<String> {
+    fn execute(&self, goal: &str, workspace: &Path, blackboard: &MissionBlackboard) -> EaiResult<String> {
         crate::gawd::safety::SafetyDetector::audit_action("SWARM_SOLVE", goal, workspace)?;
-        Ok("Safety protocols verified. No destructive patterns detected.".into())
+        let res = "Safety protocols verified. No destructive patterns detected.".to_string();
+        let mut bb = blackboard.write().unwrap();
+        bb.insert(self.name(), res.clone());
+        Ok(res)
     }
 }
 
@@ -191,9 +194,12 @@ pub struct SecurityAgent;
 impl GawdAgent for SecurityAgent {
     fn name(&self) -> String { "SecurityAgent".into() }
     fn rank(&self) -> f32 { 1.0 }
-    fn execute(&self, goal: &str, workspace: &Path, _blackboard: &MissionBlackboard) -> EaiResult<String> {
+    fn execute(&self, goal: &str, workspace: &Path, blackboard: &MissionBlackboard) -> EaiResult<String> {
         crate::gawd::security::SecurityDetector::audit_action("SWARM_SOLVE", goal, workspace)?;
-        Ok("Security audit passed. No secret leaks or exfiltration vectors detected.".into())
+        let res = "Security audit passed. No secret leaks or exfiltration vectors detected.".to_string();
+        let mut bb = blackboard.write().unwrap();
+        bb.insert(self.name(), res.clone());
+        Ok(res)
     }
 }
 
@@ -203,9 +209,12 @@ pub struct EvolutionAgent;
 impl GawdAgent for EvolutionAgent {
     fn name(&self) -> String { "EvolutionAgent".into() }
     fn rank(&self) -> f32 { 1.0 }
-    fn execute(&self, _goal: &str, workspace: &Path, _blackboard: &MissionBlackboard) -> EaiResult<String> {
+    fn execute(&self, _goal: &str, workspace: &Path, blackboard: &MissionBlackboard) -> EaiResult<String> {
         let audit = crate::daemon::evolution::EvolutionManager::perform_autonomous_drift_audit(workspace)?;
-        Ok(format!("Evolutionary health: {}", audit))
+        let res = format!("Evolutionary health: {}", audit);
+        let mut bb = blackboard.write().unwrap();
+        bb.insert(self.name(), res.clone());
+        Ok(res)
     }
 }
 
@@ -470,49 +479,36 @@ impl GawdAgent for AdminAgent {
             Ok("AdminAgent: Monitoring technical intent...".to_string())
         }?;
 
-        let mut bb = blackboard.lock().unwrap();
+        let mut bb = blackboard.write().unwrap();
         bb.insert(self.name(), res.clone());
         Ok(res)
     }
 }
 
 pub struct AgentMetaRegistry {
-    agents: Arc<Mutex<Vec<AgentProfile>>>,
+    agents: Arc<RwLock<Vec<AgentProfile>>>,
 }
 
 impl AgentMetaRegistry {
     pub fn global() -> &'static Self {
         static REGISTRY: OnceLock<AgentMetaRegistry> = OnceLock::new();
-        let registry = REGISTRY.get_or_init(|| {
-            AgentMetaRegistry {
-                agents: Arc::new(Mutex::new(Vec::new())),
-            }
-        });
-        registry.load_or_provision();
-        registry
+        REGISTRY.get_or_init(|| {
+            let registry = AgentMetaRegistry {
+                agents: Arc::new(RwLock::new(Vec::new())),
+            };
+            registry.load_or_provision();
+            registry
+        })
     }
 
     fn load_or_provision(&self) {
         let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
         let registry_path = home.join(".aeon/agent_registry.json");
 
-        // Registry Hot-Reload: Check timestamp to avoid stale state
-        static LAST_LOAD: OnceLock<Mutex<std::time::SystemTime>> = OnceLock::new();
-        let last_load_mutex = LAST_LOAD.get_or_init(|| Mutex::new(std::time::SystemTime::UNIX_EPOCH));
-
-        if let Ok(meta) = std::fs::metadata(&registry_path) {
-            let modified = meta.modified().unwrap_or(std::time::SystemTime::now());
-            let mut last_load = last_load_mutex.lock().unwrap();
-            if modified <= *last_load {
-                return; // Registry is current
-            }
-            *last_load = modified;
-        }
-
         if registry_path.exists() {
             if let Ok(content) = std::fs::read_to_string(&registry_path) {
                 if let Ok(agents) = serde_json::from_str::<Vec<AgentProfile>>(&content) {
-                    let mut registry = self.agents.lock().unwrap();
+                    let mut registry = self.agents.write().unwrap();
                     *registry = agents;
                     return;
                 }
@@ -520,14 +516,17 @@ impl AgentMetaRegistry {
         }
 
         // Bootstrap Provisioning (Rule 31)
-        self.bootstrap();
-        let agents = self.agents.lock().unwrap();
+        let new_agents = self.bootstrap_data();
+        {
+            let mut registry = self.agents.write().unwrap();
+            *registry = new_agents.clone();
+        }
         let _ = std::fs::create_dir_all(registry_path.parent().unwrap());
-        let _ = std::fs::write(&registry_path, serde_json::to_string_pretty(&*agents).unwrap_or_default());
+        let _ = std::fs::write(&registry_path, serde_json::to_string_pretty(&new_agents).unwrap_or_default());
     }
 
-    fn bootstrap(&self) {
-        let mut agents = self.agents.lock().unwrap();
+    fn bootstrap_data(&self) -> Vec<AgentProfile> {
+        let mut agents = Vec::new();
         agents.push(AgentProfile {
             name: "DevOpsAgent".into(),
             description: "Software engineering, systems architecture, and repository management.".into(),
@@ -556,11 +555,12 @@ impl AgentMetaRegistry {
             semantic_anchors: vec!["irrigation".into(), "fertilizer".into(), "harvest".into()],
             base_rank: 0.85,
         });
+        agents
     }
 
     pub fn register_agent(&self, profile: AgentProfile) {
         {
-            let mut agents = self.agents.lock().unwrap();
+            let mut agents = self.agents.write().unwrap();
             agents.push(profile);
         }
         self.save();
@@ -568,7 +568,7 @@ impl AgentMetaRegistry {
 
     pub fn update_rank(&self, name: &str, delta: f32, source: &str) {
         {
-            let mut agents = self.agents.lock().unwrap();
+            let mut agents = self.agents.write().unwrap();
             if let Some(agent) = agents.iter_mut().find(|a| a.name == name) {
                 let old_rank = agent.base_rank;
                 agent.base_rank = (agent.base_rank + delta).clamp(0.1, 1.0);
@@ -585,16 +585,16 @@ impl AgentMetaRegistry {
     fn save(&self) {
         let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
         let registry_path = home.join(".aeon/agent_registry.json");
-        let agents = self.agents.lock().unwrap();
+        let agents = self.agents.read().unwrap();
         let _ = std::fs::write(&registry_path, serde_json::to_string_pretty(&*agents).unwrap_or_default());
     }
 
     pub fn list_agents(&self) -> Vec<AgentProfile> {
-        self.agents.lock().unwrap().clone()
+        self.agents.read().unwrap().clone()
     }
 
     pub fn get_checksum(&self) -> u64 {
-        let agents = self.agents.lock().unwrap();
+        let agents = self.agents.read().unwrap();
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
         use std::hash::{Hash, Hasher};
         for agent in agents.iter() {
@@ -688,7 +688,7 @@ impl GawdAgentFleet {
 
         // Neural Semantic pass: identified via Tier 0 Vector space
         if !lower_goal.contains("admin mission") {
-            if let Ok(goal_vec) = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(goal) {
+            if let Ok(goal_vec) = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(goal, Some(&available_agents)) {
                 for agent in available_agents {
                     if fleet.len() >= max_agents { break; }
 
@@ -698,7 +698,7 @@ impl GawdAgentFleet {
                     agent_corpus.push_str(" ");
                     agent_corpus.push_str(&agent.description);
 
-                    if let Ok(agent_vec) = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(&agent_corpus) {
+                    if let Ok(agent_vec) = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(&agent_corpus, Some(&[agent.clone()])) {
                         let dot_product: f32 = goal_vec.iter().zip(agent_vec.iter()).map(|(a, b)| a * b).sum();
                         max_similarity = dot_product;
                         if max_similarity > max_global_similarity { max_global_similarity = max_similarity; }

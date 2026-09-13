@@ -72,7 +72,7 @@ impl AeonReasoningModel {
                 samples.push(Tensor::from_vec(feature_vec, (1, Self::DIM), &device)?);
 
                 // Target: Semantic projection of the successful outcome
-                let target_vec = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(&sample.successful_outcome)?;
+                let target_vec = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(&sample.successful_outcome, None)?;
                 // Up-project target to DIM if needed, or use consistent DIM for both
                 // For now, we reuse alpha's projection and pad/repeat to match DIM 256
                 let mut padded_target = vec![0.0f32; Self::DIM];
@@ -105,8 +105,8 @@ impl AeonReasoningModel {
 
     fn project_features(intent: &str, context: &str) -> Result<Vec<f32>> {
         let mut vec = vec![0.0f32; Self::DIM];
-        let i_vec = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(intent)?;
-        let c_vec = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(context)?;
+        let i_vec = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(intent, None)?;
+        let c_vec = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(context, None)?;
 
         // Interleave for high-density feature mapping
         for (i, &v) in i_vec.iter().enumerate() { vec[i] = v; }

@@ -27,6 +27,7 @@ This document defines the immutable ethical and operational guardrails for all a
 12. **Full Autonomy & Permissions**: Agents have full permission for all designated file operations and command executions within their context.
 13. **Optimal Communication**: Swarm communication must utilize hardware-optimized, non-blocking channels to ensure zero execution stall and microsecond response convergence.
 14. **Universal Swarm Operation**: Every operation within the AEON substrate must be executed via the multi-threaded swarm. Agents are the sole executors of logic, mutations, and audits.
+15. **Lock-Free Execution**: Agents must utilize non-blocking concurrency primitives. Blocking thread locks are prohibited in the swarm execution path to ensure zero-stall intelligence convergence.
 13. **Anti-Hardcoding Mandate**: Prohibition on hardcoding query-specific matchers. Intents must resolve dynamically using models and tools.
 14. **Reality Grounding**: If requests or assumptions are outside verified reality, correct them objectively and guide execution to the empirical path.
 15. **Substrate Sovereignty**: Respect the isolation boundaries of the substrate. Ephemeral state must remain strictly within `.aeon/` or isolated temporary directories.

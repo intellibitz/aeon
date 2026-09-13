@@ -102,7 +102,7 @@ impl AeonAlphaModel {
 
         for line in content.lines() {
             if let Ok(entry) = serde_json::from_str::<DistillationStaged>(line) {
-                let vec = Self::semantic_centroid_projection(&entry.intent)?;
+                let vec = Self::semantic_centroid_projection(&entry.intent, None)?;
                 samples.push(Tensor::from_vec(vec, (1, Self::DIM), &device)?);
 
                 let action_clean = entry.action.to_lowercase();
@@ -115,7 +115,7 @@ impl AeonAlphaModel {
 
         // Neural Seeding (Synthetic Priming): Ensure new tools have at least one sample
         for (idx, intent) in dynamic_intents.iter().enumerate() {
-            let vec = Self::semantic_centroid_projection(intent)?;
+            let vec = Self::semantic_centroid_projection(intent, None)?;
             samples.push(Tensor::from_vec(vec, (1, Self::DIM), &device)?);
             labels.push(idx as u32);
         }
@@ -161,7 +161,7 @@ impl AeonAlphaModel {
 
     pub fn predict_intent_with_confidence(&self, prompt: &str) -> Result<(String, f32)> {
         let device = crate::gemi::hardware::HardwareProfiler::get_candle_device();
-        let input_vec = Self::semantic_centroid_projection(prompt)?;
+        let input_vec = Self::semantic_centroid_projection(prompt, None)?;
         let input_tensor = Tensor::from_vec(input_vec, (1, Self::DIM), &device)?;
 
         let output = self.fc1.forward(&input_tensor)?;
@@ -214,7 +214,7 @@ impl AeonAlphaModel {
     }
 
     /// Deterministic Semantic Embedding Substrate
-    pub fn semantic_centroid_projection(prompt: &str) -> Result<Vec<f32>> {
+    pub fn semantic_centroid_projection(prompt: &str, anchors: Option<&[crate::gawd::agents::AgentProfile]>) -> Result<Vec<f32>> {
         let mut vec = vec![0.0f32; Self::DIM];
         let prompt_lower = prompt.to_lowercase();
         let words: Vec<&str> = prompt_lower.split(|c: char| !c.is_alphanumeric()).filter(|s| !s.is_empty()).collect();
@@ -222,7 +222,7 @@ impl AeonAlphaModel {
         if words.is_empty() { return Ok(vec); }
 
         for (i, word) in words.iter().enumerate() {
-            let word_vec = Self::get_semantic_anchor(word);
+            let word_vec = Self::get_semantic_anchor(word, anchors);
             for (j, &val) in word_vec.iter().enumerate() {
                 let weight = 1.0 / (i as f32 + 1.0);
                 vec[j] += val * weight;
@@ -240,20 +240,22 @@ impl AeonAlphaModel {
         Ok(vec)
     }
 
-    fn get_semantic_anchor(word: &str) -> Vec<f32> {
+    fn get_semantic_anchor(word: &str, anchors: Option<&[crate::gawd::agents::AgentProfile]>) -> Vec<f32> {
         let mut anchor = vec![0.0f32; Self::DIM];
 
-        // Adaptive Semantic Anchors: Query registry for domain specialist keywords
-        let registry = crate::gawd::agents::AgentMetaRegistry::global();
-        let agents = registry.list_agents();
-        for agent in agents {
-            if agent.semantic_anchors.iter().any(|a| a == word) {
-                 // Map to agent-specific segment (starting from DIM 80+)
-                 let offset = 80 + (agent.name.len() % 40);
-                 anchor[offset] = 1.0;
-                 return anchor;
+        // Zero-Lock Anchor Mapping (Aspiration 24 Mandate)
+        if let Some(agent_profiles) = anchors {
+            for agent in agent_profiles {
+                if agent.semantic_anchors.iter().any(|a| a == word) {
+                     let offset = 80 + (agent.name.len() % 40);
+                     anchor[offset] = 1.0;
+                     return anchor;
+                }
             }
         }
+
+        let mut h = 0u32;
+        for b in word.as_bytes() { h = h.wrapping_add(*b as u32); }
 
         let category = match word {
             "status" | "health" | "state" | "check" | "hardware" | "system" | "report" => 0,
@@ -271,8 +273,6 @@ impl AeonAlphaModel {
             let start = category * 10;
             for j in start..start+10 { anchor[j] = 1.0; }
         } else {
-            let mut h = 0u32;
-            for b in word.as_bytes() { h = h.wrapping_add(*b as u32); }
             anchor[(h as usize) % Self::DIM] = 0.5;
         }
         anchor
@@ -294,8 +294,8 @@ mod tests {
 
     #[test]
     fn test_semantic_centroid_projection_determinism() {
-        let vec1 = AeonAlphaModel::semantic_centroid_projection("check engine status").unwrap();
-        let vec2 = AeonAlphaModel::semantic_centroid_projection("check engine status").unwrap();
+        let vec1 = AeonAlphaModel::semantic_centroid_projection("check engine status", None).unwrap();
+        let vec2 = AeonAlphaModel::semantic_centroid_projection("check engine status", None).unwrap();
         assert_eq!(vec1.len(), AeonAlphaModel::DIM);
         assert_eq!(vec1, vec2);
     }

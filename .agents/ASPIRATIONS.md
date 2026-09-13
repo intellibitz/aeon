@@ -109,3 +109,8 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 
 ### [Aspiration 23] Universal Swarm Operation
 * **Core Paradigm**: The "Swarm-Only" mandate. 100% of AEON substrate operations—ranging from core architectural mutations and global version synchronization to transient diagnostic audits—must be executed through the multi-threaded GAWD Swarm. Direct serial execution of engine logic is constitutionally prohibited, ensuring that every operation benefits from swarm-parallelism, safety auditing, and epistemic verification.
+
+---
+
+### [Aspiration 24] Lock-Free Native Substrate
+* **Core Paradigm**: The "Zero-Wait" mandate. AEON must eliminate blocking thread locks from its execution critical path. The substrate must utilize lock-free data structures (e.g., atomic pointers, crossbeam channels) and non-blocking message-passing architectures to ensure that high-density agent swarms never enter a wait-state, satisfying the hardware-only limit principle.

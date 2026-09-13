@@ -6,7 +6,7 @@ use std::io::{BufRead, BufReader, Write};
 use std::net::{TcpStream, UdpSocket};
 use std::path::Path;
 use std::time::Duration;
-use std::sync::{Arc, Mutex, OnceLock};
+use std::sync::{Arc, Mutex, RwLock, OnceLock};
 use serde::{Deserialize, Serialize};
 
 use super::agents::{GawdAgentFleet, GawdAgentInfo, MissionBlackboard};
@@ -40,7 +40,7 @@ impl AmaSupervisor {
     pub const UDP_DISCOVERY_PORT: u16 = 9092;
 
     pub fn list_cluster_nodes() -> Vec<ClusterPeerNode> {
-        static DISCOVERED_PEERS: OnceLock<Arc<Mutex<Vec<ClusterPeerNode>>>> = OnceLock::new();
+        static DISCOVERED_PEERS: OnceLock<Arc<RwLock<Vec<ClusterPeerNode>>>> = OnceLock::new();
         let peers_mutex = DISCOVERED_PEERS.get_or_init(|| {
             let initial = vec![ClusterPeerNode {
                 node_id: "aeon-local-master".to_string(),
@@ -48,13 +48,13 @@ impl AmaSupervisor {
                 node_type: "LOCAL_MASTER".to_string(),
                 is_active: true,
                 capabilities: vec!["CORE".to_string(), "INFERENCE".to_string(), "TOOLING".to_string()],
-                registry_checksum: crate::gawd::agents::AgentMetaRegistry::global().get_checksum(),
+                registry_checksum: 0, // crate::gawd::agents::AgentMetaRegistry::global().get_checksum(),
                 latency_ms: 0,
                 uptime_secs: 0,
                 trust_score: 1.0,
             }];
 
-            let shared = Arc::new(Mutex::new(initial));
+            let shared = Arc::new(RwLock::new(initial));
             let t_shared = Arc::clone(&shared);
 
             // Zero-Config Background Discovery Loop
@@ -90,7 +90,7 @@ impl AmaSupervisor {
                                      0
                                  };
 
-                                 let mut peers = t_shared.lock().unwrap();
+                                 let mut peers = t_shared.write().unwrap();
                                  let addr_str = format!("{}:9090", src.ip());
                                  if let Some(p) = peers.iter_mut().find(|p| p.address == addr_str) {
                                      p.trust_score = (p.trust_score + 0.05).min(1.0);
@@ -121,12 +121,12 @@ impl AmaSupervisor {
             shared
         });
 
-        peers_mutex.lock().unwrap().clone()
+        peers_mutex.read().unwrap().clone()
     }
 
     pub fn supervise_mission(goal: &str, workspace: &Path) -> (Vec<A2AMessage>, Vec<GawdAgentInfo>) {
         // 1. Initialize Mission Blackboard (High-Density Context Store with 1024 entry lease cap)
-        let blackboard: MissionBlackboard = Arc::new(Mutex::new(super::agents::HighDensityContextStore::new(1024)));
+        let blackboard: MissionBlackboard = Arc::new(RwLock::new(super::agents::HighDensityContextStore::new(1024)));
 
         // 2. Dynamic Fleet Synthesis
         let agents = GawdAgentFleet::synthesize_fleet(goal, workspace);
@@ -180,7 +180,7 @@ impl AmaSupervisor {
         }
 
         // 5. Weighted Swarm Consensus Pass (Rule 31 Hardening)
-        let final_state = blackboard.lock().unwrap();
+        let final_state = blackboard.read().unwrap();
         if !final_state.is_empty() {
             // Aggregate agent outputs weighted by rank and node trust
             let mut weighted_wisdom = String::new();

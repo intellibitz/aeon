@@ -125,7 +125,7 @@ impl GemiEngine {
 
     /// Aspiration 7: Ultra-Latency Competitive Inference Racing
     fn reason_internal(prompt: &str, workspace: &Path, allow_reflex: bool) -> String {
-        let preparation_blackboard = std::sync::Arc::new(std::sync::Mutex::new(crate::gawd::agents::HighDensityContextStore::new(1)));
+        let preparation_blackboard = std::sync::Arc::new(std::sync::RwLock::new(crate::gawd::agents::HighDensityContextStore::new(1)));
         let _ = crate::gawd::agents::AeonRuntimeAgent.execute(prompt, workspace, &preparation_blackboard);
 
         if allow_reflex {

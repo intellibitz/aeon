@@ -84,7 +84,7 @@ fn secure_path(workspace: &Path, user_path: &str) -> EaiResult<PathBuf> {
 
 pub struct ToolRegistry {
     tools: RwLock<HashMap<String, Arc<dyn AeonTool>>>,
-    locks: Arc<Mutex<HashMap<String, u64>>>,
+    locks: Arc<RwLock<HashMap<String, u64>>>,
 }
 
 impl ToolRegistry {
@@ -93,7 +93,7 @@ impl ToolRegistry {
         REGISTRY.get_or_init(|| {
             let registry = ToolRegistry {
                 tools: RwLock::new(HashMap::new()),
-                locks: Arc::new(Mutex::new(HashMap::new())),
+                locks: Arc::new(RwLock::new(HashMap::new())),
             };
             registry.bootstrap();
             registry
@@ -499,7 +499,7 @@ impl ToolRegistry {
         let registry = Self::global();
         let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs();
 
-        let mut locks = registry.locks.lock().unwrap();
+        let mut locks = registry.locks.write().unwrap();
         if let Some(&timestamp) = locks.get(resource_id) {
             // Lease-Based Timed Locks (300s TTL)
             if now - timestamp < 300 {
@@ -512,7 +512,7 @@ impl ToolRegistry {
 
     pub fn release_meta_lock(resource_id: &str) {
         let registry = Self::global();
-        let mut locks = registry.locks.lock().unwrap();
+        let mut locks = registry.locks.write().unwrap();
         locks.remove(resource_id);
     }
 }

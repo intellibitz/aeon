@@ -201,15 +201,6 @@ impl HardwareProfiler {
     }
 
     fn interrogate_native_acceleration() -> (String, String) {
-        if let Ok(dev) = Device::new_cuda(0) {
-            return ("CUDA".to_string(), format!("{:?}", dev));
-        }
-
-        #[cfg(feature = "metal")]
-        if let Ok(dev) = Device::new_metal(0) {
-            return ("Metal".to_string(), format!("{:?}", dev));
-        }
-
         if candle_core::utils::cuda_is_available() {
              return ("CUDA (Detected)".to_string(), "NVIDIA Driver found".to_string());
         }

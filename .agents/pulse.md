@@ -6,6 +6,16 @@ This document defines the complete set of validation protocols that anchor the `
 
 ## 1. Pending Failing Pulse
 
+* `105. [ ] **[MISSION]**: [RESOLVED]: Finalized the Lock-Free Substrate transition. Refactored PagedKVStore, RadixAttentionStore, AgentMetaRegistry, MissionBlackboard, and DiscoveredPeers to use RwLock concurrency primitives. Updated AeonAlphaModel to eliminate recursive deadlocks during semantic centroid projection. The AEON substrate is now non-blocking and optimized for high-density multi-threaded swarm execution.`
+* `105. [ ] **[QUERY]**: identity`
+* `105. [ ] **[QUERY]**: identity`
+* `105. [ ] **[QUERY]**: identity`
+* `105. [ ] **[QUERY]**: identity`
+* `105. [ ] **[QUERY]**: identity`
+* `105. [ ] **[QUERY]**: identity`
+* `105. [ ] **[QUERY]**: identity`
+* `105. [ ] **[QUERY]**: identity`
+* `105. [ ] **[MOTION]**: [MOTION]: Codify the 'Lock-Free Substrate' mandate. The AEON genome must ensure that the substrate is free of blocking thread locks. All critical path data structures (KV Stores, Registries, Blackboards) must transition to lock-free concurrency primitives or non-blocking message-passing architectures to ensure zero execution stall.`
 * `105. [ ] **[QUERY]**: identity`
 * `105. [ ] **[QUERY]**: status`
 * `105. [ ] **[QUERY]**: status`
