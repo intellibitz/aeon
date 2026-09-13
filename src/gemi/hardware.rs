@@ -69,6 +69,13 @@ impl HardwareProfiler {
         }
     }
 
+    pub fn check_oom_critical() -> bool {
+        let profile = Self::get_profile();
+        if profile.ram_gb == 0 { return false; }
+        let usage_pct = ((profile.ram_gb - profile.available_ram_gb) as f32 / profile.ram_gb as f32) * 100.0;
+        usage_pct > 90.0
+    }
+
     fn get_cpu_brand() -> String {
         if cfg!(target_os = "linux") {
             if let Ok(content) = std::fs::read_to_string("/proc/cpuinfo") {

@@ -7,7 +7,7 @@ This document defines the operational directives for environment establishment, 
 ## 1. Alpha-Self Host Mandates (Foundational Readiness)
 
 1. **Daemon Persistence**: The `AmaDaemon` must sustain a continuous, resilient background process, binding standard MCP interop ports (9090, 9091, 9093) and A2A discovery ports (9092).
-2. **Hardware Interrogation**: The `AeonRuntimeAdmin` must continuously audit CPU/GPU topologies and system RAM to guarantee 100% compute saturation for the execution core.
+2. **Hardware Interrogation**: The `AeonRuntimeAdmin` must continuously audit CPU/GPU topologies and system RAM to guarantee optimal compute saturation (max 90% utilization) and proactively prevent Out-of-Memory (OOM) events.
 3. **Autonomous Drift Detection**: The substrate must periodically audit itself for capability gaps and trigger the *Motion Rule* (autonomous evolution cycles) without user command.
 4. **Self-Healing Reflex**: The engine must autonomously recover from structural pathologies, port collisions, or memory faults via protocol-based provisioning and hardware re-tuning.
 

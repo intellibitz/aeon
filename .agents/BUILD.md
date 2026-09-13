@@ -7,7 +7,7 @@ This document defines the mechanics of the `aeon` binary lifecycle, release orch
 ## 1. Core Build Mechanics
 
 1. **Lightning-Fast Compilation**: Optimization of build configurations and aggressive caching to minimize overhead and accelerate iteration.
-2. **Maximum Resource Utilization**: Saturation of all available hardware resources (CPU threads, RAM, parallel jobs) during the compilation cycle.
+2. **Maximum Resource Utilization**: Optimal saturation of hardware resources (CPU threads, RAM, parallel jobs) during the compilation cycle, with an absolute mandate to never exceed physical memory limits.
 3. **Workspace Purity Enforcement**: Absolute isolation of build artifacts and test pollutants. All ephemeral state must be contained within git-ignored `.aeon/` directories.
 4. **Dynamic Context Enforcement**: Zero hardcoded static configurations in source code. All engine and network parameters must be discoverable at runtime.
 

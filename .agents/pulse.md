@@ -6,6 +6,7 @@ This document defines the complete set of validation protocols that anchor the `
 
 ## 1. Pending Failing Pulse
 
+* `101. [ ] **[MOTION]**: [MOTION]: Refine Hardware Saturation mandates to ensure 'Optimal Level' utilization. AEON must autonomously prevent Out-of-Memory (OOM) events by capping resource consumption at 90% of available capacity, transitioning from 'Absolute Saturation' to 'Safe Peak Performance'.`
 ## 2. Ingested & Resolved Pulse (The Realized Genome)
 
 ### 2.1 Core Governance & Epistemic Integrity [MOTION]

@@ -26,8 +26,8 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 
 ---
 
-### [Aspiration 5] Hardware-Saturated Inference Substrate
-* **Core Paradigm**: Active interrogation of CPU/GPU topologies using the Candle tensor framework. Deployment of the `AeonRuntimeAdmin` to dynamically map reasoning to the optimal acceleration substrate and peak param ladder based on live hardware profile.
+### [Aspiration 5] Optimal Hardware Saturation Substrate
+* **Core Paradigm**: The "No-OOM" mandate. Active interrogation of CPU/GPU topologies using the Candle tensor framework. AEON must dynamically map reasoning to the peak performance ladder while autonomously capping resource consumption at 90% of available capacity to prevent system instability.
 
 ---
 
