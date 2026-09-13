@@ -46,6 +46,7 @@ This document defines the complete set of validation protocols that anchor the `
 33. `[x]` **Unified Interaction Interface**: Every user vision anchored in a verifiable typed test entry.
 34. `[x]` **Axiomatic Pulse Ingestion**: The binary possesses a native reflex to classify intents and inject them into `pulse.md`.
 35. `[x]` **Federated Experience Aggregation**: Aggregation of distilled reasoning from alpha-user environments to evolve the global genome.
+84. `[x]` **Deep Model Scan**: Implemented `deep-scan` subcommand for parallel home-wide model discovery and automatic configuration registration.
 
 ### 2.3 Structural Topology & Pillars [MOTION]
 36. `[x]` **AoA Coordination**: GAWD/AmaDaemon parallel dispatcher is functional.

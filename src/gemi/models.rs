@@ -345,7 +345,7 @@ impl ModelManager {
                     };
                     if is_valid && path.metadata().map(|m| m.len()).unwrap_or(0) > 1_000_000 {
                         let file_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("model");
-                        let checksum = Self::calculate_simple_checksum(&path).ok();
+                        let checksum = None; // Aspiration 4: Deferred Checksum (Performance)
                         let prov_file = path.with_extension("provenance.json");
                         let provenance = if prov_file.exists() {
                             fs::read_to_string(&prov_file).ok().and_then(|s| serde_json::from_str(&s).ok())
@@ -361,6 +361,103 @@ impl ModelManager {
                         });
                     }
                 }
+            }
+        }
+    }
+
+    pub fn deep_scan_home_and_register(global_dir: &Path) -> EaiResult<String> {
+        let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_default();
+        if !home.is_dir() {
+            return Err(crate::error::EaiError::filesystem("User home directory not detected"));
+        }
+
+        let mut sub_paths = Vec::new();
+        if let Ok(entries) = fs::read_dir(&home) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+                if path.is_dir() && !name.starts_with('.') && !["node_modules", "target", "vendor", "proc", "sys", "dev", "Library"].contains(&name) {
+                    sub_paths.push(path);
+                }
+            }
+        }
+        let hidden_folders = [".android", ".cache", ".local", "Downloads"];
+        for h in hidden_folders {
+            let p = home.join(h);
+            if p.is_dir() {
+                sub_paths.push(p);
+            }
+        }
+
+        sub_paths.sort();
+        sub_paths.dedup();
+
+        let found_folders = std::sync::Arc::new(std::sync::Mutex::new(std::collections::HashSet::new()));
+        let mut handles = Vec::new();
+
+        for sub_path in sub_paths {
+            let ff = std::sync::Arc::clone(&found_folders);
+            handles.push(std::thread::spawn(move || {
+                let mut local_discovered = Vec::new();
+                let mut local_visited = std::collections::HashSet::new();
+                Self::recursive_scan_model_dir_for_paths(&sub_path, &mut local_discovered, &mut local_visited);
+                if !local_discovered.is_empty() {
+                    let mut lock = ff.lock().unwrap();
+                    for p in local_discovered {
+                        lock.insert(p);
+                    }
+                }
+            }));
+        }
+
+        for h in handles {
+            let _ = h.join();
+        }
+
+        let mut cfg = crate::sandbox::manager::AeonConfig::load(global_dir)?;
+        let mut new_paths_added = 0;
+
+        let lock = found_folders.lock().unwrap();
+        for folder in lock.iter() {
+            if !cfg.local_scan_paths.contains(folder) {
+                cfg.local_scan_paths.push(folder.clone());
+                new_paths_added += 1;
+            }
+        }
+
+        cfg.save(global_dir)?;
+
+        Ok(format!("Deep scan complete. Discovered and registered {} new local model directories to user config.", new_paths_added))
+    }
+
+    fn recursive_scan_model_dir_for_paths(dir: &Path, discovered_folders: &mut Vec<String>, visited: &mut std::collections::HashSet<PathBuf>) {
+        if let Ok(canonical) = dir.canonicalize() { if !visited.insert(canonical) { return; } }
+        let folder_name = dir.file_name().and_then(|n| n.to_str()).unwrap_or("");
+        if [".git", "node_modules", "target", "vendor", ".cargo", ".rustup", ".gradle", "proc", "sys"].contains(&folder_name) { return; }
+
+        if let Ok(entries) = fs::read_dir(dir) {
+            let mut folder_has_model = false;
+            let mut sub_dirs = Vec::new();
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.is_dir() {
+                    sub_dirs.push(path);
+                } else if path.is_file() {
+                    let lower_ext = path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
+                    if ["gguf", "safetensors", "onnx", "bin", "pt", "ckpt"].contains(&lower_ext.as_str()) {
+                        if path.metadata().map(|m| m.len()).unwrap_or(0) > 1_000_000 {
+                            folder_has_model = true;
+                        }
+                    }
+                }
+            }
+
+            if folder_has_model {
+                discovered_folders.push(dir.to_string_lossy().to_string());
+            }
+
+            for sd in sub_dirs {
+                Self::recursive_scan_model_dir_for_paths(&sd, discovered_folders, visited);
             }
         }
     }

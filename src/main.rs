@@ -74,6 +74,7 @@ fn print_help() {
     println!("  gemi                     Start GEMI REST server");
     println!("  status                   Inspect workspace health report");
     println!("  models                   List available models");
+    println!("  deep-scan                Parallel deep scan of user home for local models");
     println!("  agents                   List active agents");
     println!("  engines                  List active engines");
     println!("  benchmark                Run performance benchmark");
@@ -178,6 +179,12 @@ fn main() {
         "models" => {
             let res = aeon_engine::gmcp::GmcpHost::dispatch("list_models", &serde_json::json!(null).to_string(), &cwd);
             println!("{}", res);
+        }
+        "deep-scan" | "deep_scan" => {
+            match aeon_engine::gemi::models::ModelManager::deep_scan_home_and_register(&global_dir) {
+                Ok(msg) => println!("{}", msg),
+                Err(e) => eprintln!("Deep scan failed: {}", e),
+            }
         }
         "pulse" => {
             let intent = args.get(1..).map(|s| s.join(" ")).unwrap_or_default();
@@ -298,6 +305,15 @@ fn main() {
                 Ok(msg) => {
                     info!("Natural intent ingested successfully");
                     println!("{}", msg);
+
+                    if msg.contains("[MISSION]") || msg.contains("[QUERY]") {
+                        let answer = ama.solve_clean(&goal, &cwd, AEON_VERSION);
+                        if !io::stdout().is_terminal() {
+                            print!("{}", answer);
+                        } else {
+                            println!("{}", answer);
+                        }
+                    }
                 }
                 Err(e) => {
                     warn!("Natural intent ingestion failed: {}. Falling back to direct solving.", e);
