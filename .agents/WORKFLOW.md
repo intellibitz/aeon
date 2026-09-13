@@ -43,6 +43,7 @@ This document defines the Meta-Workflow for substrate evolution and the Federate
 ## 4. Phase C: Execution & Distillation (Mission Cycle)
 
 17. **Explosive Swarm Dispatch**: Parallel execution of agents across isolated threads, coordinating via a shared, high-density **Mission Blackboard**.
-18. **Chain of Truth Convergence**: Swarm participants converge on a verified outcome, grounding all results in empirical filesystem state and tool results.
+18. **Recursive Fork-Join**: For complex missions, the orchestrator triggers a recursive "Split-Parallel-Join" cycle. The goal is partitioned into independent sub-missions, processed by sub-swarms, and re-joined upon semantic convergence.
+19. **Chain of Truth Convergence**: Swarm participants converge on a verified outcome, grounding all results in empirical filesystem state and tool results.
 19. **Substrate Ingestion**: Successful reasoning is staged and distilled into the **Native Tier 2 Reasoning Model** to close the loop between experience and memory.
 20. **Autonomous Drift Correction**: The `EvolutionManager` audits the mission logs for capability gaps and triggers autonomous synthesis to heal the substrate.

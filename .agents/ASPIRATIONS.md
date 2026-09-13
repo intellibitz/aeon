@@ -119,3 +119,8 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 
 ### [Aspiration 25] <2ms Ultra-Reflex Substrate
 * **Core Paradigm**: The "Instant-Intelligence" mandate. 100% of AEON engine internal operations (projection, routing, swarm synthesis, lock-free access) must complete in under 2ms. Heavy inference tasks must utilize speculative early-exit reflexes to satisfy this constraint on the primary execution thread. Intelligence is useless if delayed.
+
+---
+
+### [Aspiration 26] Recursive Swarm Parallelism (Split-Parallel-Join)
+* **Core Paradigm**: The "Divide-and-Conquer" mandate. The AEON swarm must autonomously decompose complex missions into independent sub-tasks, execute them in parallel across the multi-threaded substrate, and join results using high-fidelity semantic synthesis. Implement via high-performance work-stealing or fork-join patterns to maximize hardware saturation while maintaining sub-2ms orchestration overhead.

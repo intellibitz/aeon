@@ -76,6 +76,11 @@ impl AmaMasterAgent {
     pub fn solve(&self, goal: &str, workspace: &Path, version: &str) -> EaiResult<AmaMissionReport> {
         let goal = self.sanitize_input(goal)?;
         let lower_goal = goal.to_lowercase();
+        // Recursive Parallel Parallelism (Aspiration 26)
+        if lower_goal.contains("parallel") || lower_goal.contains("split") {
+             return self.solve_parallel_mission(&goal, workspace, version);
+        }
+
         // Autonomous Task Decomposition (Rule 12 Check)
         if (goal.len() > 150 || lower_goal.contains(" and then ") || lower_goal.contains(" finally ")) && !goal.contains("[STEP ") {
              return self.solve_planned_mission(&goal, workspace, version);
@@ -174,6 +179,53 @@ impl AmaMasterAgent {
         }
 
         Err(crate::error::EaiError::governance(format!("Recursive reasoning failed after 3 attempts. Last violation: {}", last_error)))
+    }
+
+    fn solve_parallel_mission(&self, goal: &str, workspace: &Path, version: &str) -> EaiResult<AmaMissionReport> {
+        let plan = crate::gemi::engine::MissionPlanner::partition_mission(goal, workspace)?;
+
+        // Speculative Parallelism (Aspiration 26)
+        // Partitioned tasks are executed in parallel across the multi-threaded substrate.
+        let mut results = Vec::new();
+        let mut handles = Vec::new();
+
+        for (i, sub_goal) in plan.goals.iter().enumerate() {
+            let g = format!("[PARALLEL STEP {}/{}]: {}", i + 1, plan.goals.len(), sub_goal);
+            let w = workspace.to_path_buf();
+            let v = version.to_string();
+
+            handles.push(std::thread::spawn(move || {
+                let ama = AmaMasterAgent::new();
+                // Sub-mission budget is shorter to prevent parent hang
+                ama.solve(&g, &w, &v)
+            }));
+        }
+
+        for handle in handles {
+            if let Ok(res) = handle.join() {
+                results.push(res);
+            }
+        }
+
+        let mut all_interactions = Vec::new();
+        let mut all_agents = Vec::new();
+        let mut final_responses = Vec::new();
+
+        for res in results {
+            if let Ok(report) = res {
+                all_interactions.extend(report.interactions);
+                all_agents.extend(report.agents);
+                final_responses.push(report.final_answer);
+            }
+        }
+
+        Ok(AmaMissionReport {
+            goal: goal.to_string(),
+            status: "COMPLETE".to_string(),
+            agents: all_agents,
+            interactions: all_interactions,
+            final_answer: format!("PARALLEL_FORK_JOIN_COMPLETE ({} steps):\n\n{}", final_responses.len(), final_responses.join("\n\n---\n\n")),
+        })
     }
 
     fn solve_planned_mission(&self, goal: &str, workspace: &Path, version: &str) -> EaiResult<AmaMissionReport> {

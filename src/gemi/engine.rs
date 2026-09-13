@@ -285,6 +285,24 @@ impl MissionPlanner {
         Ok(MissionPlan { goals })
     }
 
+    pub fn partition_mission(goal: &str, workspace: &Path) -> EaiResult<MissionPlan> {
+        let plan_prompt = format!(
+            "MISSION_GOAL: {}\n\n[INSTRUCTION]: Partition this mission into INDEPENDENT sub-tasks that can execute in parallel. Output as a comma-separated list of actions.",
+            goal
+        );
+        let plan_str = GemiEngine::generate_reasoning(&plan_prompt, workspace);
+        let mut goals = Vec::new();
+        if plan_str.contains(',') {
+            for g in plan_str.split(',') {
+                let clean = g.trim();
+                if !clean.is_empty() { goals.push(clean.to_string()); }
+            }
+        } else {
+            goals.push(goal.to_string());
+        }
+        Ok(MissionPlan { goals })
+    }
+
     pub fn refine_plan(original_goal: &str, blackboard_state: &str, workspace: &Path) -> EaiResult<MissionPlan> {
         let refine_prompt = format!(
             "ORIGINAL_GOAL: {}\nCURRENT_STATE: {}\n\n[INSTRUCTION]: Mid-mission change. Re-synthesize sub-goals.",
