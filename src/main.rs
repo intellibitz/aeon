@@ -297,6 +297,12 @@ fn main() {
                 }
             }
 
+            let is_ide_agent = !io::stdout().is_terminal()
+                || std::env::var("ANDROID_STUDIO").is_ok()
+                || std::env::var("INTELLIJ_IDEA").is_ok()
+                || std::env::var("VSCODE_PID").is_ok()
+                || std::env::var("IDE_SERVER_PORT").is_ok();
+
             let is_creator = cwd.join(".agents").is_dir() || std::env::var("AEON_CREATOR_MODE").is_ok() || std::env::var("AEON_VERBOSE").is_ok();
             let ama = AmaMasterAgent::new();
 
@@ -333,11 +339,12 @@ fn main() {
                             let _ = cmd.spawn();
                         }
                     } else {
-                        // Instant Query Reflex (Zero-Mutation - QUERIES.md)
-                        let answer = ama.solve_clean(&goal, &cwd, AEON_VERSION);
-                        if !io::stdout().is_terminal() {
-                            print!("{}", answer);
+                        // Instant Query Reflex (Zero-Mutation - QUERIES.md & Aspiration 2 Protocol)
+                        if let Ok(report) = ama.solve(&goal, &cwd, AEON_VERSION) {
+                            let formatted = report.to_protocol_format(is_ide_agent);
+                            println!("{}", formatted);
                         } else {
+                            let answer = ama.solve_clean(&goal, &cwd, AEON_VERSION);
                             println!("{}", answer);
                         }
                     }

@@ -1,6 +1,6 @@
 # AEON Architectural Aspirations
 
-* **Current Engine Version**: `v0.1.2022831`
+* **Current Engine Version**: `v0.1.2022832`
 
 This document defines the structural roadmap and evolution goals of the `aeon` substrate.
 
@@ -11,8 +11,8 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 
 ---
 
-### [Aspiration 2] Universal Natural Language Interface
-* **Core Paradigm**: All interactions with the substrate—from user intent fulfillment to cross-agent coordination—are strictly natural language driven. Eliminates static CLI friction.
+### [Aspiration 2] Universal Natural Language Interface & Standard Agent Protocols
+* **Core Paradigm**: All interactions with the substrate—from user intent fulfillment to cross-agent coordination—are strictly natural language driven. When operating inside host environments (Android Studio, IntelliJ IDEA, VS Code, or MCP agent clients), AEON outputs standard engine protocol tags (`<thinking>` for swarm traces, `<result>` for final verified outputs) or JSON-RPC 2.0 objects, enabling external agent clients to decipher and display AEON's output stream seamlessly to the user.
 
 ---
 

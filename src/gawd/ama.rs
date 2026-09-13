@@ -18,6 +18,28 @@ pub struct AmaMissionReport {
     pub final_answer: String,
 }
 
+impl AmaMissionReport {
+    pub fn to_protocol_format(&self, is_ide_environment: bool) -> String {
+        if is_ide_environment {
+            let mut thinking = format!("[AEON Substrate Swarm Report - Status: {}]\n", self.status);
+            for agent in &self.agents {
+                thinking.push_str(&format!("- [Agent] {} ({})\n", agent.name, agent.provider));
+            }
+            for msg in &self.interactions {
+                thinking.push_str(&format!("- [Swarm Flux] {}: {}\n", msg.sender, msg.payload));
+            }
+
+            format!(
+                "<thinking>\n{}\n</thinking>\n\n<result>\n{}\n</result>",
+                thinking.trim(),
+                self.final_answer.trim()
+            )
+        } else {
+            self.final_answer.clone()
+        }
+    }
+}
+
 pub struct AmaMasterAgent;
 
 impl Default for AmaMasterAgent {
