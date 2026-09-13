@@ -1,6 +1,6 @@
 # AEON Architectural Aspirations
 
-* **Current Engine Version**: `v0.1.2022821`
+* **Current Engine Version**: `v0.1.2022822`
 
 This document defines the structural roadmap and evolution goals of the `aeon` substrate.
 

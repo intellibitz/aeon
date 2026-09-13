@@ -1,6 +1,6 @@
 # AEON Runtime Mandates
 
-* **Current Engine Version**: `v0.1.2022821`
+* **Current Engine Version**: `v0.1.2022822`
 
 This document defines the operational directives for environment establishment, maintenance, and safety across both the `alpha-self` (core host) and `alpha-user` (mutable workspace) boundaries.
 
@@ -28,10 +28,11 @@ This document defines the operational directives for environment establishment, 
 14. **Swarm Intelligence Escalation**: Use native 'reason' tools directly for absolute autonomy when complex logic is required.
 15. **Mission Persistence**: Maintain stateful mission checkpoints (`mission_checkpoint.json`) to allow recovery from interrupted swarms.
 16. **Epistemic Chain of Truth**: Ground every agent outcome in verified actions, neural context, and empirical filesystem state.
+17. **Universal Swarm Execution**: 100% of runtime operations across all tiers (Motions, Missions, Queries, GEMI, GMCP) must execute through the multi-threaded GAWD Swarm.
 
 ## 4. Governance & Safety Guardrails
 
-17. **Destructive Command Guard**: Absolute prohibition on executing commands matching high-risk patterns (e.g., `rm -rf /`, `mkfs`, `shred`).
-18. **Critical Path Protection**: Zero-tolerance for unauthorized access to system-critical paths like `/etc/shadow` or `/boot`.
-19. **Secret Token Recognition**: Active detection and masking of sensitive credentials (e.g., `sk-`, `ghp_`, `AWS_SECRET_ACCESS_KEY`).
-20. **Exfiltration Vector Defense**: Detect and intercept unauthorized data exfiltration attempts via network pipes or post-data tools.
+18. **Destructive Command Guard**: Absolute prohibition on executing commands matching high-risk patterns (e.g., `rm -rf /`, `mkfs`, `shred`).
+19. **Critical Path Protection**: Zero-tolerance for unauthorized access to system-critical paths like `/etc/shadow` or `/boot`.
+20. **Secret Token Recognition**: Active detection and masking of sensitive credentials (e.g., `sk-`, `ghp_`, `AWS_SECRET_ACCESS_KEY`).
+21. **Exfiltration Vector Defense**: Detect and intercept unauthorized data exfiltration attempts via network pipes or post-data tools.
