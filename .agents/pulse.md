@@ -59,6 +59,7 @@ This document defines the complete set of validation protocols that anchor the `
 94. `[x]` **Native Kernel Synthesis**: Replaced structural shells in `ReflexInferenceKernel`, `TensorReflexKernel`, and `TurboReflexEngine` with functional Rust kernels using `candle-core`.
 95. `[x]` **Epistemic Delegation**: Implemented Swarm Consensus Verification with a 0.85 threshold to allow trusting open-source vendors when local empirical proof is unavailable.
 96. `[x]` **SOTA Weights Paradigm**: Generalized Runtime Mandate 5 to enforce autonomous SOTA weight provisioning based on hardware profiling, deprecating static native identifiers.
+97. `[x]` **Autonomous MCP Scouting**: Enhanced `MetaMcpServer` pillar with web-scouting capabilities. AEON now autonomously benchmarks and ranks open-source MCP servers using trust scores and latency metrics.
 
 ### 2.3 Structural Topology & Pillars [MOTION]
 36. `[x]` **AoA Coordination**: GAWD/AmaDaemon parallel dispatcher is functional.

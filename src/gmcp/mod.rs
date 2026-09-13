@@ -13,6 +13,8 @@ pub struct GlobalMcpEntry {
     pub description: String,
     pub package: String,
     pub category: String,
+    pub trust_score: Option<f32>,
+    pub latency_ms: Option<u64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

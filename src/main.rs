@@ -76,6 +76,7 @@ fn print_help() {
     println!("  models                   List available models");
     println!("  select-model             Select or override active model");
     println!("  deep-scan                Parallel deep scan of user home for local models");
+    println!("  mcp-scout                Autonomous web-scouting of open-source MCP servers");
     println!("  agents                   List active agents");
     println!("  engines                  List active engines");
     println!("  benchmark                Run performance benchmark");
@@ -197,6 +198,10 @@ fn main() {
                 Ok(msg) => println!("{}", msg),
                 Err(e) => eprintln!("Deep scan failed: {}", e),
             }
+        }
+        "mcp-scout" | "mcp_scout" => {
+            let res = aeon_engine::gmcp::GmcpHost::dispatch("mcp_registry", &serde_json::json!(null).to_string(), &cwd);
+            println!("{}", res);
         }
         "pulse" => {
             let intent = args.get(1..).map(|s| s.join(" ")).unwrap_or_default();

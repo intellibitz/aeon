@@ -219,11 +219,13 @@ impl ToolRegistry {
             }
         });
 
-        Self::register_meta_tool(&mut tools, "mcp_registry", "List global MCP registry entries", MetaCategory::McpProxy, |_arg, _ws| {
-            let entries = GmcpClient::fetch_global_registry();
-            let mut out = format!("Global MCP Server Registry (Count: {})\n\n", entries.len());
+        Self::register_meta_tool(&mut tools, "mcp_registry", "Interrogate global MCP registry and benchmark servers", MetaCategory::McpProxy, |_arg, _ws| {
+            let entries = GmcpClient::autonomous_web_scout();
+            let mut out = format!("Global MCP Substrate Roster (Count: {})\n\n", entries.len());
             for e in &entries {
-                out.push_str(&format!("- [{}] {}: {}\n  Package: {}\n", e.category, e.name, e.description, e.package));
+                let trust = e.trust_score.unwrap_or(0.0);
+                let lat = e.latency_ms.unwrap_or(0);
+                out.push_str(&format!("- [{}] {}: {} (Trust: {:.2} | Latency: {}ms)\n  Package: {}\n", e.category, e.name, e.description, trust, lat, e.package));
             }
             Ok(out)
         });

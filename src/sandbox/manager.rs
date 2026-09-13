@@ -86,9 +86,9 @@ impl Default for AeonConfig {
             aeon_repo: "intellibitz/aeon".to_string(),
             mcp_registry_url: "https://raw.githubusercontent.com/intellibitz/aeon/main/registry.json".to_string(),
             bootstrap_mcp_servers: vec![
-                GlobalMcpEntry { name: "database".to_string(), description: "Standard Protocol SQL Database Server".to_string(), package: "mcp-server-postgres".to_string(), category: "database".to_string() },
-                GlobalMcpEntry { name: "search".to_string(), description: "Standard Protocol Web Search Server".to_string(), package: "mcp-server-search".to_string(), category: "search".to_string() },
-                GlobalMcpEntry { name: "vcs".to_string(), description: "Standard Protocol Version Control Server".to_string(), package: "mcp-server-github".to_string(), category: "vcs".to_string() },
+                GlobalMcpEntry { name: "database".to_string(), description: "Standard Protocol SQL Database Server".to_string(), package: "mcp-server-postgres".to_string(), category: "database".to_string(), trust_score: Some(0.95), latency_ms: Some(10) },
+                GlobalMcpEntry { name: "search".to_string(), description: "Standard Protocol Web Search Server".to_string(), package: "mcp-server-search".to_string(), category: "search".to_string(), trust_score: Some(0.90), latency_ms: Some(50) },
+                GlobalMcpEntry { name: "vcs".to_string(), description: "Standard Protocol Version Control Server".to_string(), package: "mcp-server-github".to_string(), category: "vcs".to_string(), trust_score: Some(0.92), latency_ms: Some(30) },
             ],
             cloud_scout_timeout_secs: 8,
             beacon_interval_secs: 30,
