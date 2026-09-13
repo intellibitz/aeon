@@ -169,7 +169,8 @@ impl GemiEngine {
             }
         });
 
-        let winner = rx.recv_timeout(std::time::Duration::from_millis(60000))
+        // Fluid Hardware-Aware Execution Lease (Rule 11 & Aspiration 21)
+        let winner = rx.recv_timeout(std::time::Duration::from_secs(600))
             .unwrap_or_else(|_| {
                 LlamaCppEngine.run_inference(prompt).unwrap_or_else(|e| format!("FINAL_REPAIR_FAILED: {}", e))
             });
@@ -346,9 +347,9 @@ impl NativeInferenceEngine for AeonGgufEngine {
         let mut all_tokens = vec![];
         let mut tokens_to_process = prompt_tokens.to_vec();
 
-        // 1. Set Execution Deadline (Rule 23 Hardening)
+        // Fluid Hardware-Aware Timeout (Rule 11 & Aspiration 21)
         let start_time = std::time::Instant::now();
-        let timeout = std::time::Duration::from_secs(180);
+        let timeout = std::time::Duration::from_secs(600);
 
         // Universal Generative Loop: Fluid Context Expansion (Max 256 tokens for instant reflex)
         for i in 0..256 {

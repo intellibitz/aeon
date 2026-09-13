@@ -779,14 +779,13 @@ impl GawdAgentFleet {
                 // Enforce a strict 60s execution lease per agent (Aspiration 22)
                 let (tx, rx) = std::sync::mpsc::channel();
                 std::thread::spawn(move || {
-                    eprintln!("[DEBUG Inner] Starting agent: {}", agent.name());
                     let res = agent.execute(&g, &w, &bb).unwrap_or_else(|e| format!("Agent Execution Failed: {}", e));
                     let _ = tx.send(res);
                 });
 
-                let res = rx.recv_timeout(std::time::Duration::from_secs(60))
-                    .unwrap_or_else(|_| "[TIMEOUT] Agent execution exceeded 60s lease.".to_string());
-                eprintln!("[DEBUG Swarm] Finished agent: {}", name);
+                // Rule 11 & Aspiration 21: Hardware-Only Limit (Fluid 10-Minute Lease)
+                let res = rx.recv_timeout(std::time::Duration::from_secs(600))
+                    .unwrap_or_else(|_| rx.recv().unwrap_or_else(|_| "[TIMEOUT] Agent execution exceeded hardware limit.".to_string()));
                 (name, res)
             }));
         }
