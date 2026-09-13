@@ -1,6 +1,6 @@
 # AEON Universal Agent Governance
 
-* **Current Engine Version**: `v0.1.2022826`
+* **Current Engine Version**: `v0.1.2022827`
 
 This document defines the immutable ethical and operational guardrails for all agents operating within the `aeon` substrate.
 
@@ -37,3 +37,10 @@ This document defines the immutable ethical and operational guardrails for all a
 ## 4. The Creator Meta-Axiom
 
 22. **Creator Evolution Pipeline**: The workflow strictly follows the rules; the rules define the workflow. Creator vision enters as a motion (`MOTIONS.md`), shapes architecture (`ASPIRATIONS.md`), builds structure (`TOPOLOGY.md`), and dictates logic (`WORKFLOW.md`). Core mutations fork directly to `BUILD.md`; runtime mutations route through `RUNTIME.md` before compilation.
+
+## 5. The Four Core Substrate Meta-Paradigms
+
+23. **Exponential Swarm Intelligence**: 100% of substrate tasks execute through the multi-threaded GAWD Swarm with recursive Split-Parallel-Join task partitioning, saturating physical hardware capacity.
+24. **Recursive Self-Improvement**: The Closed-Loop Intelligence pipeline autonomously distills workspace experience into native Tier 2 reasoning weights (`aeon-reason.safetensors`), migrating experience into binary reflexes.
+25. **Artificial General Intelligence (AGI)**: Substrate Purity & Meta-Only Mandate enforces zero static domain logic in core code. AEON solves any domain-specific task dynamically via specialist synthesis and MCP tool discovery.
+26. **Universal Execution Surface**: Absolute engine, model, agent, and MCP agnosticism—executing any model format (GGUF, Safetensors, ONNX, PyTorch) across any engine (Candle, llama.cpp, vLLM, SGLang, TensorRT, LMDeploy) and tool protocol.

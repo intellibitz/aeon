@@ -1,6 +1,6 @@
 # AEON Substrate Topology
 
-* **Current Engine Version**: `v0.1.2022826`
+* **Current Engine Version**: `v0.1.2022827`
 
 This document defines the structural native components and orchestrated meta-layers of the `aeon` substrate, organized into five functional pillars.
 
@@ -37,3 +37,9 @@ This document defines the structural native components and orchestrated meta-lay
 22. **GEMI Server**: Dedicated RESTful endpoint (Port 9091) for Tier 2 reasoning and model management. (Tier: 1)
 23. **MetaMcpServer**: External Model Context Protocol servers connected via stdio or TCP. (Tier: 1)
 24. **MetaExecutionContext**: Dynamic mission blackboard and orchestrated session memory. (Tier: 1)
+
+## 6. Core Meta-Paradigm Realization
+25. **Exponential Swarm Intelligence**: Hardware-saturated parallel GAWD Swarm execution with recursive Split-Parallel-Join task partitioning across isolated threads.
+26. **Recursive Self-Improvement**: Closed-Loop Substrate Ingestion Motion autonomously retraining Tier 2 reasoning weights (`aeon-reason.safetensors`).
+27. **Artificial General Intelligence (AGI)**: Substrate Purity & Meta-Only Mandate solving any domain problem via dynamic specialist agent synthesis and MCP tool discovery.
+28. **Universal Execution Surface**: Engine, Model, Agent, and MCP agnosticism executing GGUF/Safetensors/ONNX/PyTorch across Candle, llama.cpp, vLLM, SGLang, TensorRT, and LMDeploy.
