@@ -365,6 +365,8 @@ impl NativeInferenceEngine for AeonGgufEngine {
 mod tests {
     use super::*;
     use std::path::PathBuf;
+    use std::sync::mpsc;
+    use std::thread;
 
     #[test]
     fn test_competitive_racing_logic() {

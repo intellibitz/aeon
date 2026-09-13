@@ -1,6 +1,6 @@
 # AEON Substrate Validation Genome (PULSE)
 
-* **Current Engine Version**: `v0.1.2022829`
+* **Current Engine Version**: `v0.1.2022830`
 
 This document defines the complete set of validation protocols that anchor the `aeon` genome. Every entry reflects a hard-compiled reflex or an orchestrated meta-behavior.
 

@@ -36,12 +36,24 @@ impl ReasoningTrainer {
                 if std::fs::rename(&experience_file, &archive_path).is_ok() {
                     eprintln!("[Reasoning Trainer] Experience threshold reached ({} samples). Initializing Substrate Ingestion Motion for 'aeon-reason' Tier 2 model...", count);
                     if let Ok(exe) = std::env::current_exe() {
-                        let _ = std::process::Command::new(exe)
-                            .arg("--bg-train")
+                        let mut cmd = std::process::Command::new(exe);
+                        cmd.arg("--bg-train")
                             .stdin(std::process::Stdio::null())
                             .stdout(std::process::Stdio::null())
-                            .stderr(std::process::Stdio::null())
-                            .spawn();
+                            .stderr(std::process::Stdio::null());
+
+                        #[cfg(unix)]
+                        {
+                            use std::os::unix::process::CommandExt;
+                            unsafe {
+                                cmd.pre_exec(|| {
+                                    libc::setsid();
+                                    Ok(())
+                                });
+                            }
+                        }
+
+                        let _ = cmd.spawn();
                     }
                     return Ok(format!("Substrate Ingestion Motion initialized in background ({} samples).", count));
                 }

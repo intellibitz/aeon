@@ -309,13 +309,25 @@ fn main() {
                         // Non-Blocking Swarm Orchestration (Aspiration 22 & <2ms Instant Reflex Mandate)
                         // Ingests pulse instantly (<1ms) and dispatches background process for mission execution
                         if let Ok(exe) = std::env::current_exe() {
-                            let _ = std::process::Command::new(exe)
-                                .args(["--bg-solve", &goal])
+                            let mut cmd = std::process::Command::new(exe);
+                            cmd.args(["--bg-solve", &goal])
                                 .current_dir(&cwd)
                                 .stdin(std::process::Stdio::null())
                                 .stdout(std::process::Stdio::null())
-                                .stderr(std::process::Stdio::null())
-                                .spawn();
+                                .stderr(std::process::Stdio::null());
+
+                            #[cfg(unix)]
+                            {
+                                use std::os::unix::process::CommandExt;
+                                unsafe {
+                                    cmd.pre_exec(|| {
+                                        libc::setsid();
+                                        Ok(())
+                                    });
+                                }
+                            }
+
+                            let _ = cmd.spawn();
                         }
                     } else {
                         // Instant Query Reflex (Zero-Mutation - QUERIES.md)
