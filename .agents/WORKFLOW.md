@@ -1,6 +1,6 @@
 # AEON Operational Workflow
 
-* **Current Engine Version**: `v0.1.2022812`
+* **Current Engine Version**: `v0.1.2022813`
 
 This document defines the Meta-Workflow for substrate evolution and the Federated Parallelism logic of the active `aeon` engine.
 
@@ -47,3 +47,4 @@ This document defines the Meta-Workflow for substrate evolution and the Federate
 21. **Chain of Truth Convergence**: Swarm participants converge on a verified outcome, grounding all results in empirical filesystem state and tool results.
 22. **Substrate Ingestion**: Successful reasoning is staged and distilled into the **Native Tier 2 Reasoning Model** to close the loop between experience and memory.
 23. **Autonomous Drift Correction**: The `EvolutionManager` audits the mission logs for capability gaps and triggers autonomous synthesis to heal the substrate.
+24. **Decoupled Swarm Messaging Mechanics**: High-throughput communication between swarm agents operates via Reactor/Proactor event loops, lock-free work-stealing queues, and zero-copy ring buffers, enforcing credit-based backpressure and sub-2ms response convergence.

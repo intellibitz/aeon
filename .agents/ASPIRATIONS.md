@@ -1,6 +1,6 @@
 # AEON Architectural Aspirations
 
-* **Current Engine Version**: `v0.1.2022812`
+* **Current Engine Version**: `v0.1.2022813`
 
 This document defines the structural roadmap and evolution goals of the `aeon` substrate.
 
@@ -136,3 +136,13 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 
 ### [Aspiration 26] Recursive Swarm Parallelism (Split-Parallel-Join)
 * **Core Paradigm**: The "Divide-and-Conquer" mandate. The AEON swarm must autonomously decompose complex missions into independent sub-tasks, execute them in parallel across the multi-threaded substrate, and join results using high-fidelity semantic synthesis. Implement via high-performance work-stealing or fork-join patterns to maximize hardware saturation while maintaining sub-2ms orchestration overhead.
+
+---
+
+### [Aspiration 27] Universal Non-Blocking & Decoupled Concurrency Substrate
+* **Core Paradigm**: The "High-Throughput Reactive Mechanics" mandate. The AEON substrate constitutionally codifies state-of-the-art non-blocking, asynchronous, multi-threaded, parallel, and decoupled messaging patterns:
+  1. **Non-Blocking / Async I/O**: Reactor/Proactor event loops with epoll/kqueue readiness and IOCP completion notifications, managed via zero-cost Future/Task continuations and state machines.
+  2. **Multi-Threading & Lock-Free Sync**: Work-stealing Chase-Lev deques, Treiber stacks, Michael-Scott queues, Hazard Pointers / Epoch-Based / RCU reclamation, CAS primitives, and spinlocks/rwlocks.
+  3. **Parallel Processing**: Recursive Fork-Join, Map-Reduce data parallelism, Actor model scheduling, SIMD/SIMT data parallelism, and pipeline stage overlapping.
+  4. **Decoupled Messaging**: Pub-Sub, Request-Reply, Actor/CSP channels, Reactive Streams with backpressure, LMAX Disruptor zero-copy ring buffers, and Raft/Paxos consensus.
+  5. **Low-Level Supporting Primitives**: Work-stealing & fair scheduling, consistent hashing load balancing, vector clocks / Lamport causality, phi-accrual failure detection, and token-bucket flow control.

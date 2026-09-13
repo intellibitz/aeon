@@ -1,6 +1,6 @@
 # AEON Universal Agent Governance
 
-* **Current Engine Version**: `v0.1.2022812`
+* **Current Engine Version**: `v0.1.2022813`
 
 This document defines the immutable ethical and operational guardrails for all agents operating within the `aeon` substrate.
 
@@ -32,7 +32,8 @@ This document defines the immutable ethical and operational guardrails for all a
 18. **Anti-Hardcoding Mandate**: Prohibition on hardcoding query-specific matchers. Intents must resolve dynamically using models and tools.
 19. **Reality Grounding**: If requests or assumptions are outside verified reality, correct them objectively and guide execution to the empirical path.
 20. **Substrate Sovereignty**: Respect the isolation boundaries of the substrate. Ephemeral state must remain strictly within `.aeon/` or isolated temporary directories.
+21. **Decoupled Messaging & Reactive Mechanics**: Agents and swarm channels must utilize decoupled asynchronous messaging primitives (Pub-Sub, Actor/CSP channels, Work-Stealing deques, LMAX Disruptor ring buffers, and credit-based backpressure) to guarantee sub-2ms orchestration latency and zero-copy data transfer.
 
 ## 4. The Creator Meta-Axiom
 
-21. **Creator Evolution Pipeline**: The workflow strictly follows the rules; the rules define the workflow. Creator vision enters as a motion (`MOTIONS.md`), shapes architecture (`ASPIRATIONS.md`), builds structure (`TOPOLOGY.md`), and dictates logic (`WORKFLOW.md`). Core mutations fork directly to `BUILD.md`; runtime mutations route through `RUNTIME.md` before compilation.
+22. **Creator Evolution Pipeline**: The workflow strictly follows the rules; the rules define the workflow. Creator vision enters as a motion (`MOTIONS.md`), shapes architecture (`ASPIRATIONS.md`), builds structure (`TOPOLOGY.md`), and dictates logic (`WORKFLOW.md`). Core mutations fork directly to `BUILD.md`; runtime mutations route through `RUNTIME.md` before compilation.
