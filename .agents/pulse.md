@@ -62,6 +62,7 @@ This document defines the complete set of validation protocols that anchor the `
 97. `[x]` **Autonomous MCP Scouting**: Enhanced `MetaMcpServer` pillar with web-scouting capabilities. AEON now autonomously benchmarks and ranks open-source MCP servers using trust scores and latency metrics.
 98. `[x]` **SOTA Library Scouting**: Implemented `LibraryScoutAgent` to autonomously discover and recommend high-performing open-source Rust crates to solve detected capability gaps.
 99. `[x]` **Constraint-Free Evolution**: Implemented a constitutional mandate (Aspiration 20) for the substrate to autonomously identify and report technical bottlenecks, ensuring zero-gatekeeping of system potential.
+100. `[x]` **Fluid Intent Scaling**: Removed artificial limits on user input, STDIN, and token generation. Implemented hardware-aware scaling and 10-minute fluid execution leases.
 
 ### 2.3 Structural Topology & Pillars [MOTION]
 36. `[x]` **AoA Coordination**: GAWD/AmaDaemon parallel dispatcher is functional.

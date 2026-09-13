@@ -72,12 +72,12 @@ impl GmcpServer {
                             let _ = tx.send(response_json);
                         });
 
-                        // Enforce a strict 60-second timeout for GMCP protocol requests
-                        let response_json = rx.recv_timeout(std::time::Duration::from_secs(60))
+                        // Enforce a fluid execution lease (Aspiration 20)
+                        let response_json = rx.recv_timeout(std::time::Duration::from_secs(600)) // 10 minute fluid lease
                             .unwrap_or_else(|_| {
                                 json!({
                                     "jsonrpc": "2.0",
-                                    "error": { "code": -32000, "message": "Execution Timeout" }
+                                    "error": { "code": -32000, "message": "Mission Timeout: Substrate saturation exceeded 600s lease." }
                                 }).to_string()
                             });
 

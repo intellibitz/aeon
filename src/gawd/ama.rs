@@ -29,9 +29,11 @@ impl AmaMasterAgent {
     fn sanitize_input(&self, input: &str) -> EaiResult<String> {
         let trimmed = input.trim();
 
-        // 1. Length Constraint (Rule 23 Hardening)
-        if trimmed.len() > 4096 {
-            return Err(crate::error::EaiError::governance("Input exceeds maximum allowed length (4096 characters)."));
+        let hardware = crate::gemi::hardware::HardwareProfiler::get_profile();
+        let max_len = (hardware.available_ram_gb * 1024 * 1024).max(4096); // Scale with RAM, min 4KB
+
+        if trimmed.len() > max_len {
+            return Err(crate::error::EaiError::governance(format!("Input exceeds hardware-scaled limit ({} characters).", max_len)));
         }
 
         if trimmed.is_empty() {

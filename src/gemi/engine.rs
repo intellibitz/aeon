@@ -342,8 +342,8 @@ impl NativeInferenceEngine for AeonGgufEngine {
         let start_time = std::time::Instant::now();
         let timeout = std::time::Duration::from_secs(180);
 
-        // Universal Generative Loop
-        for i in 0..512 {
+        // Universal Generative Loop: Fluid Context Expansion (Mandate Removal)
+        for i in 0..4096 {
             // 2. Continuous Timeout Check
             if start_time.elapsed() > timeout {
                 return Err(EaiError::inference(format!("Inference timed out after {}s", timeout.as_secs())));

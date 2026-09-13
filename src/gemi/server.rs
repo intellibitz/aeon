@@ -158,12 +158,12 @@ impl GemiServer {
                     let _ = tx.send(result);
                 });
 
-                // Enforce a strict 60-second timeout for any mission execution
-                let response = rx.recv_timeout(std::time::Duration::from_secs(60))
+                // Enforce a fluid execution lease (Aspiration 20)
+                let response = rx.recv_timeout(std::time::Duration::from_secs(600)) // 10 minute fluid lease
                     .unwrap_or_else(|_| {
                         let payload = json!({
                             "error": "Mission Timeout",
-                            "message": "The intelligence substrate exceeded the 60-second execution lease."
+                            "message": "The intelligence substrate exceeded the 600-second execution lease."
                         }).to_string();
                         Ok(Response::from_string(payload)
                             .with_status_code(504)

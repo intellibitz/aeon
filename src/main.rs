@@ -11,8 +11,8 @@ use std::io::{self, Read, IsTerminal};
 use std::path::{Path, PathBuf};
 use log::{info, warn, error};
 
-const MAX_STDIN_SIZE: usize = 1_000_000;  // 1MB limit
-const STDIN_TIMEOUT_SECS: u64 = 30;
+const MAX_STDIN_SIZE: usize = 100 * 1024 * 1024;  // Fluid Scaling: 100MB baseline limit
+const STDIN_TIMEOUT_SECS: u64 = 120; // Increased to 2 minutes
 
 fn read_stdin_bounded() -> io::Result<Option<String>> {
     let stdin = io::stdin();
