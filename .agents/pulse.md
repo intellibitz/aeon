@@ -1,22 +1,11 @@
 # AEON Substrate Validation Genome (PULSE)
 
-* **Current Engine Version**: `v0.1.2022792`
+* **Current Engine Version**: `v0.1.2022793`
 
 This document defines the complete set of validation protocols that anchor the `aeon` genome. Every entry reflects a hard-compiled reflex or an orchestrated meta-behavior.
 
 ## 1. Pending Failing Pulse
 
-* `85. [ ] **[QUERY]**: list health status`
-* `85. [ ] **[MOTION]**: Motion: Disable mandatory model provenance check for local models to allow manual model selection and faster iteration`
-* `85. [ ] **[QUERY]**: what is your name?`
-* `85. [ ] **[QUERY]**: list models`
-* `85. [ ] **[MISSION]**: use gemma-4-31b model and print opalite song lyrics`
-* `85. [ ] **[MISSION]**: use gemma-4-31b model and print opalite song lyrics`
-* `85. [ ] **[QUERY]**: list active models`
-* `85. [ ] **[QUERY]**: list health status`
-* `85. [ ] **[QUERY]**: list health status`
-* `85. [ ] **[MISSION]**: use gemma-4-31b model and print opalite song lyrics`
-* `85. [ ] **[MISSION]**: use gemma-4-31b model and print opalite song lyrics`
 ## 2. Ingested & Resolved Pulse (The Realized Genome)
 
 ### 2.1 Core Governance & Epistemic Integrity [MOTION]
@@ -58,6 +47,8 @@ This document defines the complete set of validation protocols that anchor the `
 34. `[x]` **Axiomatic Pulse Ingestion**: The binary possesses a native reflex to classify intents and inject them into `pulse.md`.
 35. `[x]` **Federated Experience Aggregation**: Aggregation of distilled reasoning from alpha-user environments to evolve the global genome.
 84. `[x]` **Deep Model Scan**: Implemented `deep-scan` subcommand for parallel home-wide model discovery and automatic configuration registration.
+85. `[x]` **Candle Upgrade**: Updated `candle-core`, `candle-nn`, and `candle-transformers` to `v0.8.4` for latest spectral mapping and architectural optimizations.
+86. `[x]` **Provenance Bypass**: Implemented manual local model selection bypass to allow trust-neutral iterative testing.
 
 ### 2.3 Structural Topology & Pillars [MOTION]
 36. `[x]` **AoA Coordination**: GAWD/AmaDaemon parallel dispatcher is functional.

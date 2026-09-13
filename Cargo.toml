@@ -1,6 +1,6 @@
 [package]
 name = "aeon-engine"
-version = "0.1.2022792"
+version = "0.1.2022793"
 edition = "2021"
 authors = ["IntelliBitz", "Muthu Ramadoss", "AEON EAI Core"]
 description = "aeon-engine: EAI: Exponential Intelligence for Any AI. - GAWD, GEMI & GMCP Multi-Agent Engine"
@@ -9,9 +9,9 @@ license = "Apache-2.0"
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-candle-core = { version = "0.8.2" }
-candle-nn = { version = "0.8.2" }
-candle-transformers = { version = "0.8.2" }
+candle-core = { version = "0.8.4" }
+candle-nn = { version = "0.8.4" }
+candle-transformers = { version = "0.8.4" }
 tokenizers = "0.21.0"
 hf-hub = "0.4.1"
 anyhow = "1.0"
