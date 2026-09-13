@@ -41,7 +41,7 @@ impl AmaSupervisor {
 
     pub fn list_cluster_nodes() -> Vec<ClusterPeerNode> {
         static DISCOVERED_PEERS: OnceLock<Arc<RwLock<Vec<ClusterPeerNode>>>> = OnceLock::new();
-        let peers_mutex = DISCOVERED_PEERS.get_or_init(|| {
+        let peers_lock = DISCOVERED_PEERS.get_or_init(|| {
             let initial = vec![ClusterPeerNode {
                 node_id: "aeon-local-master".to_string(),
                 address: "127.0.0.1:9090".to_string(),
@@ -121,7 +121,7 @@ impl AmaSupervisor {
             shared
         });
 
-        peers_mutex.read().unwrap().clone()
+        peers_lock.read().unwrap().clone()
     }
 
     pub fn supervise_mission(goal: &str, workspace: &Path) -> (Vec<A2AMessage>, Vec<GawdAgentInfo>) {

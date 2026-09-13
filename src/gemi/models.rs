@@ -393,7 +393,7 @@ impl ModelManager {
         sub_paths.sort();
         sub_paths.dedup();
 
-        let found_folders = std::sync::Arc::new(std::sync::Mutex::new(std::collections::HashSet::new()));
+        let found_folders = std::sync::Arc::new(std::sync::RwLock::new(std::collections::HashSet::new()));
         let mut handles = Vec::new();
 
         for sub_path in sub_paths {
@@ -403,7 +403,7 @@ impl ModelManager {
                 let mut local_visited = std::collections::HashSet::new();
                 Self::recursive_scan_model_dir_for_paths(&sub_path, &mut local_discovered, &mut local_visited);
                 if !local_discovered.is_empty() {
-                    let mut lock = ff.lock().unwrap();
+                    let mut lock = ff.write().unwrap();
                     for p in local_discovered {
                         lock.insert(p);
                     }
@@ -418,7 +418,7 @@ impl ModelManager {
         let mut cfg = crate::sandbox::manager::AeonConfig::load(global_dir)?;
         let mut new_paths_added = 0;
 
-        let lock = found_folders.lock().unwrap();
+        let lock = found_folders.read().unwrap();
         for folder in lock.iter() {
             if !cfg.local_scan_paths.contains(folder) {
                 cfg.local_scan_paths.push(folder.clone());

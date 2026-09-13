@@ -3,7 +3,7 @@
 // RULE 23: Motion Rule Protocol - Aspiration 7: Competitive Inference Racing
 
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex, OnceLock, mpsc};
+use std::sync::{Arc, RwLock, OnceLock, mpsc};
 use std::thread;
 use std::collections::HashMap;
 use crate::error::{EaiError, EaiResult};
@@ -26,11 +26,11 @@ pub struct InferenceHost;
 impl InferenceHost {
     /// Universal Substrate Ingestion (Aspiration 8)
     /// Dynamically identifies and loads any GGUF architecture from local or web sources.
-    pub fn get_model(model_path: &Path, device: &candle_core::Device) -> EaiResult<Arc<Mutex<ModelSubstrate>>> {
-        static CACHED_MODELS: OnceLock<Arc<Mutex<HashMap<PathBuf, Arc<Mutex<ModelSubstrate>>>>>> = OnceLock::new();
-        let cache = CACHED_MODELS.get_or_init(|| Arc::new(Mutex::new(HashMap::new())));
+    pub fn get_model(model_path: &Path, device: &candle_core::Device) -> EaiResult<Arc<RwLock<ModelSubstrate>>> {
+        static CACHED_MODELS: OnceLock<Arc<RwLock<HashMap<PathBuf, Arc<RwLock<ModelSubstrate>>>>>> = OnceLock::new();
+        let cache = CACHED_MODELS.get_or_init(|| Arc::new(RwLock::new(HashMap::new())));
 
-        let mut map = cache.lock().unwrap();
+        let mut map = cache.write().unwrap();
         if let Some(m) = map.get(model_path) {
             return Ok(Arc::clone(m));
         }
@@ -88,7 +88,7 @@ impl InferenceHost {
             _ => ModelSubstrate::Generic(weights),
         };
 
-        let shared = Arc::new(Mutex::new(substrate));
+        let shared = Arc::new(RwLock::new(substrate));
         map.insert(model_path.to_path_buf(), Arc::clone(&shared));
         Ok(shared)
     }
@@ -341,7 +341,7 @@ impl NativeInferenceEngine for AeonGgufEngine {
 
         let device = HardwareProfiler::get_candle_device();
         let substrate_shared = InferenceHost::get_model(&model_path, &device)?;
-        let mut substrate = substrate_shared.lock().unwrap();
+        let mut substrate = substrate_shared.write().unwrap();
 
         let model_weights = match &mut *substrate {
             ModelSubstrate::Llama(w) | ModelSubstrate::Gemma(w) | ModelSubstrate::Generic(w) => w,

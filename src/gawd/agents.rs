@@ -797,12 +797,12 @@ mod tests {
 
     #[test]
     fn test_blackboard_convergence() {
-        let bb = Arc::new(Mutex::new(HighDensityContextStore::new(100)));
+        let bb = Arc::new(std::sync::RwLock::new(HighDensityContextStore::new(100)));
         // Skip actual execution in unit test to avoid hang/inference dependency
         // let agent = DynamicAgent { agent_name: "TestAgent".into(), mission_profile: "Test".into(), agent_rank: 0.5 };
         // let _ = agent.execute("test goal", Path::new("."), &bb);
 
-        let mut data = bb.lock().unwrap();
+        let mut data = bb.write().unwrap();
         // Manually insert for test if reasoning fails in environment without weights
         if !data.contains_key("TestAgent") {
             data.insert("TestAgent".into(), "Converged".into());

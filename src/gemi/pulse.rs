@@ -3,19 +3,19 @@
 
 use anyhow::{Result, anyhow};
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, RwLock};
 use std::collections::HashMap;
 use once_cell::sync::Lazy;
 use super::alpha::AeonAlphaModel;
 
 pub struct AeonPulse;
 
-static REFLEX_CACHE: Lazy<Arc<Mutex<HashMap<String, String>>>> = Lazy::new(|| {
-    Arc::new(Mutex::new(HashMap::new()))
+static REFLEX_CACHE: Lazy<Arc<RwLock<HashMap<String, String>>>> = Lazy::new(|| {
+    Arc::new(RwLock::new(HashMap::new()))
 });
 
-static CURRENT_FINGERPRINT: Lazy<Arc<Mutex<String>>> = Lazy::new(|| {
-    Arc::new(Mutex::new(String::new()))
+static CURRENT_FINGERPRINT: Lazy<Arc<RwLock<String>>> = Lazy::new(|| {
+    Arc::new(RwLock::new(String::new()))
 });
 
 impl AeonPulse {
@@ -29,18 +29,18 @@ impl AeonPulse {
         // Neural Synchronization (Cache Invalidation)
         {
             let fingerprint = AeonAlphaModel::get_model_fingerprint(&global_dir);
-            let mut current = CURRENT_FINGERPRINT.lock().unwrap();
+            let mut current = CURRENT_FINGERPRINT.write().unwrap();
             if *current != fingerprint {
                 eprintln!("[Tier 0 Reflex] Neural substrate evolved. Invalidating cache...");
                 *current = fingerprint;
-                let mut cache = REFLEX_CACHE.lock().unwrap();
+                let mut cache = REFLEX_CACHE.write().unwrap();
                 cache.clear();
             }
         }
 
         // Sub-100us Reflex Cache
         {
-            let cache = REFLEX_CACHE.lock().unwrap();
+            let cache = REFLEX_CACHE.read().unwrap();
             if let Some(cached_action) = cache.get(prompt_trimmed) {
                 return Ok(cached_action.clone());
             }
@@ -59,7 +59,7 @@ impl AeonPulse {
                     }
 
                     // Populate Cache
-                    let mut cache = REFLEX_CACHE.lock().unwrap();
+                    let mut cache = REFLEX_CACHE.write().unwrap();
                     cache.insert(prompt_trimmed.to_string(), final_action.clone());
 
                     return Ok(final_action);

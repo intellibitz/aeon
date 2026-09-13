@@ -2,7 +2,7 @@
 // 100% Rust implementation for memory-efficient multi-threaded reasoning
 
 use std::path::Path;
-use std::sync::{Arc, Mutex, RwLock, OnceLock};
+use std::sync::{Arc, RwLock, OnceLock};
 use std::collections::HashMap;
 use crate::error::EaiResult;
 
@@ -11,7 +11,7 @@ use crate::error::EaiResult;
 /// and enable high-density concurrent reasoning.
 pub struct PagedKVStore {
     pages: Arc<RwLock<HashMap<u64, Vec<f32>>>>,
-    lru: Arc<Mutex<Vec<u64>>>, // Track usage order
+    lru: Arc<RwLock<Vec<u64>>>, // Track usage order
     _page_size: usize,
     max_pages: usize,
 }
@@ -22,7 +22,7 @@ impl PagedKVStore {
         STORE.get_or_init(|| {
             PagedKVStore {
                 pages: Arc::new(RwLock::new(HashMap::new())),
-                lru: Arc::new(Mutex::new(Vec::new())),
+                lru: Arc::new(RwLock::new(Vec::new())),
                 _page_size: 4096, // 4KB Pages
                 max_pages: 1024 * 16, // 64MB Cache Limit
             }
@@ -31,7 +31,7 @@ impl PagedKVStore {
 
     pub fn store_page(&self, page_id: u64, data: Vec<f32>) -> EaiResult<()> {
         let mut pages = self.pages.write().unwrap();
-        let mut lru = self.lru.lock().unwrap();
+        let mut lru = self.lru.write().unwrap();
 
         if pages.len() >= self.max_pages && !pages.contains_key(&page_id) {
             // Mandate: Strict LRU Eviction (Aspiration 6)
@@ -48,7 +48,7 @@ impl PagedKVStore {
 
     pub fn get_page(&self, page_id: u64) -> Option<Vec<f32>> {
         let pages = self.pages.read().unwrap();
-        let mut lru = self.lru.lock().unwrap();
+        let mut lru = self.lru.write().unwrap();
 
         if let Some(data) = pages.get(&page_id) {
             // Update LRU position on access
@@ -63,7 +63,7 @@ impl PagedKVStore {
 
     pub fn clear(&self) {
         let mut pages = self.pages.write().unwrap();
-        let mut lru = self.lru.lock().unwrap();
+        let mut lru = self.lru.write().unwrap();
         pages.clear();
         lru.clear();
     }
