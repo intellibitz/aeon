@@ -73,3 +73,21 @@ impl AlphaSelf {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_compiled_genome_accuracy() {
+        assert_eq!(AlphaSelf::VERSION, env!("CARGO_PKG_VERSION"));
+        assert!(!AlphaSelf::RULES.is_empty(), "AGENTS.md axioms must be compiled into binary");
+        assert!(!AlphaSelf::COMPONENTS.is_empty(), "TOPOLOGY.md components must be compiled into binary");
+        assert!(!AlphaSelf::WORKFLOW_STEPS.is_empty(), "WORKFLOW.md steps must be compiled into binary");
+        assert!(!AlphaSelf::PULSE_AXIOMS.is_empty(), "pulse.md axioms must be compiled into binary");
+
+        let summary = AlphaSelf::inspect_compiled_binary_instructions();
+        assert!(summary.contains(env!("CARGO_PKG_VERSION")));
+        assert!(summary.contains("Hardcoded Axiom Rules:"));
+    }
+}
