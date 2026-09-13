@@ -247,6 +247,80 @@ impl GawdAgent for VllmBridgeAgent {
     }
 }
 
+/// SGLang Structured Generation Bridge Agent (Aspiration 9)
+pub struct SglangBridgeAgent;
+
+impl GawdAgent for SglangBridgeAgent {
+    fn name(&self) -> String { "SglangBridgeAgent".into() }
+    fn rank(&self) -> f32 { 0.95 }
+    fn execute(&self, goal: &str, _workspace: &Path, _blackboard: &MissionBlackboard) -> EaiResult<String> {
+        // Structured Delegation Protocol
+        let client = crate::gmcp::client::GmcpClient::scout_reasoning_remotes();
+        for remote_name in client {
+            if remote_name.to_lowercase().contains("sglang") {
+                let res = crate::gmcp::client::GmcpClient::execute_external_tool(&remote_name, "structured_generate", goal);
+                if !res.contains("[FAIL]") {
+                    return Ok(format!("[SGLang Power-Tier]: {}", res));
+                }
+            }
+        }
+
+        // Local SGLang Proxy Fallback
+        let sglang_url = std::env::var("SGLANG_API_BASE").unwrap_or_else(|_| "http://localhost:30000/v1".to_string());
+        let body = serde_json::json!({
+            "model": "sglang-substrate",
+            "prompt": goal,
+            "sampling_params": { "max_new_tokens": 512, "temperature": 0.0 }
+        });
+
+        match ureq::post(&format!("{}/chat/completions", sglang_url)).send_json(body) {
+            Ok(resp) => {
+                let json: serde_json::Value = resp.into_json().map_err(|e| crate::error::EaiError::inference(e.to_string()))?;
+                let text = json["choices"][0]["message"]["content"].as_str().unwrap_or("SGLang output empty").to_string();
+                Ok(format!("[SGLang Local Proxy]: {}", text))
+            }
+            Err(_) => Err(crate::error::EaiError::inference("SGLang remote or local proxy unreachable"))
+        }
+    }
+}
+
+/// llama.cpp Universal Compatibility Bridge Agent (Aspiration 10)
+pub struct LlamaCppBridgeAgent;
+
+impl GawdAgent for LlamaCppBridgeAgent {
+    fn name(&self) -> String { "LlamaCppBridgeAgent".into() }
+    fn rank(&self) -> f32 { 0.90 }
+    fn execute(&self, goal: &str, _workspace: &Path, _blackboard: &MissionBlackboard) -> EaiResult<String> {
+        // Universal GGUF Protocol (Fallback to llama.cpp standard)
+        let client = crate::gmcp::client::GmcpClient::scout_reasoning_remotes();
+        for remote_name in client {
+            if remote_name.to_lowercase().contains("llama") {
+                let res = crate::gmcp::client::GmcpClient::execute_external_tool(&remote_name, "completions", goal);
+                if !res.contains("[FAIL]") {
+                    return Ok(format!("[llama.cpp Power-Tier]: {}", res));
+                }
+            }
+        }
+
+        // Local llama-server Proxy (Standard Port 8080)
+        let llama_url = std::env::var("LLAMA_API_BASE").unwrap_or_else(|_| "http://localhost:8080/v1".to_string());
+        let body = serde_json::json!({
+            "prompt": goal,
+            "n_predict": 512,
+            "temperature": 0.0
+        });
+
+        match ureq::post(&format!("{}/completions", llama_url)).send_json(body) {
+            Ok(resp) => {
+                let json: serde_json::Value = resp.into_json().map_err(|e| crate::error::EaiError::inference(e.to_string()))?;
+                let text = json["choices"][0]["text"].as_str().unwrap_or("llama.cpp output empty").to_string();
+                Ok(format!("[llama.cpp Local Proxy]: {}", text))
+            }
+            Err(_) => Err(crate::error::EaiError::inference("llama.cpp remote or local proxy unreachable"))
+        }
+    }
+}
+
 pub struct AgentMetaRegistry {
     agents: Arc<Mutex<Vec<AgentProfile>>>,
 }
@@ -417,6 +491,8 @@ impl GawdAgentFleet {
 
         // Aspiration 9: High-Throughput Reasoning Integration
         fleet.push(Arc::new(VllmBridgeAgent));
+        fleet.push(Arc::new(SglangBridgeAgent));
+        fleet.push(Arc::new(LlamaCppBridgeAgent));
 
         fleet.push(Arc::new(DynamicAgent {
             agent_name: "ContextAgent".into(),
