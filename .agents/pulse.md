@@ -6,7 +6,6 @@ This document defines the complete set of validation protocols that anchor the `
 
 ## 1. Pending Failing Pulse
 
-* `101. [ ] **[MOTION]**: [MOTION]: Refine Hardware Saturation mandates to ensure 'Optimal Level' utilization. AEON must autonomously prevent Out-of-Memory (OOM) events by capping resource consumption at 90% of available capacity, transitioning from 'Absolute Saturation' to 'Safe Peak Performance'.`
 ## 2. Ingested & Resolved Pulse (The Realized Genome)
 
 ### 2.1 Core Governance & Epistemic Integrity [MOTION]
@@ -64,6 +63,7 @@ This document defines the complete set of validation protocols that anchor the `
 98. `[x]` **SOTA Library Scouting**: Implemented `LibraryScoutAgent` to autonomously discover and recommend high-performing open-source Rust crates to solve detected capability gaps.
 99. `[x]` **Constraint-Free Evolution**: Implemented a constitutional mandate (Aspiration 20) for the substrate to autonomously identify and report technical bottlenecks, ensuring zero-gatekeeping of system potential.
 100. `[x]` **Fluid Intent Scaling**: Removed artificial limits on user input, STDIN, and token generation. Implemented hardware-aware scaling and 10-minute fluid execution leases.
+101. `[x]` **Optimal Hardware Saturation**: Refined genome to mandate "Safe Peak Performance" (max 90% utilization) and implemented autonomous OOM prevention in the swarm synthesizer.
 
 ### 2.3 Structural Topology & Pillars [MOTION]
 36. `[x]` **AoA Coordination**: GAWD/AmaDaemon parallel dispatcher is functional.
