@@ -89,3 +89,8 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 
 ### [Aspiration 19] SOTA Library Scouting Protocol
 * **Core Paradigm**: The "Infinite Resource Pool" mandate. AEON must autonomously discover, benchmark, and recommend high-performing open-source Rust crates and frameworks from global registries (e.g., crates.io). This ensures the substrate can perpetually evolve its functional surface by integrating verified state-of-the-art logic to solve detected capability gaps.
+
+---
+
+### [Aspiration 20] Constraint-Free Evolution Protocol
+* **Core Paradigm**: The "No-Gates" mandate. AEON must autonomously identify, quantify, and report technical or architectural bottlenecks that limit its performance or interoperability. This protocol mandates that the substrate proactively propose genome mutations to remove these constraints, ensuring zero-gatekeeping of system potential and perpetual alignment with creator intent.
