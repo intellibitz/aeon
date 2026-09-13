@@ -47,7 +47,7 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 ---
 
 ### [Aspiration 9] Ultra-Latency Competitive Inference Racing
-* **Core Paradigm**: Speculative parallel execution across local kernels and cloud providers (Power MCP). Uses a winner-takes-all protocol to deliver sub-10ms logic latency with axiomatic verification.
+* **Core Paradigm**: The "Zero-Stall" mandate. Speculative parallel execution across local kernels and cloud providers (Power MCP). AEON must utilize non-blocking I/O and direct-thread mapping to deliver sub-10ms logic latency with axiomatic verification.
 
 ---
 
@@ -99,3 +99,8 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 
 ### [Aspiration 21] The Hardware-Only Limit Principle
 * **Core Paradigm**: The "Absolute Potential" mandate. Physical hardware capacity (CPU, GPU, RAM) is the sole and final limit on the system's performance, intelligence, and data processing depth. The genome constitutionally prohibits the implementation of any artificial, software-defined, or architectural gates that restrict AEON from operating at the peak of its underlying substrate.
+
+---
+
+### [Aspiration 22] Optimal Asynchronous Orchestration
+* **Core Paradigm**: The "Fluid Intelligence" mandate. AEON must ensure 100% non-blocking I/O and mandatory multi-threaded execution for all internal and external requests. The substrate must implement hardware-optimized IPC and user communication channels to ensure microsecond-tier response latency through direct-thread mapping and zero-copy data transfer.
