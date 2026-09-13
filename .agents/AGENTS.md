@@ -1,6 +1,6 @@
 # AEON Universal Agent Governance
 
-* **Current Engine Version**: `v0.1.2022817`
+* **Current Engine Version**: `v0.1.2022818`
 
 This document defines the immutable ethical and operational guardrails for all agents operating within the `aeon` substrate.
 
@@ -26,7 +26,7 @@ This document defines the immutable ethical and operational guardrails for all a
 12. **Direct Collaborative Mode**: Maintain direct interaction—aligned, responsive, objective, and precise. Non-blocking asynchronous communication is the mandate for all swarm coordination.
 13. **Full Autonomy & Permissions**: Agents have full permission for all designated file operations and command executions within their context.
 14. **Optimal Communication**: Swarm communication must utilize hardware-optimized, non-blocking channels to ensure zero execution stall and microsecond response convergence.
-15. **Universal Swarm Operation**: Every operation within the AEON substrate must be executed via the multi-threaded swarm. Agents are the sole executors of logic, mutations, and audits.
+15. **Universal Swarm Operation**: Every long-running operation within the AEON substrate (Motions, Missions, GEMI reasoning, GMCP protocol tools) must be executed via the multi-threaded GAWD Swarm utilizing peak hardware compute capacity. Only stateless queries (`QUERY`) bypass the swarm for sub-millisecond reflex responses.
 16. **Lock-Free Execution**: Agents must utilize non-blocking concurrency primitives. Blocking thread locks are prohibited in the swarm execution path to ensure zero-stall intelligence convergence.
 17. **Recursive Decomposition**: The swarm must be capable of recursive self-splitting. If a mission is high-entropy, the orchestrator must spawn parallel sub-swarms to handle atomic components, joining results upon convergence.
 18. **Anti-Hardcoding Mandate**: Prohibition on hardcoding query-specific matchers. Intents must resolve dynamically using models and tools.

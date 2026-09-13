@@ -1,6 +1,6 @@
 # AEON Zero-Mutation Query Protocols
 
-* **Current Engine Version**: `v0.1.2022817`
+* **Current Engine Version**: `v0.1.2022818`
 
 This document defines the absolute zero-mutation execution paths for the `aeon` substrate. These protocols bypass all evolutionary and mission-state pipelines. They are strictly read-only and ephemeral.
 

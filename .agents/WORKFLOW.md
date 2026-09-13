@@ -1,6 +1,6 @@
 # AEON Operational Workflow
 
-* **Current Engine Version**: `v0.1.2022817`
+* **Current Engine Version**: `v0.1.2022818`
 
 This document defines the Meta-Workflow for substrate evolution and the Federated Parallelism logic of the active `aeon` engine.
 
@@ -29,7 +29,7 @@ This document defines the Meta-Workflow for substrate evolution and the Federate
 
 ## 2. Universal Swarm Execution (Mandatory)
 
-12. **The Swarm Mandate**: Every operation—regardless of path (1a, 1b, or 1c)—must initialize a specialized GAWD Swarm. Direct serial execution of engine logic is prohibited.
+12. **The Swarm Mandate**: Every operation—Motions (1a), Missions (1b), GEMI reasoning, and GMCP tool operations—must initialize a specialized GAWD Swarm at maximum hardware capacity. Direct serial execution of long-running logic is prohibited. Only Queries (1c) bypass the swarm for instant reflex responses.
 13. **Phase A: Foundational Readiness**: The `AeonRuntimeAdmin` continuously audits host CPU/GPU/RAM topologies and provisions the optimal model ladder via the swarm.
 14. **Substrate Optimization**: The `AeonRuntimeAdmin` provisions the optimal model ladder step and locks the engine to the peak performing local weights.
 15. **Daemon Persistence**: The `AmaDaemon` sustains the GMCP/GEMI/UDP server fleet, maintaining a stateful protocol bridge for all internal and external requests.
