@@ -228,17 +228,19 @@ impl AmaMasterAgent {
 
             let lower_goal = current_goal.to_lowercase();
             let is_motion = lower_goal.contains("admin mission") || lower_goal.contains("motion") || lower_goal.contains("sync") || lower_goal.contains("audit") || lower_goal.contains("release");
+            let swarm_context = AmaSupervisor::gather_weighted_wisdom(&interactions, &agents);
 
             let final_answer = if is_motion {
                 // Tier 1 GAWD Swarm Dispatch for Motions & Core Workspace Mutations
-                let data = AmaSupervisor::gather_weighted_wisdom(&interactions, &agents);
-                format!("AMA-Motion-Convergence ({}):\n\n{}", version, data)
+                format!("AMA-Motion-Convergence ({}):\n\n{}", version, swarm_context)
+            } else if !swarm_context.trim().is_empty() && !swarm_context.contains("No valid wisdom gathered") {
+                // Swarm Convergence: Use high-confidence swarm wisdom directly without CPU model loop hang
+                swarm_context
             } else {
-                // Tier 2 Native Local Model Inference for Missions (GemiEngine + Local Swarm Context)
+                // Tier 2 Native Local Model Inference Fallback for Open Missions
                 let model_name = crate::gemi::models::ModelManager::get_selected_model()
                     .unwrap_or_else(|| "aeon-native-synthesis".to_string());
 
-                let swarm_context = AmaSupervisor::gather_weighted_wisdom(&interactions, &agents);
                 let reasoning_prompt = format!(
                     "MISSION_GOAL: {}\n\nLOCAL_SWARM_CONTEXT:\n{}\n\n[INSTRUCTION]: Resolve this mission using native local model inference.",
                     current_goal, swarm_context
