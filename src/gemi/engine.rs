@@ -9,7 +9,6 @@ use std::collections::HashMap;
 use crate::error::{EaiError, EaiResult};
 use crate::gemi::models::ModelManager;
 use crate::gemi::hardware::HardwareProfiler;
-use crate::gawd::agents::GawdAgent;
 
 use candle_core::quantized::gguf_file;
 use candle_transformers::models::quantized_llama as llama;
@@ -127,22 +126,11 @@ impl GemiEngine {
 
     /// Aspiration 7: Ultra-Latency Competitive Inference Racing
     fn reason_internal(prompt: &str, workspace: &Path, allow_reflex: bool) -> String {
-        let preparation_blackboard = std::sync::Arc::new(std::sync::RwLock::new(crate::gawd::agents::HighDensityContextStore::new(1)));
-        let _ = crate::gawd::agents::AeonRuntimeAgent.execute(prompt, workspace, &preparation_blackboard);
-
         if allow_reflex {
             let (reflex_decision, _) = super::reflex::ReflexEngine::try_solve(prompt, workspace);
             if let super::reflex::ReflexDecision::Solved(action) = reflex_decision {
                 return action;
             }
-        }
-
-        // Native Priority: Use local reasoning tool if available
-        if crate::gmcp::tools::ToolRegistry::exists("reason") {
-             let res = crate::gmcp::tools::ToolRegistry::execute_tool("reason", &serde_json::json!(prompt), workspace);
-             if !res.contains("failed") && !res.is_empty() {
-                 return res;
-             }
         }
 
         let (tx, rx) = mpsc::channel();
@@ -362,8 +350,8 @@ impl NativeInferenceEngine for AeonGgufEngine {
         let start_time = std::time::Instant::now();
         let timeout = std::time::Duration::from_secs(180);
 
-        // Universal Generative Loop: Fluid Context Expansion (Mandate Removal)
-        for i in 0..4096 {
+        // Universal Generative Loop: Fluid Context Expansion (Max 256 tokens for instant reflex)
+        for i in 0..256 {
             // 2. Continuous Timeout Check
             if start_time.elapsed() > timeout {
                 return Err(EaiError::inference(format!("Inference timed out after {}s", timeout.as_secs())));

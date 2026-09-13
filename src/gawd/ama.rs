@@ -60,6 +60,7 @@ impl AmaMasterAgent {
     /// Primary entry point for all natural language intents.
     /// Enforces the <2ms Instant-Intelligence mandate (Aspiration 25).
     pub fn solve_clean(&self, goal: &str, workspace: &Path, version: &str) -> String {
+        eprintln!("[DEBUG AMA] solve_clean started");
         let start = std::time::Instant::now();
         let res = self.solve(goal, workspace, version);
         let elapsed = start.elapsed();

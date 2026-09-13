@@ -4,6 +4,7 @@
 use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use crate::error::EaiResult;
+use crate::gawd::agents::GawdAgent;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProtocolReflex {
@@ -71,13 +72,11 @@ impl ProtocolKnowledgeBase {
         let mut pair = format!("INTENT: {}\n", intent);
 
         let workspace = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("."));
-        let agents = super::agents::GawdAgentFleet::synthesize_fleet(intent, &workspace);
-        for agent in agents {
-            if agent.name() == "SafetyAgent" || agent.name() == "ContextAgent" {
-                let bb = std::sync::Arc::new(std::sync::RwLock::new(super::agents::HighDensityContextStore::new(10)));
-                let res = agent.execute(intent, &workspace, &bb)?;
-                pair.push_str(&format!("REFLEX_GUARD ({}): {}\n", agent.name(), res));
-            }
+        let bb = std::sync::Arc::new(std::sync::RwLock::new(super::agents::HighDensityContextStore::new(10)));
+
+        let safety = super::agents::SafetyAgent;
+        if let Ok(res) = safety.execute(intent, &workspace, &bb) {
+            pair.push_str(&format!("REFLEX_GUARD (SafetyAgent): {}\n", res));
         }
 
         let action = crate::gemi::pulse::AeonPulse::reason(intent, &workspace).unwrap_or_else(|_| "ACTION: status".into());

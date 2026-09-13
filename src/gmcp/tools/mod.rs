@@ -283,8 +283,7 @@ impl ToolRegistry {
 
         Self::register_meta_tool(&mut tools, "reason", "Execute swarm reasoning substrate", MetaCategory::SystemPrimitive, |arg, workspace| {
              let arg_s = if let Some(s) = arg.as_str() { s.to_string() } else { arg.to_string() };
-             let ama = crate::gawd::ama::AmaMasterAgent::new();
-             Ok(ama.solve_clean(&arg_s, workspace, crate::AEON_VERSION))
+             Ok(crate::gemi::engine::GemiEngine::generate_reasoning_deep(&arg_s, workspace))
         });
 
         // 5. Meta-Intelligence Bridge Primitives

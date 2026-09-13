@@ -755,6 +755,7 @@ impl GawdAgentFleet {
                 // Enforce a strict 60s execution lease per agent (Aspiration 22)
                 let (tx, rx) = std::sync::mpsc::channel();
                 std::thread::spawn(move || {
+                    eprintln!("[DEBUG Swarm] Executing agent: {}", agent.name());
                     let res = agent.execute(&g, &w, &bb).unwrap_or_else(|e| format!("Agent Execution Failed: {}", e));
                     let _ = tx.send(res);
                 });
