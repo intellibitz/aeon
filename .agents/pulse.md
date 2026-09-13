@@ -1,11 +1,22 @@
 # AEON Substrate Validation Genome (PULSE)
 
-* **Current Engine Version**: `v0.1.2022791`
+* **Current Engine Version**: `v0.1.2022792`
 
 This document defines the complete set of validation protocols that anchor the `aeon` genome. Every entry reflects a hard-compiled reflex or an orchestrated meta-behavior.
 
 ## 1. Pending Failing Pulse
 
+* `85. [ ] **[QUERY]**: list health status`
+* `85. [ ] **[MOTION]**: Motion: Disable mandatory model provenance check for local models to allow manual model selection and faster iteration`
+* `85. [ ] **[QUERY]**: what is your name?`
+* `85. [ ] **[QUERY]**: list models`
+* `85. [ ] **[MISSION]**: use gemma-4-31b model and print opalite song lyrics`
+* `85. [ ] **[MISSION]**: use gemma-4-31b model and print opalite song lyrics`
+* `85. [ ] **[QUERY]**: list active models`
+* `85. [ ] **[QUERY]**: list health status`
+* `85. [ ] **[QUERY]**: list health status`
+* `85. [ ] **[MISSION]**: use gemma-4-31b model and print opalite song lyrics`
+* `85. [ ] **[MISSION]**: use gemma-4-31b model and print opalite song lyrics`
 ## 2. Ingested & Resolved Pulse (The Realized Genome)
 
 ### 2.1 Core Governance & Epistemic Integrity [MOTION]

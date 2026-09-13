@@ -340,13 +340,13 @@ impl NativeInferenceEngine for AeonGgufEngine {
 
         // 1. Set Execution Deadline (Rule 23 Hardening)
         let start_time = std::time::Instant::now();
-        let timeout = std::time::Duration::from_secs(45);
+        let timeout = std::time::Duration::from_secs(180);
 
         // Universal Generative Loop
         for i in 0..512 {
             // 2. Continuous Timeout Check
             if start_time.elapsed() > timeout {
-                return Err(EaiError::inference("Inference timed out after 45s"));
+                return Err(EaiError::inference(format!("Inference timed out after {}s", timeout.as_secs())));
             }
 
             let input = candle_core::Tensor::new(tokens_to_process.as_slice(), &device)

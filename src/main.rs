@@ -74,6 +74,7 @@ fn print_help() {
     println!("  gemi                     Start GEMI REST server");
     println!("  status                   Inspect workspace health report");
     println!("  models                   List available models");
+    println!("  select-model             Select or override active model");
     println!("  deep-scan                Parallel deep scan of user home for local models");
     println!("  agents                   List active agents");
     println!("  engines                  List active engines");
@@ -179,6 +180,17 @@ fn main() {
         "models" => {
             let res = aeon_engine::gmcp::GmcpHost::dispatch("list_models", &serde_json::json!(null).to_string(), &cwd);
             println!("{}", res);
+        }
+        "select-model" | "select_model" => {
+            let model = args.get(1).map(|s| s.as_str()).unwrap_or("");
+            if model.is_empty() {
+                println!("Usage: aeon select-model <model_name_or_id>");
+            } else {
+                match aeon_engine::gemi::models::ModelManager::set_selected_model(model) {
+                    Ok(msg) => println!("{}", msg),
+                    Err(e) => eprintln!("Failed to select model: {}", e),
+                }
+            }
         }
         "deep-scan" | "deep_scan" => {
             match aeon_engine::gemi::models::ModelManager::deep_scan_home_and_register(&global_dir) {

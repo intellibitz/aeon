@@ -155,6 +155,14 @@ impl ToolRegistry {
             Ok(out)
         });
 
+        Self::register_meta_tool(&mut tools, "select_model", "Select or override active model substrate", MetaCategory::SystemPrimitive, |arg, _workspace| {
+            let arg_s = arg.as_str().unwrap_or("");
+            if arg_s.trim().is_empty() {
+                return Ok("Usage: select_model <model_name_or_id>".to_string());
+            }
+            ModelManager::set_selected_model(arg_s.trim()).map_err(EaiError::config)
+        });
+
         Self::register_meta_tool(&mut tools, "scout_model", "Scout or install model substrate", MetaCategory::SystemPrimitive, |arg, _workspace| {
             let arg_s = arg.as_str().unwrap_or("");
             if arg_s.trim().is_empty() {
