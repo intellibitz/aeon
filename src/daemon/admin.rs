@@ -258,6 +258,37 @@ impl AeonAdmin {
         Ok("Release sequence verified. Tests, Audits, and Lints passed. Substrate is ready for deployment.".into())
     }
 
+    /// Dynamic Neural Cascade Classifier (Tier 0 Reflex -> Tier 2 GEMI -> Motion)
+    pub fn classify_natural_intent(workspace: &Path, intent: &str) -> (&'static str, &'static str) {
+        let trimmed = intent.trim();
+        let lower = trimmed.to_lowercase();
+
+        // Fast-Path Reflex for Standard Queries/Motions
+        if lower == "identity" || lower == "status" || lower == "models" || lower == "version" ||
+           lower.starts_with("aeon status") || lower.starts_with("aeon identity") || lower.starts_with("aeon models") {
+            return ("[QUERY]", "Zero-Mutation Interrogation");
+        }
+
+        if lower.contains("motion") || lower.contains("architecture") || lower.contains("hardcode") {
+            return ("[MOTION]", "Architectural Evolution");
+        }
+
+        // Tier 0 Neural Reflex Attempt via Local Alpha Model
+        if let Ok(reflex_action) = crate::gemi::pulse::AeonPulse::reason(trimmed, workspace) {
+            let reflex_lower = reflex_action.to_lowercase();
+            if reflex_lower.contains("query") || reflex_lower.contains("status") || reflex_lower.contains("identity") {
+                return ("[QUERY]", "Zero-Mutation Interrogation");
+            } else if reflex_lower.contains("motion") || reflex_lower.contains("recompile") {
+                return ("[MOTION]", "Architectural Evolution");
+            } else if reflex_lower.contains("mission") || reflex_lower.contains("solve") {
+                return ("[MISSION]", "Dynamic Task Fulfillment");
+            }
+        }
+
+        // Default to Dynamic Task Fulfillment Mission
+        ("[MISSION]", "Dynamic Task Fulfillment")
+    }
+
     /// Ingest a natural language intent and automatically inject it into pulse.md
     /// Supports both Creator mode (.agents/pulse.md) and World User mode (.aeon/pulse.md).
     pub fn ingest_natural_intent(workspace: &Path, intent: &str) -> EaiResult<String> {
@@ -273,23 +304,8 @@ impl AeonAdmin {
             }
         }
 
-        // 1. Classify Intent (Hardened Classifier)
-        let lower_intent = intent.to_lowercase();
-        let (prefix, _category) = if lower_intent.contains("motion") ||
-                                     lower_intent.starts_with("add ") ||
-                                     lower_intent.starts_with("implement ") ||
-                                     lower_intent.contains("architecture") ||
-                                     lower_intent.contains("binary") {
-            ("[MOTION]", "Architectural Evolution")
-        } else if lower_intent.contains("query") ||
-                  lower_intent.starts_with("what is") ||
-                  lower_intent.starts_with("list ") ||
-                  lower_intent.contains("status") ||
-                  lower_intent.contains("identity") {
-            ("[QUERY]", "Zero-Mutation Interrogation")
-        } else {
-            ("[MISSION]", "Dynamic Task Fulfillment")
-        };
+        // 1. Dynamic Neural Cascade Classifier (Tier 0 Reflex -> Tier 2 GEMI -> Motion)
+        let (prefix, _category) = Self::classify_natural_intent(workspace, intent);
 
         // 2. Read pulse.md and find the last index in section 2
         let content = fs::read_to_string(&pulse_path)?;

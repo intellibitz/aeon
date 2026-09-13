@@ -32,17 +32,19 @@ impl ReasoningTrainer {
             let count = content.lines().count();
 
             if count >= Self::DISTILLATION_THRESHOLD {
-                eprintln!("[Reasoning Trainer] Experience threshold reached ({} samples). Initializing Substrate Ingestion Motion for 'aeon-reason' Tier 2 model...", count);
-                let g_dir = global_dir.clone();
-                let exp_f = experience_file.clone();
-                std::thread::spawn(move || {
-                    if let Ok(report) = AeonReasoningModel::train_from_experience(&g_dir) {
-                        let archive_path = g_dir.join(format!("reasoning_archive_{}.jsonl", std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs()));
-                        let _ = std::fs::rename(&exp_f, archive_path);
-                        eprintln!("[Reasoning Trainer] Background Distillation Complete: {}", report);
+                let archive_path = global_dir.join(format!("reasoning_archive_{}.jsonl", std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs()));
+                if std::fs::rename(&experience_file, &archive_path).is_ok() {
+                    eprintln!("[Reasoning Trainer] Experience threshold reached ({} samples). Initializing Substrate Ingestion Motion for 'aeon-reason' Tier 2 model...", count);
+                    if let Ok(exe) = std::env::current_exe() {
+                        let _ = std::process::Command::new(exe)
+                            .arg("--bg-train")
+                            .stdin(std::process::Stdio::null())
+                            .stdout(std::process::Stdio::null())
+                            .stderr(std::process::Stdio::null())
+                            .spawn();
                     }
-                });
-                return Ok(format!("Substrate Ingestion Motion initialized in background ({} samples).", count));
+                    return Ok(format!("Substrate Ingestion Motion initialized in background ({} samples).", count));
+                }
             }
         }
 

@@ -142,6 +142,12 @@ fn main() {
             }
             return;
         }
+        "--bg-train" | "bg-train" => {
+            let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
+            let global_dir = home.join(".aeon");
+            let _ = aeon_engine::gemi::reasoning::AeonReasoningModel::train_from_experience(&global_dir);
+            return;
+        }
         "help" | "-h" | "--help" => {
             print_help();
         }

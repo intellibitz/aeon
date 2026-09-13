@@ -1,6 +1,6 @@
 # AEON Architectural Aspirations
 
-* **Current Engine Version**: `v0.1.2022819`
+* **Current Engine Version**: `v0.1.2022820`
 
 This document defines the structural roadmap and evolution goals of the `aeon` substrate.
 
@@ -120,7 +120,7 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 ---
 
 ### [Aspiration 23] Universal Swarm Operation
-* **Core Paradigm**: The "Swarm-Only" mandate. 100% of AEON substrate operations—including Motions, Missions, GEMI deep reasoning, and GMCP tool protocol executions—must be executed through the multi-threaded GAWD Swarm utilizing maximum safe hardware compute capacity. Direct serial execution of long-running engine logic is constitutionally prohibited. Only stateless queries (`QUERY`) bypass the swarm for sub-millisecond reflex delivery.
+* **Core Paradigm**: The "Swarm-Only" mandate. 100% of AEON substrate operations—including Motions, Missions, Queries, GEMI deep reasoning, and GMCP tool protocol executions—must be executed through the multi-threaded GAWD Swarm utilizing maximum safe hardware compute capacity. Direct serial execution of engine logic is constitutionally prohibited, ensuring that every pulse benefits from swarm-parallelism, safety auditing, and epistemic verification.
 
 ---
 
