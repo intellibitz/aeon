@@ -36,12 +36,14 @@ pub enum MetaCategory {
     IntelligenceBridge,
 }
 
+pub type MetaToolHandler = Arc<dyn Fn(&serde_json::Value, &Path) -> EaiResult<String> + Send + Sync>;
+
 /// Generic Meta-Tool Struct
 pub struct MetaTool {
     pub tool_name: String,
     pub tool_desc: String,
     pub category: MetaCategory,
-    pub handler: Arc<dyn Fn(&serde_json::Value, &Path) -> EaiResult<String> + Send + Sync>,
+    pub handler: MetaToolHandler,
 }
 
 impl AeonTool for MetaTool {
@@ -172,7 +174,7 @@ impl ToolRegistry {
         });
 
         Self::register_meta_tool(&mut tools, "train_reflexes", "Manually trigger native neural reflex distillation", MetaCategory::SystemPrimitive, |_arg, workspace| {
-            crate::gawd::reflex_trainer::ReflexTrainer::force_train(workspace).map(|r| r)
+            crate::gawd::reflex_trainer::ReflexTrainer::force_train(workspace)
         });
 
         Self::register_meta_tool(&mut tools, "read_file", "Read file content in workspace", MetaCategory::WorkspaceIo, |arg, workspace| {

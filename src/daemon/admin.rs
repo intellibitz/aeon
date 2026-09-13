@@ -233,7 +233,7 @@ impl AeonAdmin {
 
         eprintln!("[Release Gatekeeper] 3. Executing Static Analysis (Clippy)...");
         let clippy = Command::new("cargo")
-            .args(&["clippy", "--all-targets", "--all-features", "--", "-D", "warnings"])
+            .args(["clippy", "--all-targets", "--all-features", "--", "-D", "warnings"])
             .current_dir(workspace)
             .output()?;
         if !clippy.status.success() {
@@ -245,7 +245,7 @@ impl AeonAdmin {
         let missions = ["identity", "status", "models"];
         for mission in missions {
             let mission_out = Command::new("cargo")
-                .args(&["run", "--quiet", "--", mission])
+                .args(["run", "--quiet", "--", mission])
                 .current_dir(workspace)
                 .output()?;
 
@@ -320,7 +320,7 @@ impl AeonAdmin {
         let last_index = lines.iter()
             .filter_map(|l| {
                 let trimmed = l.trim();
-                if trimmed.is_empty() || !trimmed.chars().next().unwrap().is_digit(10) { return None; }
+                if trimmed.is_empty() || !trimmed.chars().next().unwrap().is_ascii_digit() { return None; }
                 trimmed.split('.').next()?.parse::<usize>().ok()
             })
             .max()
@@ -364,7 +364,7 @@ impl AeonAdmin {
 
     pub fn run_lint(workspace: &Path) -> EaiResult<String> {
         let out = Command::new("cargo")
-            .args(&["clippy", "--all-targets", "--all-features"])
+            .args(["clippy", "--all-targets", "--all-features"])
             .current_dir(workspace)
             .output()?;
         Ok(String::from_utf8_lossy(&out.stdout).to_string())

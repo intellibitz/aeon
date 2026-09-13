@@ -20,6 +20,12 @@ pub struct AmaMissionReport {
 
 pub struct AmaMasterAgent;
 
+impl Default for AmaMasterAgent {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AmaMasterAgent {
     pub fn new() -> Self {
         Self
@@ -211,12 +217,10 @@ impl AmaMasterAgent {
         let mut all_agents = Vec::new();
         let mut final_responses = Vec::new();
 
-        for res in results {
-            if let Ok(report) = res {
-                all_interactions.extend(report.interactions);
-                all_agents.extend(report.agents);
-                final_responses.push(report.final_answer);
-            }
+        for report in results.into_iter().flatten() {
+            all_interactions.extend(report.interactions);
+            all_agents.extend(report.agents);
+            final_responses.push(report.final_answer);
         }
 
         Ok(AmaMissionReport {
@@ -274,12 +278,12 @@ impl AmaMasterAgent {
 
         let mut report = String::new();
         report.push_str("# aeon Substrate - Technical Report\n\n");
-        report.push_str(&format!("- **Engine**: aeon EAI Substrate\n"));
+        report.push_str("- **Engine**: aeon EAI Substrate\n");
         report.push_str(&format!("- **Version**: {}\n", crate::AEON_VERSION));
         report.push_str(&format!("- **Active Model**: {}\n\n", model_name));
 
         report.push_str(&axiom_summary);
-        report.push_str("\n");
+        report.push('\n');
         report.push_str(&topology_summary);
 
         Ok(report)
@@ -306,11 +310,10 @@ impl AmaMasterAgent {
                 let _ = super::pkb::ProtocolKnowledgeBase::stage_distillation_pair(goal, &res.final_answer, workspace, Some(metadata));
             }
 
-            if msg.sender == "AeonUniversalSubstrateAgent" {
-                if msg.payload.contains("VIOLATION") || msg.payload.contains("FAILURE") {
+            if msg.sender == "AeonUniversalSubstrateAgent"
+                && (msg.payload.contains("VIOLATION") || msg.payload.contains("FAILURE")) {
                      crate::sandbox::manager::AeonAuditLogger::log_event(workspace, "TOOL_FAILURE", &msg.payload);
                 }
-            }
         }
 
         Ok(res.final_answer)

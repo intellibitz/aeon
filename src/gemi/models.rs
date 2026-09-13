@@ -340,10 +340,7 @@ impl ModelManager {
                 if path.is_dir() { Self::recursive_scan_model_dir(&path, discovered, visited); }
                 else if path.is_file() {
                     let lower_ext = path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
-                    let is_valid = match lower_ext.as_str() {
-                        "gguf" | "safetensors" | "onnx" | "bin" | "pt" | "ckpt" => true,
-                        _ => false
-                    };
+                    let is_valid = matches!(lower_ext.as_str(), "gguf" | "safetensors" | "onnx" | "bin" | "pt" | "ckpt");
                     if is_valid && path.metadata().map(|m| m.len()).unwrap_or(0) > 1_000_000 {
                         let file_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("model");
                         let checksum = None; // Aspiration 4: Deferred Checksum (Performance)
@@ -445,11 +442,10 @@ impl ModelManager {
                     sub_dirs.push(path);
                 } else if path.is_file() {
                     let lower_ext = path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
-                    if ["gguf", "safetensors", "onnx", "bin", "pt", "ckpt"].contains(&lower_ext.as_str()) {
-                        if path.metadata().map(|m| m.len()).unwrap_or(0) > 1_000_000 {
+                    if ["gguf", "safetensors", "onnx", "bin", "pt", "ckpt"].contains(&lower_ext.as_str())
+                        && path.metadata().map(|m| m.len()).unwrap_or(0) > 1_000_000 {
                             folder_has_model = true;
                         }
-                    }
                 }
             }
 

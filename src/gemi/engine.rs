@@ -21,13 +21,15 @@ pub enum ModelSubstrate {
     Generic(llama::ModelWeights),
 }
 
+type ModelCacheMap = HashMap<PathBuf, Arc<RwLock<ModelSubstrate>>>;
+
 pub struct InferenceHost;
 
 impl InferenceHost {
     /// Universal Substrate Ingestion (Aspiration 8)
     /// Dynamically identifies and loads any GGUF architecture from local or web sources.
     pub fn get_model(model_path: &Path, device: &candle_core::Device) -> EaiResult<Arc<RwLock<ModelSubstrate>>> {
-        static CACHED_MODELS: OnceLock<Arc<RwLock<HashMap<PathBuf, Arc<RwLock<ModelSubstrate>>>>>> = OnceLock::new();
+        static CACHED_MODELS: OnceLock<Arc<RwLock<ModelCacheMap>>> = OnceLock::new();
         let cache = CACHED_MODELS.get_or_init(|| Arc::new(RwLock::new(HashMap::new())));
 
         let mut map = cache.write().unwrap();
@@ -166,7 +168,7 @@ impl GemiEngine {
             if let Ok(model) = crate::gemi::reasoning::AeonReasoningModel::load(&global_dir) {
                  if let Ok(_vec) = model.reason(&p2, "converged") {
                       // Map semantic vector back to intent text (Heuristic for now)
-                      let _ = tx2.send(format!("[DISTILLED_REASON]: Semantic convergence achieved. Output projected from native reasoning substrate."));
+                      let _ = tx2.send("[DISTILLED_REASON]: Semantic convergence achieved. Output projected from native reasoning substrate.".to_string());
                  }
             }
         });

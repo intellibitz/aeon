@@ -75,7 +75,7 @@ fn main() {
             }
         } else if line.trim().starts_with("* **Core Paradigm**:") {
             if let (Some(id), Some(title)) = (current_id, current_title.take()) {
-                let paradigm = line.splitn(2, ':').nth(1).unwrap().trim();
+                let paradigm = line.split_once(':').unwrap().1.trim();
                 generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", id + 20, title, paradigm));
                 current_id = None;
             }
@@ -219,7 +219,7 @@ fn main() {
             }
         } else if line.trim().starts_with("* **Core Paradigm**:") {
             if let (Some(id), Some(title)) = (current_id, current_title.take()) {
-                let paradigm = line.splitn(2, ':').nth(1).unwrap().trim();
+                let paradigm = line.split_once(':').unwrap().1.trim();
                 generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", id + 20, title, paradigm));
                 current_id = None;
             }
@@ -278,7 +278,7 @@ fn main() {
 
 fn parse_list_item(line: &str) -> Option<(usize, String, String)> {
     let line = line.trim();
-    if line.is_empty() || !line.chars().next().unwrap().is_digit(10) { return None; }
+    if line.is_empty() || !line.chars().next().unwrap().is_ascii_digit() { return None; }
     let parts: Vec<&str> = line.splitn(2, '.').collect();
     if parts.len() < 2 { return None; }
     let id: usize = parts[0].parse().ok()?;
@@ -314,7 +314,7 @@ fn parse_aspiration_header(line: &str) -> Option<(usize, String)> {
 
 fn parse_topology_item(line: &str) -> Option<(String, String, String)> {
     let line = line.trim();
-    if line.is_empty() || !line.chars().next().unwrap().is_digit(10) { return None; }
+    if line.is_empty() || !line.chars().next().unwrap().is_ascii_digit() { return None; }
     let parts: Vec<&str> = line.splitn(2, '.').collect();
     if parts.len() < 2 { return None; }
     let content = parts[1].trim();

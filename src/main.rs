@@ -290,7 +290,6 @@ fn main() {
                         } else {
                             println!("{}", answer);
                         }
-                        return;
                     }
                 }
                 Err(e) => {

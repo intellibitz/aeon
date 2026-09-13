@@ -180,7 +180,7 @@ impl AeonAlphaModel {
         if p.rank() == 0 {
             // Convert scalar to vector of 1
             let val = p.to_vec0::<f32>()?;
-            let results = vec![val];
+            let results = [val];
 
             let mut max_idx = 0;
             let mut max_val = 0.0;
@@ -279,7 +279,7 @@ impl AeonAlphaModel {
 
         if category < 10 {
             let start = category * 10;
-            for j in start..start+10 { anchor[j] = 1.0; }
+            for val in anchor.iter_mut().skip(start).take(10) { *val = 1.0; }
         } else {
             anchor[(h as usize) % Self::DIM] = 0.5;
         }

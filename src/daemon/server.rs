@@ -41,7 +41,7 @@ impl DaemonContext {
     pub fn setup_signal_handlers(&self) -> Result<(), EaiError> {
         let shutdown = Arc::clone(&self.shutdown_signal);
         thread::spawn(move || {
-            if let Ok(mut signals) = Signals::new(&[SIGTERM, SIGINT]) {
+            if let Ok(mut signals) = Signals::new([SIGTERM, SIGINT]) {
                 for sig in signals.forever() {
                     eprintln!("[AmaDaemon] Received signal: {}", sig);
                     shutdown.store(true, Ordering::Release);
@@ -66,6 +66,7 @@ impl DaemonLock {
             .read(true)
             .write(true)
             .create(true)
+            .truncate(true)
             .open(path)
             .map_err(|e| e.to_string())?;
 

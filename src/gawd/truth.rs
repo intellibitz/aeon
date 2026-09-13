@@ -20,7 +20,7 @@ impl AeonTruthAgent {
         // Pattern: File System Mutation Detection
         if result.contains("Wrote to ") || result.contains("Saved to ") {
              let mut found_path = false;
-             let parts: Vec<&str> = result.split(|c| c == ' ' || c == '[' || c == ']').collect();
+             let parts: Vec<&str> = result.split([' ', '[', ']']).collect();
              for part in parts {
                  let path_candidate = part.trim_matches(|c| c == '.' || c == ':' || c == '[' || c == ']');
                  if (path_candidate.contains('/') || path_candidate.contains('.')) && !path_candidate.is_empty() {
@@ -79,7 +79,7 @@ impl AeonTruthAgent {
             .mean_all().map_err(|e| EaiError::inference(e.to_string()))?
             .to_scalar::<f32>().map_err(|e| EaiError::inference(e.to_string()))? - (mean * mean);
 
-        let score = (var * 10.0 + 0.5).min(1.0).max(0.0);
+        let score = (var * 10.0 + 0.5).clamp(0.0, 1.0);
         Ok(score)
     }
 }

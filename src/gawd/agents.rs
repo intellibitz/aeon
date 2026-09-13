@@ -132,7 +132,7 @@ impl GawdAgent for AeonRuntimeAgent {
     fn rank(&self) -> f32 { 1.0 }
     fn execute(&self, _goal: &str, workspace: &Path, _blackboard: &MissionBlackboard) -> EaiResult<String> {
         // 1. Substrate Infrastructure Audit
-        let cloud_env_keys = vec!["AEON_API_KEY", "MODEL_API_KEY", "EAI_API_KEY", "API_KEY"];
+        let cloud_env_keys = ["AEON_API_KEY", "MODEL_API_KEY", "EAI_API_KEY", "API_KEY"];
         let cloud_available = cloud_env_keys.iter().any(|k| std::env::var(k).is_ok());
 
         // 2. Local Weight Verification (Rule 31)
@@ -526,36 +526,36 @@ impl AgentMetaRegistry {
     }
 
     fn bootstrap_data(&self) -> Vec<AgentProfile> {
-        let mut agents = Vec::new();
-        agents.push(AgentProfile {
-            name: "DevOpsAgent".into(),
-            description: "Software engineering, systems architecture, and repository management.".into(),
-            categories: vec!["code".into(), "rust".into(), "git".into(), "system".into()],
-            semantic_anchors: vec!["build".into(), "test".into(), "deploy".into(), "compile".into()],
-            base_rank: 0.9,
-        });
-        agents.push(AgentProfile {
-            name: "SearchAgent".into(),
-            description: "Deep web searching, knowledge retrieval, and data scouting.".into(),
-            categories: vec!["search".into(), "find".into(), "lyrics".into(), "look".into()],
-            semantic_anchors: vec!["google".into(), "brave".into(), "web".into(), "query".into()],
-            base_rank: 0.9,
-        });
-        agents.push(AgentProfile {
-            name: "TranslationAgent".into(),
-            description: "High-fidelity linguistic translation across global languages. Always use 'reason' tool for complex translation tasks.".into(),
-            categories: vec!["translate".into(), "language".into(), "tamil".into(), "linguistic".into()],
-            semantic_anchors: vec!["tamil".into(), "hindi".into(), "french".into(), "translator".into()],
-            base_rank: 0.9,
-        });
-        agents.push(AgentProfile {
-            name: "AgriTechAgent".into(),
-            description: "Precision agriculture, soil science, and crop nutrient management.".into(),
-            categories: vec!["soil".into(), "crop".into(), "nutrient".into(), "agri".into()],
-            semantic_anchors: vec!["irrigation".into(), "fertilizer".into(), "harvest".into()],
-            base_rank: 0.85,
-        });
-        agents
+        vec![
+            AgentProfile {
+                name: "DevOpsAgent".into(),
+                description: "Software engineering, systems architecture, and repository management.".into(),
+                categories: vec!["code".into(), "rust".into(), "git".into(), "system".into()],
+                semantic_anchors: vec!["build".into(), "test".into(), "deploy".into(), "compile".into()],
+                base_rank: 0.9,
+            },
+            AgentProfile {
+                name: "SearchAgent".into(),
+                description: "Deep web searching, knowledge retrieval, and data scouting.".into(),
+                categories: vec!["search".into(), "find".into(), "lyrics".into(), "look".into()],
+                semantic_anchors: vec!["google".into(), "brave".into(), "web".into(), "query".into()],
+                base_rank: 0.9,
+            },
+            AgentProfile {
+                name: "TranslationAgent".into(),
+                description: "High-fidelity linguistic translation across global languages. Always use 'reason' tool for complex translation tasks.".into(),
+                categories: vec!["translate".into(), "language".into(), "tamil".into(), "linguistic".into()],
+                semantic_anchors: vec!["tamil".into(), "hindi".into(), "french".into(), "translator".into()],
+                base_rank: 0.9,
+            },
+            AgentProfile {
+                name: "AgriTechAgent".into(),
+                description: "Precision agriculture, soil science, and crop nutrient management.".into(),
+                categories: vec!["soil".into(), "crop".into(), "nutrient".into(), "agri".into()],
+                semantic_anchors: vec!["irrigation".into(), "fertilizer".into(), "harvest".into()],
+                base_rank: 0.85,
+            },
+        ]
     }
 
     pub fn register_agent(&self, profile: AgentProfile) {
@@ -643,14 +643,14 @@ impl GawdAgentFleet {
     /// Neural Fleet Synthesizer: Dynamically decides which agents are required for a mission.
     /// RULE 31 Hardening: Uses semantic centroids to match agents.
     pub fn synthesize_fleet(goal: &str, workspace: &Path) -> Vec<Arc<dyn GawdAgent>> {
-        let mut fleet: Vec<Arc<dyn GawdAgent>> = Vec::new();
-
         // 1. Mandatory Substrate Guards & Preparation (RUNTIME.md Mandates)
-        fleet.push(Arc::new(AeonRuntimeAgent));
-        fleet.push(Arc::new(HardwareAgent));
-        fleet.push(Arc::new(SafetyAgent));
-        fleet.push(Arc::new(SecurityAgent));
-        fleet.push(Arc::new(EvolutionAgent));
+        let mut fleet: Vec<Arc<dyn GawdAgent>> = vec![
+            Arc::new(AeonRuntimeAgent),
+            Arc::new(HardwareAgent),
+            Arc::new(SafetyAgent),
+            Arc::new(SecurityAgent),
+            Arc::new(EvolutionAgent),
+        ];
 
         let lower_goal = goal.to_lowercase();
         if lower_goal.contains("admin") || lower_goal.contains("sync") || lower_goal.contains("audit") || lower_goal.contains("release") || lower_goal.contains("verify") || lower_goal.contains("deep-scan") || lower_goal.contains("install") || lower_goal.contains("uninstall") {
@@ -695,10 +695,10 @@ impl GawdAgentFleet {
                     let mut max_similarity = 0.0f32;
 
                     let mut agent_corpus = agent.categories.join(" ");
-                    agent_corpus.push_str(" ");
+                    agent_corpus.push(' ');
                     agent_corpus.push_str(&agent.description);
 
-                    if let Ok(agent_vec) = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(&agent_corpus, Some(&[agent.clone()])) {
+                    if let Ok(agent_vec) = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(&agent_corpus, Some(std::slice::from_ref(&agent))) {
                         let dot_product: f32 = goal_vec.iter().zip(agent_vec.iter()).map(|(a, b)| a * b).sum();
                         max_similarity = dot_product;
                         if max_similarity > max_global_similarity { max_global_similarity = max_similarity; }
