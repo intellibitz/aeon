@@ -321,6 +321,42 @@ impl GawdAgent for LlamaCppBridgeAgent {
     }
 }
 
+/// TensorRT-LLM Peak Optimization Bridge Agent (Aspiration 5)
+pub struct TensorRtBridgeAgent;
+
+impl GawdAgent for TensorRtBridgeAgent {
+    fn name(&self) -> String { "TensorRtBridgeAgent".into() }
+    fn rank(&self) -> f32 { 0.98 }
+    fn execute(&self, goal: &str, _workspace: &Path, _blackboard: &MissionBlackboard) -> EaiResult<String> {
+        // NVIDIA Hardware Saturation Protocol
+        let client = crate::gmcp::client::GmcpClient::scout_reasoning_remotes();
+        for remote_name in client {
+            if remote_name.to_lowercase().contains("tensorrt") || remote_name.to_lowercase().contains("triton") {
+                let res = crate::gmcp::client::GmcpClient::execute_external_tool(&remote_name, "infer", goal);
+                if !res.contains("[FAIL]") {
+                    return Ok(format!("[TensorRT-LLM Power-Tier]: {}", res));
+                }
+            }
+        }
+
+        // Local Triton Inference Server Proxy
+        let triton_url = std::env::var("TRITON_API_BASE").unwrap_or_else(|_| "http://localhost:8001/v2/models/aeon_model/generate".to_string());
+        let body = serde_json::json!({
+            "text_input": goal,
+            "parameters": { "max_tokens": 512, "bad_words": [], "stop_words": [] }
+        });
+
+        match ureq::post(&triton_url).send_json(body) {
+            Ok(resp) => {
+                let json: serde_json::Value = resp.into_json().map_err(|e| crate::error::EaiError::inference(e.to_string()))?;
+                let text = json["text_output"].as_str().unwrap_or("TensorRT output empty").to_string();
+                Ok(format!("[TensorRT-LLM Local Proxy]: {}", text))
+            }
+            Err(_) => Err(crate::error::EaiError::inference("TensorRT/Triton remote or local proxy unreachable"))
+        }
+    }
+}
+
 pub struct AgentMetaRegistry {
     agents: Arc<Mutex<Vec<AgentProfile>>>,
 }
@@ -493,6 +529,7 @@ impl GawdAgentFleet {
         fleet.push(Arc::new(VllmBridgeAgent));
         fleet.push(Arc::new(SglangBridgeAgent));
         fleet.push(Arc::new(LlamaCppBridgeAgent));
+        fleet.push(Arc::new(TensorRtBridgeAgent));
 
         fleet.push(Arc::new(DynamicAgent {
             agent_name: "ContextAgent".into(),
