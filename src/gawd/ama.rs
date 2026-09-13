@@ -5,7 +5,7 @@
 use std::path::Path;
 use serde::{Deserialize, Serialize};
 use crate::error::EaiResult;
-use super::agents::{GawdAgentInfo, GawdAgent};
+use super::agents::GawdAgentInfo;
 use super::amas::{A2AMessage, AmaSupervisor};
 use super::axiom::AxiomSubstrate;
 
@@ -72,15 +72,8 @@ impl AmaMasterAgent {
         let mut previous_errors = std::collections::HashSet::new();
 
         while retry_count < 3 {
-            // 1. Pre-Execution Governance Audit & Substrate Preparation
-            super::safety::SafetyDetector::audit_action("AMA_SOLVE", &current_goal, workspace)?;
-            super::security::SecurityDetector::audit_action("AMA_SOLVE", &current_goal, workspace)?;
-
-            // Aspiration 9: Autonomous Runtime Substrate Preparation
-            let preparation_blackboard = std::sync::Arc::new(std::sync::Mutex::new(super::agents::HighDensityContextStore::new(1)));
-            super::agents::AeonRuntimeAgent.execute(&current_goal, workspace, &preparation_blackboard)?;
-
             // 2. Swarm Supervision (Tier 1 AOA Dispatch)
+            // Parallel execution of Safety, Security, Runtime Setup and Mission specific agents
             let (interactions, agents) = AmaSupervisor::supervise_mission(&current_goal, workspace);
 
             // 3. Context Compression & Reflex Result Distillation (Tier 2 Hardening)
@@ -254,18 +247,8 @@ impl AmaMasterAgent {
         let goal = self.sanitize_input(goal)?;
         let _ = feedback_tx.send(format!("[AMA] Initiating mission for goal: '{}'", goal));
 
-        // Step 1: Governance & Preparation
-        let _ = feedback_tx.send("[AMA] Auditing safety and security protocols...".to_string());
-        super::safety::SafetyDetector::audit_action("AMA_SOLVE", &goal, workspace)?;
-        super::security::SecurityDetector::audit_action("AMA_SOLVE", &goal, workspace)?;
-
-        // Step 2: Runtime Substrate Preparation (Aspiration 9)
-        let _ = feedback_tx.send("[AMA] Establishing optimal runtime environment...".to_string());
-        let preparation_blackboard = std::sync::Arc::new(std::sync::Mutex::new(super::agents::HighDensityContextStore::new(1)));
-        super::agents::AeonRuntimeAgent.execute(&goal, workspace, &preparation_blackboard)?;
-
-        // Step 3: Swarm Dispatch
-        let _ = feedback_tx.send(format!("[AMA] Dispatching swarm to workspace: {}", workspace.display()));
+        // Mandate: Use multi-threaded swarm for all runtime setup and audits
+        let _ = feedback_tx.send("[AMA] Dispatching multi-threaded swarm for setup, audit, and mission execution...".to_string());
         let (interactions, agents) = AmaSupervisor::supervise_mission(&goal, workspace);
 
         for msg in &interactions {

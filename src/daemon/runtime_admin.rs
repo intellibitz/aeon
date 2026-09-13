@@ -16,8 +16,10 @@ impl AeonRuntimeAdmin {
     pub fn start_administration_cycle(workspace: &Path) {
         let ws = workspace.to_path_buf();
         thread::spawn(move || {
+            let ama = crate::gawd::ama::AmaMasterAgent::new();
             loop {
-                let _ = Self::execute_full_audit(&ws);
+                // Mandate: Use Swarm for all runtime mandates
+                let _ = ama.process_intent("perform full substrate audit, hardware optimization, and evolutionary maintenance", &ws);
                 thread::sleep(Duration::from_secs(3600)); // Foundational Audit Every Hour
             }
         });

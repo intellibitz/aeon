@@ -1,6 +1,6 @@
 # AEON Alpha-User Mutation Protocols (Missions)
 
-* **Current Engine Version**: `v0.1.2022793`
+* **Current Engine Version**: `v0.1.2022794`
 
 This document defines the mutable execution paths for the `aeon` substrate. These protocols operate within the `alpha-user` space, allowing the swarm to generate artifacts, manipulate the workspace, and distill experience without modifying the hard-compiled `alpha-self` core.
 

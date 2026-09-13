@@ -173,6 +173,42 @@ impl GawdAgent for HardwareAgent {
     }
 }
 
+/// Safety Governance Agent (RUNTIME.md Mandate 14 & 15)
+pub struct SafetyAgent;
+
+impl GawdAgent for SafetyAgent {
+    fn name(&self) -> String { "SafetyAgent".into() }
+    fn rank(&self) -> f32 { 1.0 }
+    fn execute(&self, goal: &str, workspace: &Path, _blackboard: &MissionBlackboard) -> EaiResult<String> {
+        crate::gawd::safety::SafetyDetector::audit_action("SWARM_SOLVE", goal, workspace)?;
+        Ok("Safety protocols verified. No destructive patterns detected.".into())
+    }
+}
+
+/// Security Governance Agent (RUNTIME.md Mandate 16 & 17)
+pub struct SecurityAgent;
+
+impl GawdAgent for SecurityAgent {
+    fn name(&self) -> String { "SecurityAgent".into() }
+    fn rank(&self) -> f32 { 1.0 }
+    fn execute(&self, goal: &str, workspace: &Path, _blackboard: &MissionBlackboard) -> EaiResult<String> {
+        crate::gawd::security::SecurityDetector::audit_action("SWARM_SOLVE", goal, workspace)?;
+        Ok("Security audit passed. No secret leaks or exfiltration vectors detected.".into())
+    }
+}
+
+/// Autonomous Drift & Evolution Agent (RUNTIME.md Mandate 3 & 4)
+pub struct EvolutionAgent;
+
+impl GawdAgent for EvolutionAgent {
+    fn name(&self) -> String { "EvolutionAgent".into() }
+    fn rank(&self) -> f32 { 1.0 }
+    fn execute(&self, _goal: &str, workspace: &Path, _blackboard: &MissionBlackboard) -> EaiResult<String> {
+        let audit = crate::daemon::evolution::EvolutionManager::perform_autonomous_drift_audit(workspace)?;
+        Ok(format!("Evolutionary health: {}", audit))
+    }
+}
+
 pub struct AgentMetaRegistry {
     agents: Arc<Mutex<Vec<AgentProfile>>>,
 }
@@ -327,21 +363,19 @@ pub struct GawdAgentFleet;
 
 impl GawdAgentFleet {
     /// Absolute limit for concurrent swarm participants to prevent resource exhaustion.
-    pub const MAX_CONCURRENT_AGENTS: usize = 8;
+    pub const MAX_CONCURRENT_AGENTS: usize = 32; // Scaling for high-density multi-threaded swarms
 
     /// Neural Fleet Synthesizer: Dynamically decides which agents are required for a mission.
     /// RULE 31 Hardening: Uses semantic centroids to match agents.
     pub fn synthesize_fleet(goal: &str, workspace: &Path) -> Vec<Arc<dyn GawdAgent>> {
         let mut fleet: Vec<Arc<dyn GawdAgent>> = Vec::new();
 
-        // 1. Mandatory Substrate Guards & Preparation
+        // 1. Mandatory Substrate Guards & Preparation (RUNTIME.md Mandates)
         fleet.push(Arc::new(AeonRuntimeAgent));
         fleet.push(Arc::new(HardwareAgent));
-        fleet.push(Arc::new(DynamicAgent {
-            agent_name: "SafetyAgent".into(),
-            mission_profile: "Governance and destruction detection.".into(),
-            agent_rank: 1.0,
-        }));
+        fleet.push(Arc::new(SafetyAgent));
+        fleet.push(Arc::new(SecurityAgent));
+        fleet.push(Arc::new(EvolutionAgent));
         fleet.push(Arc::new(DynamicAgent {
             agent_name: "ContextAgent".into(),
             mission_profile: "Workspace analysis and file-system awareness.".into(),

@@ -301,17 +301,6 @@ fn main() {
 
             let ama = AmaMasterAgent::new();
 
-            // Unified Meta-Substrate Dispatch (Host -> ToolRegistry)
-            if ToolRegistry::exists(cmd_name) {
-                let res = aeon_engine::gmcp::GmcpHost::dispatch(cmd_name, &cmd_arg, &cwd);
-                if !io::stdout().is_terminal() {
-                    print!("{}", res);
-                } else {
-                    println!("{}", res);
-                }
-                return;
-            }
-
             // Axiomatic Pulse Ingestion: Automatically anchor any natural language instruction into pulse.md
             match aeon_engine::daemon::admin::AeonAdmin::ingest_natural_intent(&cwd, &goal) {
                 Ok(msg) => {
@@ -325,20 +314,32 @@ fn main() {
                         } else {
                             println!("{}", answer);
                         }
+                        return;
                     }
                 }
                 Err(e) => {
-                    warn!("Natural intent ingestion failed: {}. Falling back to direct solving.", e);
+                    warn!("Natural intent ingestion failed: {}. Falling back to direct dispatch.", e);
                     AeonAuditLogger::log(&global_dir, LogLevel::Warning, "INTENT_FALLBACK", &format!("Reason: {}", e));
-
-                    // Fallback to direct solving if ingestion fails
-                    let answer = ama.solve_clean(&goal, &cwd, AEON_VERSION);
-                    if !io::stdout().is_terminal() {
-                        print!("{}", answer);
-                    } else {
-                        println!("{}", answer);
-                    }
                 }
+            }
+
+            // Unified Meta-Substrate Dispatch (Host -> ToolRegistry) - Fallback for direct tool calls or Motions
+            if ToolRegistry::exists(cmd_name) {
+                let res = aeon_engine::gmcp::GmcpHost::dispatch(cmd_name, &cmd_arg, &cwd);
+                if !io::stdout().is_terminal() {
+                    print!("{}", res);
+                } else {
+                    println!("{}", res);
+                }
+                return;
+            }
+
+            // Fallback for everything else
+            let answer = ama.solve_clean(&goal, &cwd, AEON_VERSION);
+            if !io::stdout().is_terminal() {
+                print!("{}", answer);
+            } else {
+                println!("{}", answer);
             }
         }
     }

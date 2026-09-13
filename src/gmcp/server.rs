@@ -58,29 +58,34 @@ impl GmcpServer {
                     let mut body = String::new();
                     let _ = std::io::Read::read_to_string(request.as_reader(), &mut body);
 
-                    let (tx, rx) = std::sync::mpsc::channel();
                     let workspace_thread = workspace.clone();
                     let body_thread = body.clone();
                     let server_handler_thread = server_handler;
 
                     thread::spawn(move || {
-                        let response_json = server_handler_thread.handle_request(&body_thread, &workspace_thread);
-                        let _ = tx.send(response_json);
-                    });
+                        let (tx, rx) = std::sync::mpsc::channel();
+                        let b_thread = body_thread.clone();
+                        let w_thread = workspace_thread.clone();
 
-                    // Enforce a strict 60-second timeout for GMCP protocol requests
-                    let response_json = rx.recv_timeout(std::time::Duration::from_secs(60))
-                        .unwrap_or_else(|_| {
-                            json!({
-                                "jsonrpc": "2.0",
-                                "error": { "code": -32000, "message": "Execution Timeout" }
-                            }).to_string()
+                        thread::spawn(move || {
+                            let response_json = server_handler_thread.handle_request(&b_thread, &w_thread);
+                            let _ = tx.send(response_json);
                         });
 
-                    let response = Response::from_string(response_json)
-                        .with_header(Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).unwrap())
-                        .with_header(Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap());
-                    let _ = request.respond(response);
+                        // Enforce a strict 60-second timeout for GMCP protocol requests
+                        let response_json = rx.recv_timeout(std::time::Duration::from_secs(60))
+                            .unwrap_or_else(|_| {
+                                json!({
+                                    "jsonrpc": "2.0",
+                                    "error": { "code": -32000, "message": "Execution Timeout" }
+                                }).to_string()
+                            });
+
+                        let response = Response::from_string(response_json)
+                            .with_header(Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).unwrap())
+                            .with_header(Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap());
+                        let _ = request.respond(response);
+                    });
                 }
                 _ => {
                     let _ = request.respond(Response::from_string("Not Found").with_status_code(404));

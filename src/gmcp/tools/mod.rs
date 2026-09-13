@@ -11,7 +11,6 @@ use serde::{Deserialize, Serialize};
 use crate::gmcp::client::GmcpClient;
 use crate::gemi::hardware::HardwareProfiler;
 use crate::gemi::models::ModelManager;
-use crate::gemi::engine::NativeInferenceEngine;
 use crate::error::{EaiError, EaiResult};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -278,10 +277,10 @@ impl ToolRegistry {
             }
         });
 
-        Self::register_meta_tool(&mut tools, "reason", "Execute native local reasoning substrate", MetaCategory::SystemPrimitive, |arg, _workspace| {
-             // Aspiration 8: Pure Rust-Native Inference (Hardened)
+        Self::register_meta_tool(&mut tools, "reason", "Execute swarm reasoning substrate", MetaCategory::SystemPrimitive, |arg, workspace| {
              let arg_s = if let Some(s) = arg.as_str() { s.to_string() } else { arg.to_string() };
-             crate::gemi::engine::AeonGgufEngine.run_inference(&arg_s)
+             let ama = crate::gawd::ama::AmaMasterAgent::new();
+             Ok(ama.solve_clean(&arg_s, workspace, crate::AEON_VERSION))
         });
 
         // 5. Meta-Intelligence Bridge Primitives

@@ -1,6 +1,6 @@
 # AEON Substrate Validation Genome (PULSE)
 
-* **Current Engine Version**: `v0.1.2022793`
+* **Current Engine Version**: `v0.1.2022794`
 
 This document defines the complete set of validation protocols that anchor the `aeon` genome. Every entry reflects a hard-compiled reflex or an orchestrated meta-behavior.
 
@@ -49,6 +49,8 @@ This document defines the complete set of validation protocols that anchor the `
 84. `[x]` **Deep Model Scan**: Implemented `deep-scan` subcommand for parallel home-wide model discovery and automatic configuration registration.
 85. `[x]` **Candle Upgrade**: Updated `candle-core`, `candle-nn`, and `candle-transformers` to `v0.8.4` for latest spectral mapping and architectural optimizations.
 86. `[x]` **Provenance Bypass**: Implemented manual local model selection bypass to allow trust-neutral iterative testing.
+87. `[x]` **Non-Blocking Swarm**: Refactored HTTP/SSE servers to be non-blocking and enforced multi-threaded Swarm orchestration for every Mission and Query.
+88. `[x]` **Runtime Swarm Mandates**: Migrated all mandates from `RUNTIME.md` (Setup, Audit, Evolution) into mandatory multi-threaded agent tasks within every swarm mission.
 
 ### 2.3 Structural Topology & Pillars [MOTION]
 36. `[x]` **AoA Coordination**: GAWD/AmaDaemon parallel dispatcher is functional.
