@@ -1,14 +1,11 @@
 # AEON Substrate Validation Genome (PULSE)
 
-* **Current Engine Version**: `v0.1.2022813`
+* **Current Engine Version**: `v0.1.2022814`
 
 This document defines the complete set of validation protocols that anchor the `aeon` genome. Every entry reflects a hard-compiled reflex or an orchestrated meta-behavior.
 
 ## 1. Pending Failing Pulse
 
-* `140. [ ] **[MISSION]**: find dracula lyrics`
-* `140. [ ] **[MISSION]**: find dracula lyrics, translate to tamil, show side by side`
-* `140. [ ] **[MISSION]**: print dracula lyrics`
 ## 2. Ingested & Resolved Pulse (The Realized Genome)
 
 ### 2.1 Core Governance & Epistemic Integrity [MOTION]
@@ -70,6 +67,7 @@ This document defines the complete set of validation protocols that anchor the `
 102. `[x]` **Hardware-Only Limit**: Codified the principle (Aspiration 21) that physical hardware is the sole constraint on system potential, constitutionally prohibiting artificial architectural gates.
 103. `[x]` **Optimal Async Orchestration**: Codified the mandate (Aspiration 22) for non-blocking I/O, mandatory multi-threading, and microsecond-tier communication convergence.
 104. `[x]` **Universal Swarm Operation**: Codified the mandate (Aspiration 23) that 100% of substrate operations must execute through the GAWD Swarm, ensuring zero serial execution of engine logic.
+105. `[x]` **Universal Decoupled Concurrency**: Codified the mandate (Aspiration 27) for non-blocking I/O, Reactor/Proactor event loops, lock-free work-stealing deques, and zero-copy ring buffers.
 
 ### 2.3 Structural Topology & Pillars [MOTION]
 36. `[x]` **AoA Coordination**: GAWD/AmaDaemon parallel dispatcher is functional.
@@ -140,3 +138,6 @@ This document defines the complete set of validation protocols that anchor the `
 118. `[x]` **MOTION**: Codify the 'Lock-Free Substrate' mandate. The AEON genome must ensure that the substrate is free of blocking thread locks. All critical path data structures (KV Stores, Registries, Blackboards) must transition to lock-free concurrency primitives or non-blocking message-passing architectures to ensure zero execution stall.
 120. `[x]` **QUERY**: status
 139. `[x]` **MISSION**: reason Hi
+140. `[x]` **MISSION**: find dracula lyrics
+141. `[x]` **MISSION**: find dracula lyrics, translate to tamil, show side by side
+142. `[x]` **MISSION**: print dracula lyrics
