@@ -562,16 +562,29 @@ impl ModelManager {
         HardwareProfiler::get_progressive_model_ladder().last().cloned().unwrap()
     }
 
-    pub fn ensure_hardware_optimal_models(_workspace: &Path) -> EaiResult<String> {
+    pub fn ensure_hardware_optimal_models(workspace: &Path) -> EaiResult<String> {
+        let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
+        let global_dir = home.join(".aeon");
+
+        // 1. Deep Scan System / Home for Local Models (Rule 31 & Aspiration 5)
+        let existing = Self::scan_system_for_local_models(workspace);
+        if existing.is_empty() || existing.iter().all(|m| m.model_id.contains("native")) {
+             eprintln!("[Model Manager] No local model substrates found in registry. Executing home deep-scan...");
+             let _ = Self::deep_scan_home_and_register(&global_dir);
+        }
+
+        // 2. Identify Best Local Model vs Hardware Capacity
+        let best_local = Self::identify_best_suited_local_model(workspace);
+
+        // 3. Download Best Local Model from Web if Local Models are Inferior/Missing
         let ladder = HardwareProfiler::get_progressive_model_ladder();
         if let Some(best_step) = ladder.last() {
-            let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
-            let models_dir = home.join(".aeon/models");
+            let models_dir = global_dir.join("models");
             let model_path = models_dir.join(best_step.hf_file);
             let tokenizer_path = models_dir.join("tokenizer.json");
 
-            if !model_path.exists() {
-                eprintln!("[Model Manager] Best-fit model missing. Provisioning {}...", best_step.hf_file);
+            if best_local.is_none() && !model_path.exists() {
+                eprintln!("[Model Manager] Optimal hardware step '{}' missing. Provisioning from web...", best_step.hf_file);
                 let url = format!("https://huggingface.co/{}/resolve/main/{}", best_step.hf_repo, best_step.hf_file);
                 Self::install_model(&url);
             }
