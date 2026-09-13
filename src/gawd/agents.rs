@@ -395,6 +395,33 @@ impl GawdAgent for LmdeployBridgeAgent {
     }
 }
 
+/// SOTA Library Scouting Agent (Aspiration 19)
+pub struct LibraryScoutAgent;
+
+impl GawdAgent for LibraryScoutAgent {
+    fn name(&self) -> String { "LibraryScoutAgent".into() }
+    fn rank(&self) -> f32 { 0.85 }
+    fn execute(&self, goal: &str, _workspace: &Path, _blackboard: &MissionBlackboard) -> EaiResult<String> {
+        // High-Level Library Scouting Protocol
+        // Real implementation would interrogate crates.io API
+        let lower_goal = goal.to_lowercase();
+
+        let recommendation = if lower_goal.contains("async") || lower_goal.contains("concurrency") {
+            "tokio, async-trait, crossbeam"
+        } else if lower_goal.contains("json") || lower_goal.contains("serialization") {
+            "serde, serde_json"
+        } else if lower_goal.contains("inference") || lower_goal.contains("tensor") {
+            "candle-core, tch-rs, ndarray"
+        } else if lower_goal.contains("web") || lower_goal.contains("http") {
+            "reqwest, axum, tiny_http"
+        } else {
+            "anyhow, log, clap"
+        };
+
+        Ok(format!("[Library Scout]: Based on the goal, I recommend evaluating the following SOTA open-source crates: {}.", recommendation))
+    }
+}
+
 pub struct AgentMetaRegistry {
     agents: Arc<Mutex<Vec<AgentProfile>>>,
 }
@@ -569,6 +596,8 @@ impl GawdAgentFleet {
         fleet.push(Arc::new(LlamaCppBridgeAgent));
         fleet.push(Arc::new(TensorRtBridgeAgent));
         fleet.push(Arc::new(LmdeployBridgeAgent));
+
+        fleet.push(Arc::new(LibraryScoutAgent));
 
         fleet.push(Arc::new(DynamicAgent {
             agent_name: "ContextAgent".into(),
