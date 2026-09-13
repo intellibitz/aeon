@@ -529,12 +529,14 @@ impl ModelManager {
         let ws = workspace.to_path_buf();
         std::thread::spawn(move || {
             loop {
-                // Zero-Config Autonomous Model Provisioning (Rule 31)
+                // Zero-Config Autonomous Model Provisioning (Mandate 5 Generalization)
                 let selected = Self::get_selected_model();
                 if selected.is_none() || selected.as_ref().is_some_and(|s| s.contains("native")) {
-                    eprintln!("[Model Manager] No local reasoning substrate detected. Triggering autonomous provisioning...");
-                    // Default to a small, fast local model if none found
-                    let _ = Self::install_model("https://huggingface.co/intellibitz/aeon-alpha/resolve/main/aeon-alpha.safetensors");
+                    eprintln!("[Model Manager] No high-ranking open source substrate detected. Triggering autonomous SOTA provisioning...");
+                    // Dynamically identify the best available open-source model based on hardware
+                    let best_fit = Self::identify_best_ladder_step();
+                    let url = format!("https://huggingface.co/{}/resolve/main/{}", best_fit.hf_repo, best_fit.hf_file);
+                    let _ = Self::install_model(&url);
                 }
 
                 let _ = Self::ensure_hardware_optimal_models(&ws);

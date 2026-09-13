@@ -1,6 +1,6 @@
 # AEON Runtime Mandates
 
-* **Current Engine Version**: `v0.1.2022795`
+* **Current Engine Version**: `v0.1.2022796`
 
 This document defines the operational directives for environment establishment, maintenance, and safety across both the `alpha-self` (core host) and `alpha-user` (mutable workspace) boundaries.
 
@@ -13,7 +13,7 @@ This document defines the operational directives for environment establishment, 
 
 ## 2. Alpha-User Environment Synthesis (Mutable State)
 
-5. **Substrate Priming**: Autonomously provision missing neural weights (`aeon-alpha.safetensors`, `aeon-reason.safetensors`) into the `.aeon/models/` vault.
+5. **Substrate Priming**: Autonomously provision the highest-ranking open-source neural weights compatible with host hardware profiling (e.g., Llama, Gemma, Mistral) into the `.aeon/models/` vault. Fixed native weight identifiers are deprecated in favor of dynamic performance-based selection.
 6. **Protocol Linking**: Dynamically bind essential MCP servers (Database, Search, VCS) and registry-discovered external tools to the active workspace.
 7. **Zero-Config Guarantee**: Adapt instantly to workspace-specific environment variables (e.g., `AEON_API_KEY`) and local system constraints without manual user intervention.
 8. **Registry Hot-Reload**: Validate the dynamic agent registry (`agent_registry.json`) via timestamp-based audits to prevent stale behavior injection during swarm synthesis.

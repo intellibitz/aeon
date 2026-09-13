@@ -1,6 +1,6 @@
 # AEON Substrate Validation Genome (PULSE)
 
-* **Current Engine Version**: `v0.1.2022795`
+* **Current Engine Version**: `v0.1.2022796`
 
 This document defines the complete set of validation protocols that anchor the `aeon` genome. Every entry reflects a hard-compiled reflex or an orchestrated meta-behavior.
 
@@ -58,6 +58,7 @@ This document defines the complete set of validation protocols that anchor the `
 93. `[x]` **LMDeploy & TurboReflex**: Implemented `LmdeployBridgeAgent` for AWQ-quantized mission delegation and synthesized native Rust `TurboReflexEngine` for peak throughput.
 94. `[x]` **Native Kernel Synthesis**: Replaced structural shells in `ReflexInferenceKernel`, `TensorReflexKernel`, and `TurboReflexEngine` with functional Rust kernels using `candle-core`.
 95. `[x]` **Epistemic Delegation**: Implemented Swarm Consensus Verification with a 0.85 threshold to allow trusting open-source vendors when local empirical proof is unavailable.
+96. `[x]` **SOTA Weights Paradigm**: Generalized Runtime Mandate 5 to enforce autonomous SOTA weight provisioning based on hardware profiling, deprecating static native identifiers.
 
 ### 2.3 Structural Topology & Pillars [MOTION]
 36. `[x]` **AoA Coordination**: GAWD/AmaDaemon parallel dispatcher is functional.
