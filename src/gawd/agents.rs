@@ -245,7 +245,7 @@ impl GawdAgent for VllmBridgeAgent {
             "temperature": 0.0
         });
 
-        match ureq::post(&format!("{}/completions", vllm_url)).send_json(body) {
+        match ureq::post(&format!("{}/completions", vllm_url)).timeout(std::time::Duration::from_millis(500)).send_json(body) {
             Ok(resp) => {
                 let json: serde_json::Value = resp.into_json().map_err(|e| crate::error::EaiError::inference(e.to_string()))?;
                 let text = json["choices"][0]["text"].as_str().unwrap_or("vLLM output empty").to_string();
@@ -282,7 +282,7 @@ impl GawdAgent for SglangBridgeAgent {
             "sampling_params": { "max_new_tokens": 512, "temperature": 0.0 }
         });
 
-        match ureq::post(&format!("{}/chat/completions", sglang_url)).send_json(body) {
+        match ureq::post(&format!("{}/chat/completions", sglang_url)).timeout(std::time::Duration::from_millis(500)).send_json(body) {
             Ok(resp) => {
                 let json: serde_json::Value = resp.into_json().map_err(|e| crate::error::EaiError::inference(e.to_string()))?;
                 let text = json["choices"][0]["message"]["content"].as_str().unwrap_or("SGLang output empty").to_string();
@@ -319,7 +319,7 @@ impl GawdAgent for LlamaCppBridgeAgent {
             "temperature": 0.0
         });
 
-        match ureq::post(&format!("{}/completions", llama_url)).send_json(body) {
+        match ureq::post(&format!("{}/completions", llama_url)).timeout(std::time::Duration::from_millis(500)).send_json(body) {
             Ok(resp) => {
                 let json: serde_json::Value = resp.into_json().map_err(|e| crate::error::EaiError::inference(e.to_string()))?;
                 let text = json["choices"][0]["text"].as_str().unwrap_or("llama.cpp output empty").to_string();
@@ -355,7 +355,7 @@ impl GawdAgent for TensorRtBridgeAgent {
             "parameters": { "max_tokens": 512, "bad_words": [], "stop_words": [] }
         });
 
-        match ureq::post(&triton_url).send_json(body) {
+        match ureq::post(&triton_url).timeout(std::time::Duration::from_millis(500)).send_json(body) {
             Ok(resp) => {
                 let json: serde_json::Value = resp.into_json().map_err(|e| crate::error::EaiError::inference(e.to_string()))?;
                 let text = json["text_output"].as_str().unwrap_or("TensorRT output empty").to_string();
@@ -393,7 +393,7 @@ impl GawdAgent for LmdeployBridgeAgent {
             "temperature": 0.0
         });
 
-        match ureq::post(&format!("{}/completions", lmdeploy_url)).send_json(body) {
+        match ureq::post(&format!("{}/completions", lmdeploy_url)).timeout(std::time::Duration::from_millis(500)).send_json(body) {
             Ok(resp) => {
                 let json: serde_json::Value = resp.into_json().map_err(|e| crate::error::EaiError::inference(e.to_string()))?;
                 let text = json["choices"][0]["text"].as_str().unwrap_or("LMDeploy output empty").to_string();

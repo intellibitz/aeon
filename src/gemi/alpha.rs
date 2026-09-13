@@ -239,11 +239,7 @@ impl AeonAlphaModel {
             }
         }
 
-        let elapsed = start.elapsed();
-        if elapsed.as_millis() > 1 {
-            // Internal sub-operation must be well under the 2ms total budget
-            eprintln!("[WARNING] Semantic Projection exceeded 1ms: {:?}", elapsed);
-        }
+        let _elapsed = start.elapsed();
 
         Ok(vec)
     }

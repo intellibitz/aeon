@@ -78,36 +78,48 @@ impl GmcpClient {
         let registry_path = global_dir.join("global_mcp_registry.json");
         let cfg = crate::sandbox::manager::AeonConfig::load(&global_dir).expect("Fatal: Malformed configuration");
 
-        let mut entries: Vec<GlobalMcpEntry> = Vec::new();
-
-        // Scout Dynamic Registry from Cloud Substrate
-        if let Ok(resp) = ureq::get(&cfg.mcp_registry_url).timeout(std::time::Duration::from_secs(10)).call() {
-            let mut reader = resp.into_reader();
-            if let Ok(remote_entries) = serde_json::from_reader::<_, Vec<GlobalMcpEntry>>(&mut reader) {
-                if !remote_entries.is_empty() {
-                    entries = remote_entries;
-                }
-            }
-        }
-
-        // Merge Local Workspace Overrides
+        // 1. Instant Non-Blocking Local Cache Read (Aspiration 22 & <2ms Reflex Mandate)
         if registry_path.is_file() {
             if let Ok(content) = fs::read_to_string(&registry_path) {
                 if let Ok(local_entries) = serde_json::from_str::<Vec<GlobalMcpEntry>>(&content) {
-                    for local_entry in local_entries {
-                        if !entries.iter().any(|e| e.name == local_entry.name) {
-                            entries.push(local_entry);
-                        }
+                    if !local_entries.is_empty() {
+                        // Background async refresh (Non-blocking mandate)
+                        let url = cfg.mcp_registry_url.clone();
+                        let reg_p = registry_path.clone();
+                        std::thread::spawn(move || {
+                            if let Ok(resp) = ureq::get(&url).timeout(std::time::Duration::from_millis(500)).call() {
+                                let mut reader = resp.into_reader();
+                                if let Ok(remote_entries) = serde_json::from_reader::<_, Vec<GlobalMcpEntry>>(&mut reader) {
+                                    if !remote_entries.is_empty() {
+                                        let _ = fs::write(&reg_p, serde_json::to_string_pretty(&remote_entries).unwrap_or_default());
+                                    }
+                                }
+                            }
+                        });
+                        return local_entries;
                     }
                 }
             }
         }
 
-        if entries.is_empty() {
-            entries = cfg.bootstrap_mcp_servers;
-        }
-
+        // 2. Fallback to Bootstrap Config (Sub-1ms Instant Return)
+        let entries = cfg.bootstrap_mcp_servers.clone();
         let _ = fs::write(&registry_path, serde_json::to_string_pretty(&entries).unwrap_or_default());
+
+        // Spawn background fetch for initial registry population
+        let url = cfg.mcp_registry_url;
+        let reg_p = registry_path;
+        std::thread::spawn(move || {
+            if let Ok(resp) = ureq::get(&url).timeout(std::time::Duration::from_millis(1000)).call() {
+                let mut reader = resp.into_reader();
+                if let Ok(remote_entries) = serde_json::from_reader::<_, Vec<GlobalMcpEntry>>(&mut reader) {
+                    if !remote_entries.is_empty() {
+                        let _ = fs::write(&reg_p, serde_json::to_string_pretty(&remote_entries).unwrap_or_default());
+                    }
+                }
+            }
+        });
+
         entries
     }
 

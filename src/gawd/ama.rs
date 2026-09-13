@@ -82,6 +82,53 @@ impl AmaMasterAgent {
     pub fn solve(&self, goal: &str, workspace: &Path, version: &str) -> EaiResult<AmaMissionReport> {
         let goal = self.sanitize_input(goal)?;
         let lower_goal = goal.to_lowercase();
+
+        // Zero-Mutation Substrate Queries (<2ms Instant Reflex - Aspiration 25 & QUERIES.md)
+        let trimmed_query = lower_goal.trim();
+        if trimmed_query == "identity" || trimmed_query == "aeon identity" {
+            let identity_report = crate::gawd::self_core::AlphaSelf::inspect_compiled_binary_instructions();
+            return Ok(AmaMissionReport {
+                goal: goal.to_string(),
+                status: "COMPLETE".to_string(),
+                agents: Vec::new(),
+                interactions: Vec::new(),
+                final_answer: format!("AEON Substrate Identity Report ({}):\n\n{}", version, identity_report),
+            });
+        }
+
+        if trimmed_query == "status" || trimmed_query == "aeon status" {
+            let hw = crate::gemi::hardware::HardwareProfiler::get_profile();
+            let home = std::env::var_os("HOME").map(std::path::PathBuf::from).unwrap_or_default();
+            let global_dir = home.join(".aeon");
+            let daemon_status = if crate::daemon::server::AmaDaemon::check_status(&global_dir).is_some() { "RUNNING" } else { "STOPPED" };
+            let status_report = format!(
+                "AEON Substrate Status ({}) :\n- Daemon Status: {}\n- Hardware: {} CPUs ({}) | {}GB RAM | {}\n- Acceleration: {}",
+                version, daemon_status, hw.cpus, hw.cpu_brand, hw.ram_gb, hw.gpu_info, hw.native_acceleration
+            );
+            return Ok(AmaMissionReport {
+                goal: goal.to_string(),
+                status: "COMPLETE".to_string(),
+                agents: Vec::new(),
+                interactions: Vec::new(),
+                final_answer: status_report,
+            });
+        }
+
+        if trimmed_query == "models" || trimmed_query == "aeon models" {
+            let models = crate::gemi::models::ModelManager::list_models(workspace);
+            let mut roster = format!("AEON Substrate Models Roster ({}) :\n", version);
+            for m in models {
+                roster.push_str(&format!("- [{:?}] {} ({})\n", m.provider, m.name, m.model_id));
+            }
+            return Ok(AmaMissionReport {
+                goal: goal.to_string(),
+                status: "COMPLETE".to_string(),
+                agents: Vec::new(),
+                interactions: Vec::new(),
+                final_answer: roster,
+            });
+        }
+
         // Recursive Parallel Parallelism (Aspiration 26)
         if lower_goal.contains("parallel") || lower_goal.contains("split") {
              return self.solve_parallel_mission(&goal, workspace, version);

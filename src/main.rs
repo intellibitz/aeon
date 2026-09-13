@@ -166,12 +166,12 @@ fn main() {
         }
         "status" => {
             let ama = AmaMasterAgent::new();
-            let answer = ama.solve_clean("admin mission: report current substrate health and status", &cwd, AEON_VERSION);
+            let answer = ama.solve_clean("status", &cwd, AEON_VERSION);
             println!("{}", answer);
         }
         "models" => {
             let ama = AmaMasterAgent::new();
-            let answer = ama.solve_clean("admin mission: list available model substrates and verify integrity", &cwd, AEON_VERSION);
+            let answer = ama.solve_clean("models", &cwd, AEON_VERSION);
             println!("{}", answer);
         }
         "select-model" | "select_model" => {
@@ -264,12 +264,23 @@ fn main() {
             let _cmd_arg = args.get(1..).map(|s| s.join(" ")).unwrap_or_default();
             let mut goal = args.join(" ");
 
+            #[cfg(unix)]
             if !io::stdin().is_terminal() {
-                let mut buffer = String::new();
-                if io::stdin().read_to_string(&mut buffer).is_ok() {
-                    let trimmed = buffer.trim();
-                    if !trimmed.is_empty() {
-                         goal = format!("{}\n\n[INPUT DATA]:\n{}", goal, trimmed);
+                use std::os::unix::io::AsRawFd;
+                let fd = io::stdin().as_raw_fd();
+                let mut poll_fd = libc::pollfd {
+                    fd,
+                    events: libc::POLLIN,
+                    revents: 0,
+                };
+                let ret = unsafe { libc::poll(&mut poll_fd, 1, 0) };
+                if ret > 0 && (poll_fd.revents & libc::POLLIN) != 0 {
+                    let mut buffer = String::new();
+                    if io::stdin().read_to_string(&mut buffer).is_ok() {
+                        let trimmed = buffer.trim();
+                        if !trimmed.is_empty() {
+                            goal = format!("{}\n\n[INPUT DATA]:\n{}", goal, trimmed);
+                        }
                     }
                 }
             }
@@ -282,14 +293,12 @@ fn main() {
                     info!("Natural intent ingested successfully");
                     println!("{}", msg);
 
-                    if msg.contains("[MISSION]") || msg.contains("[QUERY]") {
-                        // Mandate: Swarm-Only Execution
-                        let answer = ama.solve_clean(&goal, &cwd, AEON_VERSION);
-                        if !io::stdout().is_terminal() {
-                            print!("{}", answer);
-                        } else {
-                            println!("{}", answer);
-                        }
+                    // Mandate: Swarm-Only Execution (Always execute intent)
+                    let answer = ama.solve_clean(&goal, &cwd, AEON_VERSION);
+                    if !io::stdout().is_terminal() {
+                        print!("{}", answer);
+                    } else {
+                        println!("{}", answer);
                     }
                 }
                 Err(e) => {

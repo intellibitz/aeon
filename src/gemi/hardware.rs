@@ -1,6 +1,6 @@
 // 100% Rust implementation for autonomous hardware profiling
 
-use std::sync::{RwLock, OnceLock};
+use std::sync::OnceLock;
 use serde::{Deserialize, Serialize};
 use candle_core::Device;
 
@@ -147,18 +147,14 @@ impl HardwareProfiler {
     }
 
     pub fn get_candle_device() -> Device {
-        // Dynamic Device Refresh: Re-scan for acceleration if previously CPU-bound
-        static DEVICE_CACHE: OnceLock<RwLock<Device>> = OnceLock::new();
-        let cache = DEVICE_CACHE.get_or_init(|| RwLock::new(Device::Cpu));
-
-        let mut dev = cache.write().unwrap();
-        if dev.is_cpu() {
+        // Zero-Lock Device Cache (Aspiration 24 & Sub-2ms Mandate)
+        static DEVICE_CACHE: OnceLock<Device> = OnceLock::new();
+        DEVICE_CACHE.get_or_init(|| {
             // Attempt CUDA initialization with panic safety
             let cuda_attempt = std::panic::catch_unwind(|| {
                 Device::new_cuda(0)
             });
             if let Ok(Ok(cuda_dev)) = cuda_attempt {
-                *dev = cuda_dev.clone();
                 return cuda_dev;
             }
 
@@ -169,13 +165,13 @@ impl HardwareProfiler {
                     Device::new_metal(0)
                 });
                 if let Ok(Ok(metal_dev)) = metal_attempt {
-                    *dev = metal_dev.clone();
                     return metal_dev;
                 }
             }
-        }
-        // Absolute Fallback: CPU
-        Device::Cpu
+
+            // Absolute Fallback: CPU
+            Device::Cpu
+        }).clone()
     }
 
     fn get_os_info() -> String {

@@ -64,8 +64,7 @@ impl AeonPulse {
 
                     return Ok(final_action);
                 },
-                Err(e) => {
-                    eprintln!("[Tier 0 Reflex] Escalating due to: {}", e);
+                Err(_e) => {
                     return Err(anyhow!("Low confidence reflex. Escalating to Tier 2 Deep Reasoning..."));
                 }
             }

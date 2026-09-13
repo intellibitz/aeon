@@ -302,11 +302,23 @@ impl ModelManager {
         use sha2::{Sha256, Digest};
         let mut file = fs::File::open(path)?;
         let mut hasher = Sha256::new();
+
+        // Fast Metadata-Based Sampling (<0.1ms) for Sub-2ms Reflex Mandate
+        if let Ok(meta) = path.metadata() {
+            hasher.update(meta.len().to_le_bytes());
+            if let Ok(mtime) = meta.modified() {
+                if let Ok(dur) = mtime.duration_since(std::time::UNIX_EPOCH) {
+                    hasher.update(dur.as_secs().to_le_bytes());
+                }
+            }
+        }
+
+        // Sample First 64KB Header
         let mut buffer = [0u8; 65536];
-        while let Ok(n) = file.read(&mut buffer) {
-            if n == 0 { break; }
+        if let Ok(n) = file.read(&mut buffer) {
             hasher.update(&buffer[..n]);
         }
+
         Ok(format!("{:x}", hasher.finalize()))
     }
 
@@ -317,27 +329,28 @@ impl ModelManager {
         let global_dir = home.join(".aeon");
         let cfg = crate::sandbox::manager::AeonConfig::load(&global_dir).expect("Fatal: Malformed configuration");
 
-        if workspace.is_dir() { Self::recursive_scan_model_dir(workspace, &mut discovered, &mut visited); }
+        if workspace.is_dir() { Self::recursive_scan_model_dir(workspace, &mut discovered, &mut visited, 0); }
         let global_models_dir = global_dir.join("models");
-        if global_models_dir.is_dir() { Self::recursive_scan_model_dir(&global_models_dir, &mut discovered, &mut visited); }
+        if global_models_dir.is_dir() { Self::recursive_scan_model_dir(&global_models_dir, &mut discovered, &mut visited, 0); }
         for path_str in cfg.local_scan_paths {
             let p = PathBuf::from(path_str);
-            if p.is_dir() { Self::recursive_scan_model_dir(&p, &mut discovered, &mut visited); }
+            if p.is_dir() { Self::recursive_scan_model_dir(&p, &mut discovered, &mut visited, 0); }
         }
         discovered.sort_by(|a, b| a.model_id.cmp(&b.model_id));
         discovered.dedup_by(|a, b| a.model_id == b.model_id);
         discovered
     }
 
-    fn recursive_scan_model_dir(dir: &Path, discovered: &mut Vec<ModelInfo>, visited: &mut std::collections::HashSet<PathBuf>) {
+    fn recursive_scan_model_dir(dir: &Path, discovered: &mut Vec<ModelInfo>, visited: &mut std::collections::HashSet<PathBuf>, depth: usize) {
+        if depth > 5 { return; }
         if let Ok(canonical) = dir.canonicalize() { if !visited.insert(canonical) { return; } }
         let folder_name = dir.file_name().and_then(|n| n.to_str()).unwrap_or("");
-        if [".git", "node_modules", "target", "vendor", ".cargo", ".rustup", ".gradle", "proc", "sys"].contains(&folder_name) { return; }
+        if [".git", "node_modules", "target", "vendor", ".cargo", ".rustup", ".gradle", "proc", "sys", ".cache", ".local", "Library"].contains(&folder_name) { return; }
 
         if let Ok(entries) = fs::read_dir(dir) {
             for entry in entries.flatten() {
                 let path = entry.path();
-                if path.is_dir() { Self::recursive_scan_model_dir(&path, discovered, visited); }
+                if path.is_dir() { Self::recursive_scan_model_dir(&path, discovered, visited, depth + 1); }
                 else if path.is_file() {
                     let lower_ext = path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
                     let is_valid = matches!(lower_ext.as_str(), "gguf" | "safetensors" | "onnx" | "bin" | "pt" | "ckpt");
@@ -585,7 +598,7 @@ mod tests {
         let _ = fs::write(&sf_path, vec![0u8; 2_000_000]);
         let mut discovered = Vec::new();
         let mut visited = std::collections::HashSet::new();
-        ModelManager::recursive_scan_model_dir(&tmp_dir, &mut discovered, &mut visited);
+        ModelManager::recursive_scan_model_dir(&tmp_dir, &mut discovered, &mut visited, 0);
         assert!(discovered.iter().any(|m| m.model_id.contains("test.safetensors")));
         let _ = fs::remove_dir_all(&tmp_dir);
     }

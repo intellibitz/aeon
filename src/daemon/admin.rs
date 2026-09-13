@@ -314,7 +314,7 @@ impl AeonAdmin {
         });
 
         if is_duplicate {
-            return Ok(format!("Intent '{}' is already present in pulse.md. Skipping duplicate ingestion.", intent));
+            return Ok(format!("Intent '{}' is already present in pulse.md ({})", intent, prefix));
         }
 
         let last_index = lines.iter()
