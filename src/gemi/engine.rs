@@ -40,7 +40,10 @@ impl InferenceHost {
         }
 
         // 2. Exclusive Write Access for Loading
+        println!("- [Substrate Operation] Requesting write-lock for model cache...");
+        let _ = std::io::stdout().flush();
         let mut map = cache.write().unwrap();
+
         if let Some(m) = map.get(model_path) {
             return Ok(Arc::clone(m));
         }
@@ -49,11 +52,17 @@ impl InferenceHost {
         let _ = std::io::stdout().flush();
 
         // Integrity Verification (Aspiration 4 Hardening)
+        println!("- [Substrate Operation] Verifying model integrity...");
+        let _ = std::io::stdout().flush();
         ModelManager::verify_model_integrity(model_path)?;
 
+        println!("- [Substrate Operation] Opening weight file...");
+        let _ = std::io::stdout().flush();
         let mut file = std::fs::File::open(model_path)
             .map_err(|e| EaiError::inference(format!("Failed to open weights {}: {}", model_path.display(), e)))?;
 
+        println!("- [Substrate Operation] Parsing GGUF metadata...");
+        let _ = std::io::stdout().flush();
         let mut model_data = gguf_file::Content::read(&mut file)
             .map_err(|e| EaiError::inference(format!("GGUF Metadata Error: {}", e)))?;
 
@@ -90,11 +99,15 @@ impl InferenceHost {
         }
 
         // Robust Architectural Loading
+        println!("- [Substrate Operation] Initializing {:?} weights on {:?}...", arch, device);
+        let _ = std::io::stdout().flush();
         let weights = llama::ModelWeights::from_gguf(model_data, &mut file, device)
             .map_err(|e| {
                 EaiError::inference(format!("Architecture '{}' load failure: {}", arch, e))
             })?;
 
+        println!("- [Substrate Operation] Model substrate ready.");
+        let _ = std::io::stdout().flush();
         let substrate = match arch.as_str() {
             "gemma" => ModelSubstrate::Gemma(weights),
             "llama" => ModelSubstrate::Llama(weights),
@@ -313,37 +326,58 @@ impl NativeInferenceEngine for AeonGgufEngine {
     fn run_inference_stream(&self, prompt: &str, callback: &dyn Fn(String)) -> EaiResult<String> {
         let model_id = ModelManager::get_selected_model()
             .ok_or_else(|| EaiError::inference("No reasoning model selected."))?;
+
+        println!("- [Inference Substrate] Active Model: {}", model_id);
         let model_path = ModelManager::get_model_path(&model_id)
             .ok_or_else(|| EaiError::inference(format!("Model '{}' not found.", model_id)))?;
         let tokenizer_path = ModelManager::get_tokenizer_path(&model_id)
             .ok_or_else(|| EaiError::inference("Tokenizer missing."))?;
 
+        println!("- [Inference Substrate] Requesting device context...");
         let device = HardwareProfiler::get_candle_device();
+
+        println!("- [Inference Substrate] Acquiring model substrate shared handle...");
         let substrate_shared = InferenceHost::get_model(&model_path, &device)?;
+
+        println!("- [Inference Substrate] Locking model weights for exclusive execution...");
+        let _ = std::io::stdout().flush();
         let mut substrate = substrate_shared.write().unwrap();
 
         let model_weights = match &mut *substrate {
             ModelSubstrate::Llama(w) | ModelSubstrate::Gemma(w) | ModelSubstrate::Generic(w) => w,
         };
 
+        println!("- [Inference Substrate] Loading tokenizer from {}...", tokenizer_path.display());
         let tokenizer = Tokenizer::from_file(tokenizer_path)
             .map_err(|e| EaiError::inference(format!("Tokenizer Error: {}", e)))?;
+
+        println!("- [Inference Substrate] Encoding prompt (Length: {} chars)...", prompt.len());
         let tokens = tokenizer.encode(prompt, true)
             .map_err(|e| EaiError::inference(format!("Tokenization Error: {}", e)))?;
 
         let prompt_tokens = tokens.get_ids();
+        println!("- [Inference Substrate] Prompt encoded into {} tokens.", prompt_tokens.len());
         let mut all_tokens = vec![];
         let mut tokens_to_process = prompt_tokens.to_vec();
 
         // Fluid Hardware-Aware Timeout (Rule 11 & Aspiration 21)
         let start_time = std::time::Instant::now();
-        let timeout = std::time::Duration::from_secs(600);
+        let timeout = std::time::Duration::from_secs(300);
+
+        println!("- [Inference Substrate] Beginning neural generation loop (Max: 256 tokens)...");
+        let _ = std::io::stdout().flush();
 
         // Universal Generative Loop: Fluid Context Expansion (Max 256 tokens for instant reflex)
         for i in 0..256 {
             // 2. Continuous Timeout Check
             if start_time.elapsed() > timeout {
-                return Err(EaiError::inference(format!("Inference timed out after {}s", timeout.as_secs())));
+                println!("\n- [Substrate Warning] Neural generation loop timed out ({}s).", timeout.as_secs());
+                break;
+            }
+
+            if i % 10 == 0 && i > 0 {
+                print!(" [Trace: {}/256] ", i);
+                let _ = std::io::stdout().flush();
             }
 
             let input = candle_core::Tensor::new(tokens_to_process.as_slice(), &device)

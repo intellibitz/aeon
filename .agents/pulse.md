@@ -1,11 +1,12 @@
 # AEON Substrate Validation Genome (PULSE)
 
-* **Current Engine Version**: `v0.1.2022838`
+* **Current Engine Version**: `v0.1.2022839`
 
 This document defines the complete set of validation protocols that anchor the `aeon` genome. Every entry reflects a hard-compiled reflex or an orchestrated meta-behavior.
 
 ## 1. Pending Failing Pulse
 
+* `144. [ ] **[MISSION]**: aeon version`
 * `144. [ ] **[MISSION]**: query: find dracula lyrics, translate to tamil, show side by side`
 ## 2. Ingested & Resolved Pulse (The Realized Genome)
 

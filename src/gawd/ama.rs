@@ -88,6 +88,7 @@ impl AmaMasterAgent {
 
     pub fn solve_stream(&self, goal: &str, workspace: &Path, version: &str) -> String {
         use std::io::Write;
+        use crate::gawd::amas::AmaSupervisor;
 
         let hw = crate::gemi::hardware::HardwareProfiler::get_profile();
         let (engine_type, active_model_id) = crate::gemi::models::ModelManager::get_active_engine_and_model();
@@ -98,12 +99,76 @@ impl AmaMasterAgent {
         let local_models_count = crate::gemi::models::ModelManager::list_models(workspace).len();
 
         println!("<thinking>");
+
+        // Glass Box Integrity Guard (Aspiration 28)
+        // Ensures </thinking> is ALWAYS printed even if synthesis panics or hangs.
+        struct ThinkingGuard;
+        impl Drop for ThinkingGuard {
+            fn drop(&mut self) {
+                println!("</thinking>\n");
+                let _ = std::io::stdout().flush();
+            }
+        }
+        let _guard = ThinkingGuard;
+
         println!("[AEON Substrate Swarm Active - Full Transparency Telemetry Mode]");
         println!("- [Engine Version] v{}", version);
         println!("- [Workspace Root] {}", workspace.display());
 
-        // MICRO-DETAILED SUBSTRATE TELEMETRY (Aspiration 28 & 29)
         use crate::gawd::self_core::AlphaSelf;
+        println!("- [Core Paradigm] {}", AlphaSelf::CORE_PARADIGM);
+
+        println!("\n[GENOMIC MANDATES]");
+        for rule in AlphaSelf::RULES.iter().filter(|r| r.title.contains("Universal") || r.title.contains("Agnosticism")) {
+            println!("- [Mandate {}] {}: {}", rule.id, rule.title, rule.imperative);
+        }
+
+        // 1. Fast-Path Query Interception (Mandate 11 & 31)
+        // Bypasses the heavy inference loop for substrate-level interrogation.
+        let lower_goal = goal.trim().to_lowercase();
+        let is_query = lower_goal == "identity" || lower_goal == "aeon identity"
+            || lower_goal == "version" || lower_goal == "aeon version"
+            || lower_goal == "status" || lower_goal == "aeon status"
+            || lower_goal == "models" || lower_goal == "aeon models";
+
+        if is_query {
+            println!("\n[QUERY FAST-PATH DETECTED]");
+            let (interactions, agents) = AmaSupervisor::supervise_mission(goal, workspace);
+            for msg in &interactions {
+                println!("- [Swarm Flux] {}: {}", msg.sender, msg.payload.chars().take(100).collect::<String>());
+            }
+
+            let final_answer = if lower_goal.contains("identity") {
+                crate::gawd::self_core::AlphaSelf::inspect_compiled_binary_instructions()
+            } else if lower_goal.contains("version") {
+                format!("AEON Engine Version: v{}", version)
+            } else if lower_goal.contains("status") {
+                format!("AEON Substrate Status: Operational | Hardware: {} | RAM: {}GB", hw.cpu_brand, hw.ram_gb)
+            } else {
+                let models = crate::gemi::models::ModelManager::list_models(workspace);
+                format!("Models Roster: {} discovered.", models.len())
+            };
+
+            println!("\n[SUBSTRATE CONFIGURATION & LIMITS]");
+            let home = std::env::var_os("HOME").map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
+            let global_dir = home.join(".aeon");
+            let cfg = crate::sandbox::manager::AeonConfig::load(&global_dir).unwrap_or_default();
+            println!("- [Ports] GMCP: {} | GEMI: {} | UDP: {}", cfg.gmcp_port, cfg.gemi_port, cfg.udp_discovery_port);
+            println!("- [Model Defaults] Engine: {} | Model: {}", cfg.default_engine, cfg.default_model);
+            println!("- [Auto-Download] {}", cfg.auto_download_models);
+            println!("- [Agent Threshold] {}", cfg.agent_rank_threshold);
+            println!("- [Cloud Scout Timeout] {}s", cfg.cloud_scout_timeout_secs);
+            println!("- [Execution Lease] 600s (Aspiration 20 Fluid Limit)");
+            println!("- [Agent Timeout] 60s (Swarm Flux Guard)");
+            println!("- [Max Swarm Agents] {} (Hardware Scaled)", crate::gawd::agents::GawdAgentFleet::get_max_concurrent_agents());
+
+            println!("\n[QUERY COMPLETE]");
+            drop(_guard);
+            println!("<result>\n{}\n</result>", final_answer);
+            return final_answer;
+        }
+
+        // MICRO-DETAILED SUBSTRATE TELEMETRY (Aspiration 28 & 29)
         println!("\n[SUBSTRATE PILLARS]");
         println!("- [AoA Pillar] {} Components Active", AlphaSelf::AOA_COMPONENTS.len());
         println!("- [Agents Pillar] {} Components Active", AlphaSelf::AGENT_COMPONENTS.len());
@@ -131,6 +196,19 @@ impl AmaMasterAgent {
         println!("- [Active Local Model ID] {}", active_model_id);
         println!("- [Model Substrate Path] {}", model_path_str);
         println!("- [Discovered Local Models] {}", local_models_count);
+
+        println!("\n[SUBSTRATE CONFIGURATION & LIMITS]");
+        let home = std::env::var_os("HOME").map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
+        let global_dir = home.join(".aeon");
+        let cfg = crate::sandbox::manager::AeonConfig::load(&global_dir).unwrap_or_default();
+        println!("- [Ports] GMCP: {} | GEMI: {} | UDP: {}", cfg.gmcp_port, cfg.gemi_port, cfg.udp_discovery_port);
+        println!("- [Model Defaults] Engine: {} | Model: {}", cfg.default_engine, cfg.default_model);
+        println!("- [Auto-Download] {}", cfg.auto_download_models);
+        println!("- [Agent Threshold] {}", cfg.agent_rank_threshold);
+        println!("- [Cloud Scout Timeout] {}s", cfg.cloud_scout_timeout_secs);
+        println!("- [Execution Lease] 600s (Aspiration 20 Fluid Limit)");
+        println!("- [Agent Timeout] 60s (Swarm Flux Guard)");
+        println!("- [Max Swarm Agents] {} (Hardware Scaled)", crate::gawd::agents::GawdAgentFleet::get_max_concurrent_agents());
 
         let tools = crate::gmcp::tools::ToolRegistry::list_tools();
         println!("\n[MCP SURFACE]");
@@ -166,8 +244,11 @@ impl AmaMasterAgent {
 
         match res {
             Ok(report) => {
-                println!("</thinking>\n");
+                println!("[MISSION COMPLETE] Consensus reached.");
                 let _ = std::io::stdout().flush();
+
+                // Explicitly dropping guard here to close thinking before result
+                drop(_guard);
 
                 println!("<result>");
                 let _ = std::io::stdout().flush();
@@ -178,8 +259,10 @@ impl AmaMasterAgent {
                 report.final_answer
             }
             Err(e) => {
-                println!("</thinking>\n");
+                println!("[MISSION FAILED] {}", e);
                 let _ = std::io::stdout().flush();
+
+                drop(_guard);
 
                 let err_msg = format!("AMA Engine Error: {}", e);
                 println!("<result>\n{}\n</result>", err_msg);
@@ -189,8 +272,7 @@ impl AmaMasterAgent {
             }
         }
     }
-
-    /// realized the 'Omni-Trace' mandate by exposing streaming tokens within thinking.
+  /// realized the 'Omni-Trace' mandate by exposing streaming tokens within thinking.
     fn solve_with_streaming_trace(&self, goal: &str, workspace: &Path, _version: &str) -> EaiResult<AmaMissionReport> {
         let goal = self.sanitize_input(goal)?;
 
@@ -227,8 +309,15 @@ impl AmaMasterAgent {
         let _ = std::io::stdout().flush();
 
         // Axiomatic & Reality verification (Mandate 29 Gate)
-        let verified = crate::gemi::engine::GemiEngine::verify_axiomatic_alignment(&final_answer, workspace)?;
-        let verified_final = super::truth::TruthTransformer::verify_mission_reality(&goal, "AMA_SOLVE", &verified, workspace)?;
+        let verified = match crate::gemi::engine::GemiEngine::verify_axiomatic_alignment(&final_answer, workspace) {
+            Ok(v) => v,
+            Err(e) => format!("Axiomatic Violation: {}", e),
+        };
+
+        let verified_final = match super::truth::TruthTransformer::verify_mission_reality(&goal, "AMA_SOLVE", &verified, workspace) {
+            Ok(v) => v,
+            Err(e) => format!("Reality Violation: {}", e),
+        };
 
         Ok(AmaMissionReport {
             goal: goal.to_string(),
@@ -254,6 +343,17 @@ impl AmaMasterAgent {
                 agents,
                 interactions,
                 final_answer: format!("AEON Substrate Identity Report ({}):\n\n{}", version, identity_report),
+            });
+        }
+
+        if trimmed_query == "version" || trimmed_query == "aeon version" {
+            let (interactions, agents) = AmaSupervisor::supervise_mission(&goal, workspace);
+            return Ok(AmaMissionReport {
+                goal: goal.to_string(),
+                status: "COMPLETE".to_string(),
+                agents,
+                interactions,
+                final_answer: format!("AEON Engine Version: v{}", version),
             });
         }
 

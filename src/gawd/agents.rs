@@ -561,6 +561,8 @@ impl GawdAgent for AdminAgent {
         } else if lower_goal.contains("status") || lower_goal.contains("health") {
             let hw = crate::gemi::hardware::HardwareProfiler::get_profile();
             Ok(format!("Substrate Status: v{} | Hardware: {} | CPUs: {} | RAM: {}GB | Status: Operational", crate::AEON_VERSION, hw.cpu_brand, hw.cpus, hw.ram_gb))
+        } else if lower_goal.contains("version") {
+             Ok(format!("AEON Engine Version: v{}", crate::AEON_VERSION))
         } else if lower_goal.contains("identity") {
              let brain = crate::gawd::brain::AlphaBrainContext::initialize(workspace);
              Ok(format!("# AEON Substrate Identity\n\n{}", brain.inspect_tri_state()))
