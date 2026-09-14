@@ -1,6 +1,6 @@
 # SUSI Zero-Mutation Query Protocols
 
-* **Current Engine Version**: `v0.1.2022844`
+* **Current Engine Version**: `v0.1.2022845`
 
 This document defines the absolute zero-mutation execution paths for the `susi` substrate. These protocols bypass all evolutionary and mission-state pipelines. They are strictly read-only and ephemeral.
 

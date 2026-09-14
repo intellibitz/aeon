@@ -1,6 +1,6 @@
 # SUSI Alpha-World Evolution Protocols (Missions)
 
-* **Current Engine Version**: `v0.1.2022844`
+* **Current Engine Version**: `v0.1.2022845`
 
 This document defines the mutable execution paths for the `susi` substrate. These protocols operate within the `alpha-world` space, allowing the swarm to generate artifacts, manipulate the workspace, and distill experience without modifying the hard-compiled `alpha-self` core.
 
