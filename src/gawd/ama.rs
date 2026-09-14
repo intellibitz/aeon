@@ -95,21 +95,52 @@ impl AmaMasterAgent {
             .map(|p| p.display().to_string())
             .unwrap_or_else(|| "Internal Hard-Compiled Substrate Genome".to_string());
         let device = crate::gemi::hardware::HardwareProfiler::get_candle_device();
-        let tools_count = crate::gmcp::tools::ToolRegistry::list_tools().len();
         let local_models_count = crate::gemi::models::ModelManager::list_models(workspace).len();
 
         println!("<thinking>");
         println!("[AEON Substrate Swarm Active - Full Transparency Telemetry Mode]");
         println!("- [Engine Version] v{}", version);
         println!("- [Workspace Root] {}", workspace.display());
+
+        // MICRO-DETAILED SUBSTRATE TELEMETRY (Aspiration 28 & 29)
+        use crate::gawd::self_core::AlphaSelf;
+        println!("\n[SUBSTRATE PILLARS]");
+        println!("- [AoA Pillar] {} Components Active", AlphaSelf::AOA_COMPONENTS.len());
+        println!("- [Agents Pillar] {} Components Active", AlphaSelf::AGENT_COMPONENTS.len());
+        println!("- [Engines Pillar] {} Components Active", AlphaSelf::ENGINE_COMPONENTS.len());
+        for engine in AlphaSelf::ENGINE_COMPONENTS {
+            println!("  - [{:?}] {}: {}", engine.tier, engine.name, engine.description);
+        }
+        println!("- [Models Pillar] {} Components Active", AlphaSelf::MODEL_COMPONENTS.len());
+        for model_pillar in AlphaSelf::MODEL_COMPONENTS {
+            println!("  - [{:?}] {}: {}", model_pillar.tier, model_pillar.name, model_pillar.description);
+        }
+        println!("- [MCPs Pillar] {} Components Active", AlphaSelf::MCP_COMPONENTS.len());
+
+        println!("\n[HARDWARE INTROSPECTION]");
+        println!("- [OS/Arch] {} | {}", hw.os_info, hw.arch);
+        println!("- [Hostname] {}", hw.hostname);
+        println!("- [Uptime] {}", hw.uptime);
+        println!("- [Load Avg] {}", hw.load_avg);
+        println!("- [Hardware Profile] {} CPUs ({}) | {}GB RAM | GPU: {}", hw.cpus, hw.cpu_brand, hw.ram_gb, hw.gpu_info);
+        println!("- [Acceleration] {}", hw.native_acceleration);
+
+        println!("\n[MODEL SUBSTRATE DEEP-DIVE]");
         println!("- [GEMI Engine Substrate] {} (REST Port: 9091 | MCP Bus: 9090)", engine_type);
         println!("- [Inference Host Device] Candle Native Rust ({:?})", device);
         println!("- [Active Local Model ID] {}", active_model_id);
         println!("- [Model Substrate Path] {}", model_path_str);
         println!("- [Discovered Local Models] {}", local_models_count);
-        println!("- [Hardware Profile] {} CPUs ({}) | {}GB RAM | GPU: {}", hw.cpus, hw.cpu_brand, hw.ram_gb, hw.gpu_info);
-        println!("- [Substrate Surface] {} Meta-Tools Registered", tools_count);
-        println!("- [Goal Intent] {}", goal);
+
+        let tools = crate::gmcp::tools::ToolRegistry::list_tools();
+        println!("\n[MCP SURFACE]");
+        println!("- [Meta-Tools] {} Registered", tools.len());
+        for tool in tools.iter().take(20) {
+             println!("  - [Tool] {}: {}", tool.name, tool.description.chars().take(80).collect::<String>());
+        }
+        if tools.len() > 20 { println!("  - ... and {} more", tools.len() - 20); }
+
+        println!("\n- [Goal Intent] {}", goal);
 
         // Phase D: Omni-Trace thinking Synthesis (Aspiration 29)
         println!("\n[UNIVERSAL TRACE START]");

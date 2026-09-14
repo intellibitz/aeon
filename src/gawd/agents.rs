@@ -866,6 +866,9 @@ impl GawdAgentFleet {
         let mut results = Vec::new();
         let (tx, rx) = std::sync::mpsc::channel();
 
+        println!("- [Swarm Dispatch] Initializing parallel execution for {} agents...", agents_len);
+        let _ = std::io::stdout().flush();
+
         for agent in agents {
             let g = goal.clone();
             let w = workspace.clone();
@@ -873,6 +876,7 @@ impl GawdAgentFleet {
             let tx_clone = tx.clone();
             std::thread::spawn(move || {
                 let name = agent.name();
+                let start = std::time::Instant::now();
                 let (sub_tx, sub_rx) = std::sync::mpsc::channel();
                 std::thread::spawn(move || {
                     let res = agent.execute(&g, &w, &bb).unwrap_or_else(|e| format!("Agent Execution Failed: {}", e));
@@ -883,30 +887,23 @@ impl GawdAgentFleet {
                     Ok(r) => r,
                     Err(_) => "[TIMEOUT] Agent execution exceeded hardware limit (60s).".to_string(),
                 };
-                let _ = tx_clone.send((name, res));
+                let elapsed = start.elapsed();
+                let _ = tx_clone.send((name, res, elapsed));
             });
         }
         drop(tx);
 
-        let mut received_count = 0;
-        let total_agents = agents_len; // Use the local variable
-
-        while let Ok((name, res)) = rx.recv() {
-            received_count += 1;
+        while let Ok((name, res, elapsed)) = rx.recv() {
             if !res.trim().is_empty() && !res.contains("Query reflex audited") {
                 // Stream detailed component trace live into thinking block
                 let line_count = res.lines().count();
                 if line_count > 1 {
-                    println!("- [Swarm Flux Trace] {}: [Generated {} lines of payload/content]", name, line_count);
+                    println!("- [Swarm Flux Trace] {}: [Generated {} lines of payload/content] (Latency: {:?})", name, line_count, elapsed);
                 } else {
-                    println!("- [Swarm Flux Trace] {}: {}", name, res.trim());
+                    println!("- [Swarm Flux Trace] {}: {} (Latency: {:?})", name, res.trim(), elapsed);
                 }
             }
             results.push((name, res));
-
-            if received_count < total_agents {
-                 // println!("- [Swarm Status] {}/{} agents converged...", received_count, total_agents);
-            }
             let _ = std::io::stdout().flush();
         }
 

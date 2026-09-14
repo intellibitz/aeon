@@ -129,6 +129,8 @@ impl AmaSupervisor {
         let blackboard: MissionBlackboard = Arc::new(RwLock::new(super::agents::HighDensityContextStore::new(1024)));
 
         // 2. Dynamic Fleet Synthesis
+        println!("- [Swarm Synthesis] Analyzing goal intent for recruitment...");
+        let _ = std::io::stdout().flush();
         let agents = GawdAgentFleet::synthesize_fleet(goal, workspace);
         let fleet_info: Vec<GawdAgentInfo> = agents.iter().map(|a| GawdAgentInfo {
             name: a.name(),
@@ -137,9 +139,9 @@ impl AmaSupervisor {
             rank: a.rank()
         }).collect();
 
-        use std::io::Write;
+        println!("- [Fleet Composition] recruited {} specialist agents:", fleet_info.len());
         for agent in &fleet_info {
-            println!("- [Agent] {} ({})", agent.name, agent.provider);
+            println!("  - [Agent] {} (Rank: {:.2}) via {}", agent.name, agent.rank, agent.provider);
             let _ = std::io::stdout().flush();
         }
 
