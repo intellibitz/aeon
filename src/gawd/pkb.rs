@@ -72,7 +72,7 @@ impl ProtocolKnowledgeBase {
         let mut pair = format!("INTENT: {}\n", intent);
 
         let workspace = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("."));
-        let bb = std::sync::Arc::new(std::sync::RwLock::new(super::agents::HighDensityContextStore::new(10)));
+        let bb = std::sync::Arc::new(super::agents::HighDensityContextStore::new(10));
 
         let safety = super::agents::SafetyAgent;
         if let Ok(res) = safety.execute(intent, &workspace, &bb) {

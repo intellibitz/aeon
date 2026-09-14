@@ -5,8 +5,8 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf, Component};
 use std::process::Command;
-use std::sync::{Arc, RwLock, OnceLock};
-use std::collections::HashMap;
+use std::sync::{Arc, OnceLock};
+use dashmap::DashMap;
 use serde::{Deserialize, Serialize};
 
 use crate::gmcp::client::GmcpClient;
@@ -86,8 +86,8 @@ fn secure_path(workspace: &Path, user_path: &str) -> EaiResult<PathBuf> {
 }
 
 pub struct ToolRegistry {
-    tools: RwLock<HashMap<String, Arc<dyn AeonTool>>>,
-    locks: Arc<RwLock<HashMap<String, u64>>>,
+    pub tools: DashMap<String, Arc<dyn AeonTool>>,
+    pub locks: DashMap<String, u64>,
 }
 
 impl ToolRegistry {
@@ -95,8 +95,8 @@ impl ToolRegistry {
         static REGISTRY: OnceLock<ToolRegistry> = OnceLock::new();
         REGISTRY.get_or_init(|| {
             let registry = ToolRegistry {
-                tools: RwLock::new(HashMap::new()),
-                locks: Arc::new(RwLock::new(HashMap::new())),
+                tools: DashMap::new(),
+                locks: DashMap::new(),
             };
             registry.bootstrap();
             registry
@@ -104,11 +104,9 @@ impl ToolRegistry {
     }
 
     fn bootstrap(&self) {
-        let mut tools = self.tools.write().unwrap();
-
         // INTERNAL META-CAPABILITIES (Tier 0 & 1 Primitives)
 
-        Self::register_meta_tool(&mut tools, "status", "AEON Substrate status report", MetaCategory::SystemPrimitive, |_arg, _ws| {
+        Self::register_meta_tool(self, "status", "AEON Substrate status report", MetaCategory::SystemPrimitive, |_arg, _ws| {
             let hardware = HardwareProfiler::get_profile();
             let mut out = format!("AEON Engine Version: {}\n", crate::AEON_VERSION);
             out.push_str(&format!("System Environment: {} CPUs | RAM: {}GB | {}\n", hardware.cpus, hardware.ram_gb, hardware.gpu_info));
@@ -116,7 +114,7 @@ impl ToolRegistry {
             Ok(out)
         });
 
-        Self::register_meta_tool(&mut tools, "identity", "AEON substrate identity report", MetaCategory::SystemPrimitive, |_arg, workspace| {
+        Self::register_meta_tool(self, "identity", "AEON substrate identity report", MetaCategory::SystemPrimitive, |_arg, workspace| {
             let brain = crate::gawd::brain::AlphaBrainContext::initialize(workspace);
             let mut report = String::new();
             report.push_str("# aeon Substrate - Identity Report\n\n");
@@ -134,21 +132,21 @@ impl ToolRegistry {
             Ok(report)
         });
 
-        Self::register_meta_tool(&mut tools, "distill_genome", "Distill the hard-compiled genome into the Tier 2 reasoning model", MetaCategory::SystemPrimitive, |_arg, workspace| {
+        Self::register_meta_tool(self, "distill_genome", "Distill the hard-compiled genome into the Tier 2 reasoning model", MetaCategory::SystemPrimitive, |_arg, workspace| {
             match crate::gawd::reason_trainer::ReasoningTrainer::audit_reasoning_substrate(workspace) {
                 Ok(report) => Ok(format!("# Genome Distillation Successful\n\n{}", report)),
                 Err(e) => Ok(format!("# Genome Distillation Failed\n\nError: {}", e)),
             }
         });
 
-        Self::register_meta_tool(&mut tools, "self_validate", "Execute autonomous substrate self-validation", MetaCategory::SystemPrimitive, |_arg, workspace| {
+        Self::register_meta_tool(self, "self_validate", "Execute autonomous substrate self-validation", MetaCategory::SystemPrimitive, |_arg, workspace| {
             match crate::daemon::runtime_admin::AeonRuntimeAdmin::execute_autonomous_self_validation(workspace) {
                 Ok(report) => Ok(format!("# Substrate Self-Validation Successful\n\n{}", report)),
                 Err(e) => Ok(format!("# Substrate Self-Validation Failed\n\nError: {}", e)),
             }
         });
 
-        Self::register_meta_tool(&mut tools, "list_models", "List available model substrates", MetaCategory::SystemPrimitive, |_arg, workspace| {
+        Self::register_meta_tool(self, "list_models", "List available model substrates", MetaCategory::SystemPrimitive, |_arg, workspace| {
             let models = ModelManager::list_models(workspace);
             let mut out = format!("Active Model Substrates (Count: {})\n\n", models.len());
             for m in &models {
@@ -157,7 +155,7 @@ impl ToolRegistry {
             Ok(out)
         });
 
-        Self::register_meta_tool(&mut tools, "select_model", "Select or override active model substrate", MetaCategory::SystemPrimitive, |arg, _workspace| {
+        Self::register_meta_tool(self, "select_model", "Select or override active model substrate", MetaCategory::SystemPrimitive, |arg, _workspace| {
             let arg_s = arg.as_str().unwrap_or("");
             if arg_s.trim().is_empty() {
                 return Ok("Usage: select_model <model_name_or_id>".to_string());
@@ -165,7 +163,7 @@ impl ToolRegistry {
             ModelManager::set_selected_model(arg_s.trim()).map_err(EaiError::config)
         });
 
-        Self::register_meta_tool(&mut tools, "scout_model", "Scout or install model substrate", MetaCategory::SystemPrimitive, |arg, _workspace| {
+        Self::register_meta_tool(self, "scout_model", "Scout or install model substrate", MetaCategory::SystemPrimitive, |arg, _workspace| {
             let arg_s = arg.as_str().unwrap_or("");
             if arg_s.trim().is_empty() {
                 return Ok("Usage: scout_model <model_name_or_url>".to_string());
@@ -174,18 +172,18 @@ impl ToolRegistry {
             Ok(res)
         });
 
-        Self::register_meta_tool(&mut tools, "train_reflexes", "Manually trigger native neural reflex distillation", MetaCategory::SystemPrimitive, |_arg, workspace| {
+        Self::register_meta_tool(self, "train_reflexes", "Manually trigger native neural reflex distillation", MetaCategory::SystemPrimitive, |_arg, workspace| {
             crate::gawd::reflex_trainer::ReflexTrainer::force_train(workspace)
         });
 
-        Self::register_meta_tool(&mut tools, "read_file", "Read file content in workspace", MetaCategory::WorkspaceIo, |arg, workspace| {
+        Self::register_meta_tool(self, "read_file", "Read file content in workspace", MetaCategory::WorkspaceIo, |arg, workspace| {
             let arg_s = arg.as_str().ok_or_else(|| EaiError::protocol("Invalid argument type"))?;
             let path = secure_path(workspace, arg_s)?;
             let content = fs::read_to_string(&path).map_err(|e| EaiError::filesystem(e.to_string()))?;
             Ok(content)
         });
 
-        Self::register_meta_tool(&mut tools, "write_file", "Write content to workspace file", MetaCategory::WorkspaceIo, |arg, workspace| {
+        Self::register_meta_tool(self, "write_file", "Write content to workspace file", MetaCategory::WorkspaceIo, |arg, workspace| {
             let path_s = arg.get("path").and_then(|v| v.as_str());
             let content_s = arg.get("content").and_then(|v| v.as_str());
 
@@ -199,7 +197,7 @@ impl ToolRegistry {
             }
         });
 
-        Self::register_meta_tool(&mut tools, "exec_command", "Execute command in workspace", MetaCategory::WorkspaceIo, |arg, workspace| {
+        Self::register_meta_tool(self, "exec_command", "Execute command in workspace", MetaCategory::WorkspaceIo, |arg, workspace| {
             let arg_s = arg.as_str().ok_or_else(|| EaiError::protocol("Invalid argument type"))?;
             let clean = arg_s.trim();
             if clean.is_empty() { return Err(EaiError::protocol("Usage: exec_command <cmd>")); }
@@ -229,7 +227,7 @@ impl ToolRegistry {
             }
         });
 
-        Self::register_meta_tool(&mut tools, "mcp_registry", "Interrogate global MCP registry and benchmark servers", MetaCategory::McpProxy, |_arg, _ws| {
+        Self::register_meta_tool(self, "mcp_registry", "Interrogate global MCP registry and benchmark servers", MetaCategory::McpProxy, |_arg, _ws| {
             let entries = GmcpClient::autonomous_web_scout();
             let mut out = format!("Global MCP Substrate Roster (Count: {})\n\n", entries.len());
             for e in &entries {
@@ -240,7 +238,7 @@ impl ToolRegistry {
             Ok(out)
         });
 
-        Self::register_meta_tool(&mut tools, "mcp_configure", "Configure external MCP server", MetaCategory::McpProxy, |arg, _ws| {
+        Self::register_meta_tool(self, "mcp_configure", "Configure external MCP server", MetaCategory::McpProxy, |arg, _ws| {
             let name = arg.get("name").and_then(|v| v.as_str())
                 .or_else(|| arg.as_str().and_then(|s| s.split_whitespace().next()));
             let package = arg.get("package").and_then(|v| v.as_str())
@@ -255,7 +253,7 @@ impl ToolRegistry {
             }
         });
 
-        Self::register_meta_tool(&mut tools, "agent_register", "Dynamically register a new agent profile", MetaCategory::IntelligenceBridge, |arg, _ws| {
+        Self::register_meta_tool(self, "agent_register", "Dynamically register a new agent profile", MetaCategory::IntelligenceBridge, |arg, _ws| {
             let name = arg.get("name").and_then(|v| v.as_str());
             let desc = arg.get("description").and_then(|v| v.as_str());
             let cats = arg.get("categories").and_then(|v| v.as_str());
@@ -289,13 +287,13 @@ impl ToolRegistry {
             }
         });
 
-        Self::register_meta_tool(&mut tools, "reason", "Execute swarm reasoning substrate", MetaCategory::SystemPrimitive, |arg, workspace| {
+        Self::register_meta_tool(self, "reason", "Execute swarm reasoning substrate", MetaCategory::SystemPrimitive, |arg, workspace| {
              let arg_s = if let Some(s) = arg.as_str() { s.to_string() } else { arg.to_string() };
              Ok(crate::gemi::engine::GemiEngine::generate_reasoning_deep(&arg_s, workspace))
         });
 
         // 5. Meta-Intelligence Bridge Primitives
-        Self::register_meta_tool(&mut tools, "power_reason", "Delegate complex reasoning to Power-Tier MCP remotes", MetaCategory::IntelligenceBridge, |arg, _ws| {
+        Self::register_meta_tool(self, "power_reason", "Delegate complex reasoning to Power-Tier MCP remotes", MetaCategory::IntelligenceBridge, |arg, _ws| {
             let arg_s = if let Some(s) = arg.as_str() { s.to_string() } else { arg.to_string() };
             if arg_s.trim().is_empty() {
                 return Err(EaiError::protocol("Usage: power_reason <complex_intent>"));
@@ -313,7 +311,7 @@ impl ToolRegistry {
             Err(EaiError::protocol("No Power-Tier reasoning remotes configured or available. AEON local reasoning active."))
         });
 
-        Self::register_meta_tool(&mut tools, "meta_scout_agents", "Discover agent capabilities from connected remotes", MetaCategory::IntelligenceBridge, |_arg, _ws| {
+        Self::register_meta_tool(self, "meta_scout_agents", "Discover agent capabilities from connected remotes", MetaCategory::IntelligenceBridge, |_arg, _ws| {
             let remotes = GmcpClient::list_external_tools();
             let mut report = "Discovered Meta-Agent Capabilities:\n\n".to_string();
             for r in remotes {
@@ -324,7 +322,7 @@ impl ToolRegistry {
             Ok(report)
         });
 
-        Self::register_meta_tool(&mut tools, "meta_rank_agents", "Report current agent expertise hierarchy", MetaCategory::IntelligenceBridge, |_arg, _ws| {
+        Self::register_meta_tool(self, "meta_rank_agents", "Report current agent expertise hierarchy", MetaCategory::IntelligenceBridge, |_arg, _ws| {
             let registry = crate::gawd::agents::AgentMetaRegistry::global();
             let agents = registry.list_agents();
             let mut report = "AEON Expertise Hierarchy:\n\n".to_string();
@@ -335,7 +333,7 @@ impl ToolRegistry {
         });
 
         // DYNAMIC DISCOVERY: Synthesized Native Reflexes (Rule 11)
-        crate::gmcp::reflexes::register_synthesized_reflexes(&mut tools);
+        crate::gmcp::reflexes::register_synthesized_reflexes(self);
 
         // Zero-Config Auto-Link: Ensure essential MCP tools are mapped (Non-Blocking Mandate)
         std::thread::spawn(|| {
@@ -343,37 +341,8 @@ impl ToolRegistry {
         });
     }
 
-    /// Zero-Config Autonomous Tool Linking (Rule 21 Hardening)
-    pub fn auto_link_essential_mcp_servers() {
-        let registry = GmcpClient::fetch_global_registry();
-        let config_path = GmcpClient::get_config_path();
-
-        let config_exists = config_path.exists();
-        let mut essential_found = false;
-
-        if config_exists {
-            if let Ok(content) = fs::read_to_string(&config_path) {
-                if let Ok(config) = serde_json::from_str::<super::McpConfig>(&content) {
-                    essential_found = !config.mcp_servers.is_empty();
-                }
-            }
-        }
-
-        if !essential_found {
-            if std::env::var("AEON_VERBOSE").is_ok() {
-                eprintln!("[GMCP] No external tools configured. Auto-linking essential substrates...");
-            }
-            let essentials = ["brave_search", "filesystem", "google_search", "github", "google_maps"];
-            for e in essentials {
-                if let Some(entry) = registry.iter().find(|r| r.name == e) {
-                    let _res = GmcpClient::auto_configure_server(&entry.name, &entry.package);
-                }
-            }
-        }
-    }
-
     fn register_meta_tool<F>(
-        tools: &mut HashMap<String, Arc<dyn AeonTool>>,
+        registry: &ToolRegistry,
         name: &str,
         desc: &str,
         category: MetaCategory,
@@ -387,14 +356,13 @@ impl ToolRegistry {
             category,
             handler: Arc::new(handler),
         };
-        tools.insert(name.to_string(), Arc::new(tool));
+        registry.tools.insert(name.to_string(), Arc::new(tool));
     }
 
     pub fn list_tools() -> Vec<McpTool> {
         let registry = Self::global();
-        let mut tools: Vec<McpTool> = registry.tools.read().unwrap()
-            .values()
-            .map(|t| McpTool { name: t.name(), description: t.description() })
+        let mut tools: Vec<McpTool> = registry.tools.iter()
+            .map(|r| McpTool { name: r.key().clone(), description: r.value().description() })
             .collect();
 
         tools.extend(GmcpClient::list_external_tools());
@@ -423,8 +391,7 @@ impl ToolRegistry {
 
     pub fn exists(name: &str) -> bool {
         let registry = Self::global();
-        let tools = registry.tools.read().unwrap();
-        if tools.contains_key(name) {
+        if registry.tools.contains_key(name) {
             return true;
         }
         let lower_name = name.to_lowercase();
@@ -456,8 +423,7 @@ impl ToolRegistry {
         }
 
         let registry = Self::global();
-        let tools = registry.tools.read().unwrap();
-        if let Some(tool) = tools.get(name) {
+        if let Some(tool) = registry.tools.get(name) {
             match tool.execute(arg, workspace) {
                 Ok(res) => res,
                 Err(e) => format!("{}", e),
@@ -506,20 +472,47 @@ impl ToolRegistry {
         let registry = Self::global();
         let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs();
 
-        let mut locks = registry.locks.write().unwrap();
-        if let Some(&timestamp) = locks.get(resource_id) {
+        if let Some(timestamp) = registry.locks.get(resource_id) {
             // Lease-Based Timed Locks (300s TTL)
-            if now - timestamp < 300 {
+            if now - *timestamp < 300 {
                 return false;
             }
         }
-        locks.insert(resource_id.to_string(), now);
+        registry.locks.insert(resource_id.to_string(), now);
         true
     }
 
     pub fn release_meta_lock(resource_id: &str) {
         let registry = Self::global();
-        let mut locks = registry.locks.write().unwrap();
-        locks.remove(resource_id);
+        registry.locks.remove(resource_id);
+    }
+
+    /// Zero-Config Autonomous Tool Linking (Rule 21 Hardening)
+    pub fn auto_link_essential_mcp_servers() {
+        let registry = GmcpClient::fetch_global_registry();
+        let config_path = GmcpClient::get_config_path();
+
+        let config_exists = config_path.exists();
+        let mut essential_found = false;
+
+        if config_exists {
+            if let Ok(content) = fs::read_to_string(&config_path) {
+                if let Ok(config) = serde_json::from_str::<crate::gmcp::McpConfig>(&content) {
+                    essential_found = !config.mcp_servers.is_empty();
+                }
+            }
+        }
+
+        if !essential_found {
+            if std::env::var("AEON_VERBOSE").is_ok() {
+                eprintln!("[GMCP] No external tools configured. Auto-linking essential substrates...");
+            }
+            let essentials = ["brave_search", "filesystem", "google_search", "github", "google_maps"];
+            for e in essentials {
+                if let Some(entry) = registry.iter().find(|r| r.name == e) {
+                    let _res = GmcpClient::auto_configure_server(&entry.name, &entry.package);
+                }
+            }
+        }
     }
 }

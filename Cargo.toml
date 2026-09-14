@@ -1,6 +1,6 @@
 [package]
 name = "aeon-engine"
-version = "0.1.2022840"
+version = "0.1.2022841"
 edition = "2021"
 authors = ["IntelliBitz", "Muthu Ramadoss", "AEON EAI Core"]
 description = "aeon-engine: EAI: Exponential Intelligence for Any AI. - GAWD, GEMI & GMCP Multi-Agent Engine"
@@ -15,6 +15,10 @@ candle-transformers = { version = "0.8.4" }
 tokenizers = "0.21.0"
 hf-hub = "0.4.1"
 anyhow = "1.0"
+clap = { version = "4.5", features = ["derive", "env"] }
+dashmap = "6.0"
+indicatif = "0.17"
+reqwest = { version = "0.12", features = ["json", "blocking"] }
 ureq = { version = "2.12", features = ["json", "tls"] }
 rustyline = "15.0"
 wasmer = { version = "3.1", features = ["cranelift", "sys"] }
@@ -29,7 +33,8 @@ shlex = "1.3"
 signal-hook = "0.3"
 md5 = "0.7"
 log = "0.4"
-env_logger = "0.11"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 sha2 = "0.10"
 tokio = { version = "1.37", features = ["full", "tracing"] }
 console-subscriber = "0.2"

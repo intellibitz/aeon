@@ -4,7 +4,7 @@
 
 use std::sync::{Arc, RwLock, OnceLock};
 use std::path::{Path, PathBuf};
-use std::collections::HashMap;
+use dashmap::DashMap;
 use crate::error::EaiResult;
 use serde::{Deserialize, Serialize};
 
@@ -35,29 +35,37 @@ pub struct AgentProfile {
 
 /// High-Density Context Store (Aspiration 6)
 /// Implements lease-capped, memory-safe distributed context mapping.
-#[derive(Debug, Default)]
+/// Optimized for Lock-Free Native Substrate (Aspiration 24) using DashMap.
+#[derive(Debug)]
 pub struct HighDensityContextStore {
-    inner: HashMap<String, String>,
+    inner: DashMap<String, String>,
     capacity_limit: usize,
+}
+
+impl Default for HighDensityContextStore {
+    fn default() -> Self {
+        Self::new(1024)
+    }
 }
 
 impl HighDensityContextStore {
     pub fn new(capacity: usize) -> Self {
-        Self { inner: HashMap::new(), capacity_limit: capacity }
+        Self { inner: DashMap::new(), capacity_limit: capacity }
     }
 
-    pub fn insert(&mut self, key: String, value: String) {
+    pub fn insert(&self, key: String, value: String) {
         if self.inner.len() >= self.capacity_limit && !self.inner.contains_key(&key) {
             // Mandate: Strict LRU or oldest key removal
-            if let Some(old_key) = self.inner.keys().next().cloned() {
-                self.inner.remove(&old_key);
+            // For DashMap we just remove a random key if we are over capacity
+            if let Some(key_to_remove) = self.inner.iter().next().map(|r| r.key().clone()) {
+                self.inner.remove(&key_to_remove);
             }
         }
         self.inner.insert(key, value);
     }
 
-    pub fn get(&self, key: &str) -> Option<&String> {
-        self.inner.get(key)
+    pub fn get(&self, key: &str) -> Option<String> {
+        self.inner.get(key).map(|r| r.value().clone())
     }
 
     pub fn contains_key(&self, key: &str) -> bool {
@@ -68,18 +76,22 @@ impl HighDensityContextStore {
         self.inner.is_empty()
     }
 
-    pub fn iter(&self) -> std::collections::hash_map::Iter<'_, String, String> {
+    pub fn iter(&self) -> dashmap::iter::Iter<'_, String, String> {
         self.inner.iter()
     }
 
     pub fn to_json(&self) -> String {
-        serde_json::to_string(&self.inner).unwrap_or_else(|_| "{}".into())
+        let mut map = std::collections::HashMap::new();
+        for r in self.inner.iter() {
+            map.insert(r.key().clone(), r.value().clone());
+        }
+        serde_json::to_string(&map).unwrap_or_else(|_| "{}".into())
     }
 }
 
 /// Mission Blackboard: Shared state for swarm agents to converge on the "Chain of Truth".
-/// Optimized for High-Density Context Mapping (Aspiration 6).
-pub type MissionBlackboard = Arc<RwLock<HighDensityContextStore>>;
+/// Optimized for High-Density Context Mapping (Aspiration 6) and Lock-Free Substrate (Aspiration 24).
+pub type MissionBlackboard = Arc<HighDensityContextStore>;
 
 /// Core Intelligence Trait for AEON Swarm Agents
 pub trait GawdAgent: Send + Sync {
@@ -112,15 +124,11 @@ impl GawdAgent for DynamicAgent {
 
         if is_query_or_specialist_task {
             let res = format!("[{}]: Task coordinated and verified across swarm.", self.agent_name);
-            let mut bb = blackboard.write().unwrap();
-            bb.insert(self.agent_name.clone(), res.clone());
+            blackboard.insert(self.agent_name.clone(), res.clone());
             return Ok(res);
         }
 
-        let bb_state = {
-            let data = blackboard.read().unwrap();
-            data.to_json()
-        };
+        let bb_state = blackboard.to_json();
 
         let prompt = format!(
             "AGENT_ROLE: {}\nMISSION_PROFILE: {}\nGOAL: {}\n\n[BLACKBOARD_CONTEXT]: {}\n\n[INSTRUCTION]: Fulfill your role in the swarm. Use current blackboard state to coordinate and avoid redundancy. Output verified actions only.",
@@ -136,8 +144,7 @@ impl GawdAgent for DynamicAgent {
              crate::gemi::engine::GemiEngine::generate_reasoning(&prompt, &ws)
         };
 
-        let mut bb = blackboard.write().unwrap();
-        bb.insert(self.agent_name.clone(), res.clone());
+        blackboard.insert(self.agent_name.clone(), res.clone());
         Ok(res)
     }
 }
@@ -204,8 +211,7 @@ impl GawdAgent for SafetyAgent {
     fn execute(&self, goal: &str, workspace: &Path, blackboard: &MissionBlackboard) -> EaiResult<String> {
         crate::gawd::safety::SafetyDetector::audit_action("SWARM_SOLVE", goal, workspace)?;
         let res = "Safety protocols verified. No destructive patterns detected.".to_string();
-        let mut bb = blackboard.write().unwrap();
-        bb.insert(self.name(), res.clone());
+        blackboard.insert(self.name(), res.clone());
         Ok(res)
     }
 }
@@ -219,8 +225,7 @@ impl GawdAgent for SecurityAgent {
     fn execute(&self, goal: &str, workspace: &Path, blackboard: &MissionBlackboard) -> EaiResult<String> {
         crate::gawd::security::SecurityDetector::audit_action("SWARM_SOLVE", goal, workspace)?;
         let res = "Security audit passed. No secret leaks or exfiltration vectors detected.".to_string();
-        let mut bb = blackboard.write().unwrap();
-        bb.insert(self.name(), res.clone());
+        blackboard.insert(self.name(), res.clone());
         Ok(res)
     }
 }
@@ -235,8 +240,7 @@ impl GawdAgent for EvolutionAgent {
         let lower = goal.to_lowercase();
         if lower.contains("identity") || lower.contains("status") || lower.contains("models") || lower.contains("version") {
             let res = "Evolutionary health: Substrate Optimal.".to_string();
-            let mut bb = blackboard.write().unwrap();
-            bb.insert(self.name(), res.clone());
+            blackboard.insert(self.name(), res.clone());
             return Ok(res);
         }
 
@@ -245,8 +249,7 @@ impl GawdAgent for EvolutionAgent {
             let _ = crate::daemon::evolution::EvolutionManager::perform_autonomous_drift_audit(&ws);
         });
         let res = "Evolutionary health: Substrate Optimal.".to_string();
-        let mut bb = blackboard.write().unwrap();
-        bb.insert(self.name(), res.clone());
+        blackboard.insert(self.name(), res.clone());
         Ok(res)
     }
 }
@@ -494,8 +497,7 @@ Dracula, Dracula, Dracula".to_string()
             format!("[SearchAgent]: Retrieved search knowledge for intent: {}", goal)
         };
 
-        let mut bb = blackboard.write().unwrap();
-        bb.insert(self.name(), res.clone());
+        blackboard.insert(self.name(), res.clone());
         Ok(res)
     }
 }
@@ -535,8 +537,7 @@ impl GawdAgent for TranslationAgent {
             format!("[TranslationAgent]: Processed multilingual translation for intent: {}", goal)
         };
 
-        let mut bb = blackboard.write().unwrap();
-        bb.insert(self.name(), res.clone());
+        blackboard.insert(self.name(), res.clone());
         Ok(res)
     }
 }
@@ -591,8 +592,7 @@ impl GawdAgent for AdminAgent {
             Ok("AdminAgent: Monitoring technical intent...".to_string())
         }?;
 
-        let mut bb = blackboard.write().unwrap();
-        bb.insert(self.name(), res.clone());
+        blackboard.insert(self.name(), res.clone());
         Ok(res)
     }
 }
@@ -936,17 +936,16 @@ mod tests {
 
     #[test]
     fn test_blackboard_convergence() {
-        let bb = Arc::new(std::sync::RwLock::new(HighDensityContextStore::new(100)));
+        let bb = Arc::new(HighDensityContextStore::new(100));
         // Skip actual execution in unit test to avoid hang/inference dependency
         // let agent = DynamicAgent { agent_name: "TestAgent".into(), mission_profile: "Test".into(), agent_rank: 0.5 };
         // let _ = agent.execute("test goal", Path::new("."), &bb);
 
-        let mut data = bb.write().unwrap();
         // Manually insert for test if reasoning fails in environment without weights
-        if !data.contains_key("TestAgent") {
-            data.insert("TestAgent".into(), "Converged".into());
+        if !bb.contains_key("TestAgent") {
+            bb.insert("TestAgent".into(), "Converged".into());
         }
-        assert!(data.contains_key("TestAgent"));
+        assert!(bb.contains_key("TestAgent"));
     }
 
     #[test]

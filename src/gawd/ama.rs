@@ -5,6 +5,7 @@
 use std::path::Path;
 use std::io::Write;
 use serde::{Deserialize, Serialize};
+use tracing::info_span;
 use crate::error::EaiResult;
 use super::agents::GawdAgentInfo;
 use super::amas::{A2AMessage, AmaSupervisor};
@@ -225,6 +226,9 @@ impl AmaMasterAgent {
         let _ = std::io::stdout().flush();
 
         let start = std::time::Instant::now();
+
+        let span = info_span!("solve_stream", goal = %goal);
+        let _enter = span.enter();
 
         // Real-time trace injection (Mandate 28 & Aspiration 30)
         let res = self.solve_with_streaming_trace(goal, workspace, version);

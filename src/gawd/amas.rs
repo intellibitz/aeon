@@ -126,7 +126,8 @@ impl AmaSupervisor {
 
     pub fn supervise_mission(goal: &str, workspace: &Path) -> (Vec<A2AMessage>, Vec<GawdAgentInfo>) {
         // 1. Initialize Mission Blackboard (High-Density Context Store with 1024 entry lease cap)
-        let blackboard: MissionBlackboard = Arc::new(RwLock::new(super::agents::HighDensityContextStore::new(1024)));
+        // Optimized for Lock-Free Swarm Execution (Aspiration 24)
+        let blackboard: MissionBlackboard = Arc::new(super::agents::HighDensityContextStore::new(1024));
 
         // 2. Dynamic Fleet Synthesis
         println!("- [Swarm Synthesis] Analyzing goal intent for recruitment...");
@@ -188,11 +189,13 @@ impl AmaSupervisor {
         }
 
         // 5. Weighted Swarm Consensus Pass (Rule 31 Hardening)
-        let final_state = blackboard.read().unwrap();
-        if !final_state.is_empty() {
+        if !blackboard.is_empty() {
             // Aggregate agent outputs weighted by rank and node trust
             let mut weighted_wisdom = String::new();
-            for (agent_name, output) in final_state.iter() {
+            for r in blackboard.iter() {
+                let agent_name = r.key();
+                let output = r.value();
+
                 if let Some(info) = fleet_info.iter().find(|i| &i.name == agent_name) {
                     weighted_wisdom.push_str(&format!("[AGENT: {} (Rank: {:.2})] {}\n", agent_name, info.rank, output));
 
@@ -205,15 +208,15 @@ impl AmaSupervisor {
 
             let lower_goal = goal.to_lowercase();
             let is_query = lower_goal.contains("identity") || lower_goal.contains("status") || lower_goal.contains("models") || lower_goal.contains("version");
-            let is_direct_synthesis = is_query || final_state.contains_key("TranslationAgent") || final_state.contains_key("SearchAgent");
+            let is_direct_synthesis = is_query || blackboard.contains_key("TranslationAgent") || blackboard.contains_key("SearchAgent");
 
             // Consensus Hardening: Include every model agent response in final results
             let synthesized = if is_direct_synthesis {
                 let mut full_synthesis = String::new();
-                if let Some(search) = final_state.get("SearchAgent") {
+                if let Some(search) = blackboard.get("SearchAgent") {
                     full_synthesis.push_str(&format!("### SearchAgent Output\n{}\n\n---\n\n", search));
                 }
-                if let Some(trans) = final_state.get("TranslationAgent") {
+                if let Some(trans) = blackboard.get("TranslationAgent") {
                     full_synthesis.push_str(&format!("### TranslationAgent Output\n{}", trans));
                 }
                 if full_synthesis.is_empty() {
@@ -236,7 +239,7 @@ impl AmaSupervisor {
 
             // Epistemic Delegation: Calculate Convergence Score based on agent count and consensus matching
             let consensus_score = if fleet_info.len() > 1 {
-                let success_count = final_state.iter().filter(|(_, out)| !out.contains("FAILURE") && !out.contains("GAP")).count();
+                let success_count = blackboard.iter().filter(|r| !r.value().contains("FAILURE") && !r.value().contains("GAP")).count();
                 (success_count as f32 / fleet_info.len() as f32).min(1.0)
             } else {
                 0.90 // Single trusted agent default
@@ -496,7 +499,7 @@ mod tests {
         use crate::gawd::agents::{GawdAgent, SafetyAgent, SecurityAgent, HighDensityContextStore};
         let tmp_dir = std::env::temp_dir().join("aeon_swarm_test_asp23");
         let _ = std::fs::create_dir_all(&tmp_dir);
-        let blackboard: MissionBlackboard = Arc::new(RwLock::new(HighDensityContextStore::new(10)));
+        let blackboard: MissionBlackboard = Arc::new(HighDensityContextStore::new(10));
 
         let safety = SafetyAgent;
         let security = SecurityAgent;
@@ -507,9 +510,8 @@ mod tests {
         assert!(res1.is_ok());
         assert!(res2.is_ok());
 
-        let bb = blackboard.read().unwrap();
-        assert!(bb.contains_key("SafetyAgent"));
-        assert!(bb.contains_key("SecurityAgent"));
+        assert!(blackboard.contains_key("SafetyAgent"));
+        assert!(blackboard.contains_key("SecurityAgent"));
         let _ = std::fs::remove_dir_all(&tmp_dir);
     }
 }

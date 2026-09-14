@@ -4,6 +4,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
+use indicatif::{ProgressBar, ProgressStyle};
 use super::hardware::HardwareProfiler;
 use crate::sandbox::manager::{ModelTier, ModelInfo, ProviderType};
 use crate::error::EaiResult;
@@ -492,10 +493,22 @@ impl ModelManager {
             let dest_path = models_dir.join(file_name);
             match ureq::get(target).set("User-Agent", "AEON/0.1").call() {
                 Ok(resp) => {
+                    let total_size = resp.header("Content-Length")
+                        .and_then(|s| s.parse::<u64>().ok())
+                        .unwrap_or(expected_bytes);
+
+                    let pb = ProgressBar::new(total_size);
+                    pb.set_style(ProgressStyle::default_bar()
+                        .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} ({eta})")
+                        .unwrap()
+                        .progress_chars("#>-"));
+
                     match fs::File::create(&dest_path) {
                         Ok(mut file) => {
-                            match std::io::copy(&mut resp.into_reader(), &mut file) {
+                            let mut source = pb.wrap_read(resp.into_reader());
+                            match std::io::copy(&mut source, &mut file) {
                                 Ok(_) => {
+                                    pb.finish_with_message("Download complete");
                                     // 1. Download Verification (Rule 31 Hardening)
                                     let actual_checksum = Self::calculate_simple_checksum(&dest_path).unwrap_or_default();
 

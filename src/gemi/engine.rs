@@ -5,6 +5,7 @@
 use std::path::{Path, PathBuf};
 use std::io::Write;
 use std::sync::{Arc, RwLock, OnceLock};
+use indicatif::{ProgressBar, ProgressStyle};
 use std::collections::HashMap;
 use crate::error::{EaiError, EaiResult};
 use crate::gemi::models::ModelManager;
@@ -50,6 +51,11 @@ impl InferenceHost {
 
         println!("- [Substrate Operation] Loading neural weights: {}", model_path.display());
         let _ = std::io::stdout().flush();
+
+        let pb = ProgressBar::new_spinner();
+        pb.set_style(ProgressStyle::default_spinner().template("{spinner:.green} {msg}").unwrap());
+        pb.set_message("Loading weights...");
+        pb.enable_steady_tick(std::time::Duration::from_millis(100));
 
         // Integrity Verification (Aspiration 4 Hardening)
         println!("- [Substrate Operation] Verifying model integrity...");
@@ -108,6 +114,8 @@ impl InferenceHost {
 
         println!("- [Substrate Operation] Model substrate ready.");
         let _ = std::io::stdout().flush();
+        pb.finish_and_clear();
+
         let substrate = match arch.as_str() {
             "gemma" => ModelSubstrate::Gemma(weights),
             "llama" => ModelSubstrate::Llama(weights),

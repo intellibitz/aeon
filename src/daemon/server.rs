@@ -16,7 +16,7 @@ use std::os::windows::io::AsRawHandle;
 
 use signal_hook::{consts::{SIGTERM, SIGINT}, iterator::Signals};
 use std::sync::{atomic::{AtomicBool, Ordering}, Arc};
-use log::{info, warn};
+use tracing::{info, warn};
 
 use crate::error::{EaiError, EaiResult};
 use crate::sandbox::manager::AeonConfig;

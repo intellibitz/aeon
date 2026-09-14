@@ -4,6 +4,7 @@
 use std::sync::{Mutex, OnceLock};
 use std::collections::VecDeque;
 use std::path::PathBuf;
+use tracing::info;
 use crate::error::EaiResult;
 
 #[derive(Debug, Clone)]
@@ -32,6 +33,7 @@ impl SubstratePulseQueue {
 
     /// Non-Blocking Ingestion (Aspiration 31)
     pub fn ingest(&self, intent: &str, workspace: &PathBuf, version: &str) -> EaiResult<()> {
+        info!(intent = %intent, "Ingesting new pulse into substrate queue");
         let mut queue = self.queue.lock().unwrap();
 
         let priority = if intent.to_lowercase().contains("stop") || intent.to_lowercase().contains("wait") || intent.to_lowercase().contains("correction") {
