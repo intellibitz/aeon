@@ -1,6 +1,6 @@
 # AEON Alpha-Self Evolution Protocols (Motions)
 
-* **Current Engine Version**: `v0.1.2022843`
+* **Current Engine Version**: `v0.1.2022844`
 
 This document defines the execution paths for altering the `alpha-self` core. A Motion is triggered only after a failing test is ingested via `pulse.md`.
 
