@@ -34,6 +34,10 @@ This document defines the complete set of validation protocols that anchor the `
 21. `[x]` **MOTION**: Implement the 'Continuous Pulse Cycle' mandate. AEON must support non-blocking pulse ingestion, queueing, and continuous telemetry streaming for every pulse, allowing for real-time course correction.
 22. `[x]` **[MOTION]**: Codify the 'Absolute Accountability' mandate. The AEON genome must ensure 100% accountability for every action, including an explicit "who did what" audit in the Omni-Trace Thinking block.
 23. `[x]` **[MISSION]**: Enable 'Debug-First' evolution by defaulting the substrate log level to DEBUG and ensuring high-fidelity logs are captured in the Omni-Trace Thinking block.
+24. `[x]` **[MOTION]**: Codify the 'Opaque Logic Exclusion' paradigm. AEON must explicitly flag and prohibit non-traceable logic, ensuring 100% accountability in the thinking telemetry.
+25. `[x]` **[MOTION]**: Integrate the 'SOTA Crate Stack' mandate. The AEON genome now constitutionally prefers high-performance crates (Tokio, Rayon, Parking_lot, Crossbeam, Flume, Tracing) for all concurrent and parallel operations.
+26. `[x]` **[MOTION]**: Codify the 'Concurrency Implementation Mandates'. Detailed technical preferences (Tokio defaults, Rayon for data-parallelism, Flume for messaging) are now axiomatized in the genome.
+27. `[x]` **[MISSION]**: Optimize administrative fast-path. Refactored AmaSupervisor and DynamicAgent to bypass neural inference for 'admin' missions, preventing lock contention and deadlock pathologies.
 
 ### 2.2 Architectural Evolution & Aspirations [MOTION]
 18. `[x]` **Platform Independence**: Zero platform bias across Linux, macOS, and Windows.
@@ -141,7 +145,7 @@ This document defines the complete set of validation protocols that anchor the `
 106. `[x]` **QUERY**: split and report status and version in parallel
 107. `[x]` **MISSION**: Finalized the '<2ms Ultra-Reflex' substrate. Implemented high-resolution latency guards in AmaMasterAgent and AeonAlphaModel. Enforced sub-2ms constraint on critical execution paths with Axiomatic logging for violations. Optimized semantic projection and hardware profiling to satisfy the instant-intelligence mandate.
 108. `[x]` **MOTION**: Enforce the '<2ms Ultra-Reflex' mandate across the substrate. 100% of internal operations must be measured and optimized for sub-2ms latency. Transition slow path initialization to lazy-async background threads.
-109. `[x]` **MISSION**: Finalized the Lock-Free Substrate transition. Refactored PagedKVStore, RadixAttentionStore, AgentMetaRegistry, MissionBlackboard, and DiscoveredPeers to use RwLock concurrency primitives. Updated AeonAlphaModel to eliminate recursive deadlocks during semantic centroid projection. The AEON substrate is now non-blocking and optimized for high-density multi-threaded swarm execution.
+109. `[x]` **MISSION**: Finalized the Lock-Free Substrate transition. Refactored PagedKVStore, RadixAttentionStore, AgentMetaRegistry, MissionBlackboard, and DiscoveredPeers to use RwLock concurrency primitives. Updated AeonAlphaModel and GemiEngine to eliminate recursive deadlocks and wait-state hangs during semantic centroid projection and reasoning synthesis. The AEON substrate is now non-blocking and optimized for high-density multi-threaded swarm execution.
 110. `[x]` **QUERY**: identity
 118. `[x]` **MOTION**: Codify the 'Lock-Free Substrate' mandate. The AEON genome must ensure that the substrate is free of blocking thread locks. All critical path data structures (KV Stores, Registries, Blackboards) must transition to lock-free concurrency primitives or non-blocking message-passing architectures to ensure zero execution stall.
 120. `[x]` **QUERY**: status

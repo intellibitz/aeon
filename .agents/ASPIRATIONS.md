@@ -148,11 +148,12 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 ### [Aspiration 27] Universal Non-Blocking & Decoupled Concurrency Substrate
 * **Status**: `REALIZED`
 * **Core Paradigm**: The "High-Throughput Reactive Mechanics" mandate. The AEON substrate constitutionally codifies state-of-the-art non-blocking, asynchronous, multi-threaded, parallel, and decoupled messaging patterns:
-  1. **Non-Blocking / Async I/O**: Reactor/Proactor event loops with epoll/kqueue readiness and IOCP completion notifications, managed via zero-cost Future/Task continuations and state machines.
-  2. **Multi-Threading & Lock-Free Sync**: Work-stealing Chase-Lev deques, Treiber stacks, Michael-Scott queues, Hazard Pointers / Epoch-Based / RCU reclamation, CAS primitives, and spinlocks/rwlocks.
-  3. **Parallel Processing**: Recursive Fork-Join, Map-Reduce data parallelism, Actor model scheduling, SIMD/SIMT data parallelism, and pipeline stage overlapping.
-  4. **Decoupled Messaging**: Pub-Sub, Request-Reply, Actor/CSP channels, Reactive Streams with backpressure, LMAX Disruptor zero-copy ring buffers, and Raft/Paxos consensus.
-  5. **Low-Level Supporting Primitives**: Work-stealing & fair scheduling, consistent hashing load balancing, vector clocks / Lamport causality, phi-accrual failure detection, and token-bucket flow control.
+  1. **Non-Blocking / Async I/O**: Managed via `tokio` (Dominant work-stealing runtime), `futures`, and `async-trait`.
+  2. **Multi-Threading & Lock-Free Sync**: `parking_lot` (Fast standard lock replacements), `crossbeam` (Epoch reclamation, Treiber stacks), and `arc-swap`.
+  3. **Parallel Processing**: `rayon` (Recursive Fork-Join, Work-stealing pool) and `polars` for data parallelism.
+  4. **Decoupled Messaging**: `flume` (Sync/Async high-perf channels), `tokio::sync`, and `actor` models via `ractor`.
+  5. **High-Perf Specialized Messaging**: `rtrb` (Lock-free ring buffers) and `iceoryx2` (Zero-copy IPC).
+  6. **Observability & Diagnostics**: `tracing` and `tracing-subscriber` for structured diagnostics in concurrent systems.
 
 ---
 
@@ -178,4 +179,4 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 
 ### [Aspiration 32] Continuous Interaction Substrate
 ### [Aspiration 33] Absolute Accountability Substrate
-* **Core Paradigm**: The "100% Accountability" mandate. Every atomic action within the substrate—from low-level tool calls to high-level agent swarms—must be uniquely identifiable and attributable to a specific genomic reflex or user intent. This audit trail must be embedded directly into the Omni-Trace Thinking stream to ensure perfect traceability and alignment with creator governance.
+* **Core Paradigm**: The "100% Accountability" mandate. Every atomic action within the substrate—from low-level tool calls to high-level agent swarms—must be uniquely identifiable and attributable to a specific genomic reflex or user intent. This audit trail must be embedded directly into the Omni-Trace Thinking stream to ensure perfect traceability and alignment with creator governance. **Opaque Logic Exclusion** is the enforcement mechanism: any operation without a verifiable telemetry anchor is constitutionally prohibited.

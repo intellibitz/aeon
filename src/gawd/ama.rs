@@ -5,7 +5,7 @@
 use std::path::Path;
 use std::io::Write;
 use serde::{Deserialize, Serialize};
-use tracing::info_span;
+use tracing::{info_span, debug};
 use crate::error::EaiResult;
 use super::agents::GawdAgentInfo;
 use super::amas::{A2AMessage, AmaSupervisor};
@@ -119,6 +119,7 @@ impl AmaMasterAgent {
         use crate::gawd::self_core::AlphaSelf;
         println!("- [Core Paradigm] {}", AlphaSelf::CORE_PARADIGM);
         println!("- [Log Level] DEBUG (Glass Box Evolution Mode)");
+        println!("- [Accountability] 100% Traceability | Opaque Logic Exclusion Active (Mandate 27 & 33)");
 
         println!("\n[GENOMIC MANDATES]");
         for rule in AlphaSelf::RULES.iter().filter(|r| r.title.contains("Universal") || r.title.contains("Agnosticism")) {
@@ -133,22 +134,38 @@ impl AmaMasterAgent {
             || lower_goal == "status" || lower_goal == "aeon status"
             || lower_goal == "models" || lower_goal == "aeon models";
 
-        if is_query {
-            println!("\n[QUERY FAST-PATH DETECTED]");
-            let (interactions, _agents) = AmaSupervisor::supervise_mission(goal, workspace);
-            for msg in &interactions {
-                println!("- [Swarm Flux] {}: {}", msg.sender, msg.payload.chars().take(100).collect::<String>());
-            }
+        let is_motion = lower_goal.contains("admin mission") || lower_goal.contains("motion")
+            || lower_goal.contains("sync") || lower_goal.contains("audit")
+            || lower_goal.contains("release") || lower_goal.contains("verify");
 
-            let final_answer = if lower_goal.contains("identity") {
-                crate::gawd::self_core::AlphaSelf::inspect_compiled_binary_instructions()
-            } else if lower_goal.contains("version") {
-                format!("AEON Engine Version: v{}", version)
-            } else if lower_goal.contains("status") {
-                format!("AEON Substrate Status: Operational | Hardware: {} | RAM: {}GB", hw.cpu_brand, hw.ram_gb)
+        if is_query || is_motion {
+            let path_type = if is_query { "QUERY" } else { "ADMIN MISSION" };
+            println!("\n[{} FAST-PATH DETECTED]", path_type);
+            let (interactions, agents) = AmaSupervisor::supervise_mission(goal, workspace);
+
+            let final_answer = if is_query {
+                for msg in &interactions {
+                    println!("- [Swarm Flux] {}: {}", msg.sender, msg.payload.chars().take(100).collect::<String>());
+                }
+
+                if lower_goal.contains("identity") {
+                    crate::gawd::self_core::AlphaSelf::inspect_compiled_binary_instructions()
+                } else if lower_goal.contains("version") {
+                    format!("AEON Engine Version: v{}", version)
+                } else if lower_goal.contains("status") {
+                    format!("AEON Substrate Status: Operational | Hardware: {} | RAM: {}GB", hw.cpu_brand, hw.ram_gb)
+                } else {
+                    let models = crate::gemi::models::ModelManager::list_models(workspace);
+                    format!("Models Roster: {} discovered.", models.len())
+                }
             } else {
-                let models = crate::gemi::models::ModelManager::list_models(workspace);
-                format!("Models Roster: {} discovered.", models.len())
+                // Motion Fast-Path (Aspiration 23): Bypass Tier 2 Inference for administrative actions
+                for msg in &interactions {
+                    if msg.sender != "ConsensusMaster" {
+                        println!("- [Swarm Flux] {}: {}", msg.sender, msg.payload.chars().take(100).collect::<String>());
+                    }
+                }
+                AmaSupervisor::gather_weighted_wisdom(&interactions, &agents)
             };
 
             println!("\n[SUBSTRATE CONFIGURATION & LIMITS]");
@@ -164,7 +181,7 @@ impl AmaMasterAgent {
             println!("- [Agent Timeout] 60s (Swarm Flux Guard)");
             println!("- [Max Swarm Agents] {} (Hardware Scaled)", crate::gawd::agents::GawdAgentFleet::get_max_concurrent_agents());
 
-            println!("\n[QUERY COMPLETE]");
+            println!("\n[FAST-PATH COMPLETE]");
             drop(_guard);
             println!("<result>\n{}\n</result>", final_answer);
             return final_answer;
@@ -303,6 +320,8 @@ impl AmaMasterAgent {
             "MISSION_GOAL: {}\n\nLOCAL_SWARM_CONTEXT:\n{}\n\n[INSTRUCTION]: Resolve this mission. Output finalized verified actions.",
             goal, swarm_context
         );
+
+        debug!(target: "aeon::gawd::ama", mission_goal = %goal, reasoning_prompt = %reasoning_prompt, "Synthesized mission reasoning prompt");
 
         // Aspiration 30: Synchronous Trace (Thinking block contains streaming tokens)
         let final_answer = crate::gemi::engine::GemiEngine::generate_reasoning_stream(&reasoning_prompt, workspace, &|token| {

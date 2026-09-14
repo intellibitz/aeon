@@ -40,15 +40,7 @@ impl InferenceHost {
             }
         }
 
-        // 2. Exclusive Write Access for Loading
-        println!("- [Substrate Operation] Requesting write-lock for model cache...");
-        let _ = std::io::stdout().flush();
-        let mut map = cache.write().unwrap();
-
-        if let Some(m) = map.get(model_path) {
-            return Ok(Arc::clone(m));
-        }
-
+        // 2. Load Weights (Outside global cache lock to prevent substrate-wide stalls)
         println!("- [Substrate Operation] Loading neural weights: {}", model_path.display());
         let _ = std::io::stdout().flush();
 
@@ -58,17 +50,11 @@ impl InferenceHost {
         pb.enable_steady_tick(std::time::Duration::from_millis(100));
 
         // Integrity Verification (Aspiration 4 Hardening)
-        println!("- [Substrate Operation] Verifying model integrity...");
-        let _ = std::io::stdout().flush();
         ModelManager::verify_model_integrity(model_path)?;
 
-        println!("- [Substrate Operation] Opening weight file...");
-        let _ = std::io::stdout().flush();
         let mut file = std::fs::File::open(model_path)
             .map_err(|e| EaiError::inference(format!("Failed to open weights {}: {}", model_path.display(), e)))?;
 
-        println!("- [Substrate Operation] Parsing GGUF metadata...");
-        let _ = std::io::stdout().flush();
         let mut model_data = gguf_file::Content::read(&mut file)
             .map_err(|e| EaiError::inference(format!("GGUF Metadata Error: {}", e)))?;
 
@@ -93,7 +79,6 @@ impl InferenceHost {
             for k in common_keys {
                 let llama_key = format!("llama.{}", k);
                 if !model_data.metadata.contains_key(&llama_key) {
-                    // Try to find the key with ANY architecture prefix
                     let found_key = model_data.metadata.keys().find(|mk| mk.ends_with(k)).cloned();
                     if let Some(fk) = found_key {
                         if let Some(val) = model_data.metadata.get(&fk).cloned() {
@@ -104,7 +89,6 @@ impl InferenceHost {
             }
         }
 
-        // Robust Architectural Loading
         println!("- [Substrate Operation] Initializing {:?} weights on {:?}...", arch, device);
         let _ = std::io::stdout().flush();
         let weights = llama::ModelWeights::from_gguf(model_data, &mut file, device)
@@ -123,7 +107,17 @@ impl InferenceHost {
         };
 
         let shared = Arc::new(RwLock::new(substrate));
-        map.insert(model_path.to_path_buf(), Arc::clone(&shared));
+
+        // 3. Exclusive Write Access for Cache Registration
+        {
+            let mut map = cache.write().unwrap();
+            // Double-check if another thread loaded it in the meantime
+            if let Some(m) = map.get(model_path) {
+                return Ok(Arc::clone(m));
+            }
+            map.insert(model_path.to_path_buf(), Arc::clone(&shared));
+        }
+
         Ok(shared)
     }
 }
@@ -347,9 +341,26 @@ impl NativeInferenceEngine for AeonGgufEngine {
         println!("- [Inference Substrate] Acquiring model substrate shared handle...");
         let substrate_shared = InferenceHost::get_model(&model_path, &device)?;
 
-        println!("- [Inference Substrate] Locking model weights for exclusive execution...");
+        // Aspiration 24: Lock-Free Native Substrate (Transition to non-blocking attempt)
+        println!("- [Inference Substrate] Requesting exclusive access to model weights...");
         let _ = std::io::stdout().flush();
-        let mut substrate = substrate_shared.write().unwrap();
+
+        let wait_start = std::time::Instant::now();
+        let mut substrate = loop {
+            match substrate_shared.try_write() {
+                Ok(guard) => break guard,
+                Err(_) => {
+                    if wait_start.elapsed().as_secs() > 10 && wait_start.elapsed().as_secs() % 10 == 0 {
+                        print!(" [Substrate Contention Detected: Waiting for background agent] ");
+                    } else {
+                        print!(".");
+                    }
+                    let _ = std::io::stdout().flush();
+                    std::thread::sleep(std::time::Duration::from_millis(500));
+                }
+            }
+        };
+        println!(" [Access Granted]");
 
         let model_weights = match &mut *substrate {
             ModelSubstrate::Llama(w) | ModelSubstrate::Gemma(w) | ModelSubstrate::Generic(w) => w,

@@ -207,7 +207,7 @@ impl AmaSupervisor {
             }
 
             let lower_goal = goal.to_lowercase();
-            let is_query = lower_goal.contains("identity") || lower_goal.contains("status") || lower_goal.contains("models") || lower_goal.contains("version");
+            let is_query = lower_goal.contains("identity") || lower_goal.contains("status") || lower_goal.contains("models") || lower_goal.contains("version") || lower_goal.contains("admin");
             let is_direct_synthesis = is_query || blackboard.contains_key("TranslationAgent") || blackboard.contains_key("SearchAgent");
 
             // Consensus Hardening: Include every model agent response in final results

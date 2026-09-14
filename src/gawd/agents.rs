@@ -116,6 +116,7 @@ impl GawdAgent for DynamicAgent {
             || lower.contains("status")
             || lower.contains("models")
             || lower.contains("version")
+            || lower.contains("admin")
             || lower.contains("dracula")
             || lower.contains("lyrics")
             || lower.contains("translate")

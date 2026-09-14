@@ -55,8 +55,9 @@ AEON is governed by a set of **Epistemic Integrity Mandates** that ensure absolu
 AEON's evolution is driven by core genomic paradigms, including:
 
 - **Platform Independence**: Native execution across Linux, macOS, and Windows with zero bias.
-- **Absolute Transparency & Accountability**: Every substrate action is mapped to a responsible component in the Omni-Trace Thinking stream, ensuring 100% accountability with high-fidelity `DEBUG` logging enabled by default for perfect observability.
-- **Lock-Free Native Substrate**: Elimination of blocking thread locks across critical data structures (KV stores, registries, blackboards) using non-blocking primitives and `RwLock` concurrency.
+- **Absolute Transparency & Accountability**: Every substrate action is mapped to a responsible component in the Omni-Trace Thinking stream, ensuring 100% accountability with high-fidelity `DEBUG` logging and **Opaque Logic Exclusion** enabled by default for perfect observability.
+- **Lock-Free Native Substrate**: Elimination of blocking thread locks across critical data structures using SOTA primitives (`parking_lot`, `crossbeam`) and `RwLock` concurrency.
+- **High-Throughput Reactive Mechanics**: Constitutionally mandated use of `tokio` (async runtime), `rayon` (data parallelism), and `flume` (high-perf messaging) for peak hardware saturation. Implementation strictly follows axiomatized concurrency directives.
 - **<2ms Ultra-Reflex Substrate**: High-resolution latency guards enforcing sub-2ms intent classification and reflex response times.
 - **Recursive Swarm Parallelism**: Decomposing complex missions into independent sub-tasks via parallel split-solve-join execution.
 - **Substrate Purity**: The core codebase contains zero static domain-specific logic; all capabilities are bound dynamically via MCP.
