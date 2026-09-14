@@ -1,4 +1,4 @@
-// AEON Unified Substrate: Multi-Modal Semantic Projection & Paged KV Storage
+// SUSI Unified Substrate: Multi-Modal Semantic Projection & Paged KV Storage
 // 100% Rust implementation for memory-efficient multi-threaded reasoning
 
 use std::path::Path;
@@ -143,7 +143,7 @@ impl ReflexInferenceKernel {
             .map_err(|e| crate::error::EaiError::inference(e.to_string()))?;
         let _result = inference_tensor.sum_all().map_err(|e| crate::error::EaiError::inference(e.to_string()))?;
 
-        Ok("Synthesized output from AEON Reflex Kernel (Sub-10ms Latency achieved via Native Rust).".to_string())
+        Ok("Synthesized output from SUSI Reflex Kernel (Sub-10ms Latency achieved via Native Rust).".to_string())
     }
 }
 
@@ -168,7 +168,7 @@ impl TensorReflexKernel {
         // Execute Peak MatMul (Hardware Saturated)
         let _res = t1.matmul(&t2).map_err(|e| crate::error::EaiError::inference(e.to_string()))?;
 
-        Ok("Synthesized output from AEON Tensor Reflex Kernel (Hardware Saturated via CUDA/Metal).".to_string())
+        Ok("Synthesized output from SUSI Tensor Reflex Kernel (Hardware Saturated via CUDA/Metal).".to_string())
     }
 }
 
@@ -192,13 +192,13 @@ impl TurboReflexEngine {
         // Execute AWQ-Optimized Batch (Compression Optimized)
         let _res = t.exp().map_err(|e| crate::error::EaiError::inference(e.to_string()))?;
 
-        Ok("Synthesized output from AEON Turbo Reflex Engine (AWQ-Optimized & In-Flight Batching).".to_string())
+        Ok("Synthesized output from SUSI Turbo Reflex Engine (AWQ-Optimized & In-Flight Batching).".to_string())
     }
 }
 
-pub struct AeonUnifiedSubstrate;
+pub struct SusiUnifiedSubstrate;
 
-impl AeonUnifiedSubstrate {
+impl SusiUnifiedSubstrate {
     /// Aspiration 14: Unified Multi-Modal Embedding Space
     pub fn project_to_unified_space(
         text: Option<&str>,

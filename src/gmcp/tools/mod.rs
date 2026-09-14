@@ -20,14 +20,14 @@ pub struct McpTool {
     pub description: String,
 }
 
-/// Dynamic Trait for AEON Substrate Tools
-pub trait AeonTool: Send + Sync {
+/// Dynamic Trait for SUSI Substrate Tools
+pub trait SusiTool: Send + Sync {
     fn name(&self) -> String;
     fn description(&self) -> String;
     fn execute(&self, arg: &serde_json::Value, workspace: &Path) -> EaiResult<String>;
 }
 
-/// Enum representing Meta-Tool Category in AEON Substrate
+/// Enum representing Meta-Tool Category in SUSI Substrate
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MetaCategory {
     SystemPrimitive,
@@ -47,7 +47,7 @@ pub struct MetaTool {
     pub handler: MetaToolHandler,
 }
 
-impl AeonTool for MetaTool {
+impl SusiTool for MetaTool {
     fn name(&self) -> String { self.tool_name.clone() }
     fn description(&self) -> String { self.tool_desc.clone() }
     fn execute(&self, arg: &serde_json::Value, workspace: &Path) -> EaiResult<String> {
@@ -86,7 +86,7 @@ fn secure_path(workspace: &Path, user_path: &str) -> EaiResult<PathBuf> {
 }
 
 pub struct ToolRegistry {
-    pub tools: DashMap<String, Arc<dyn AeonTool>>,
+    pub tools: DashMap<String, Arc<dyn SusiTool>>,
     pub locks: DashMap<String, u64>,
 }
 
@@ -106,18 +106,18 @@ impl ToolRegistry {
     fn bootstrap(&self) {
         // INTERNAL META-CAPABILITIES (Tier 0 & 1 Primitives)
 
-        Self::register_meta_tool(self, "status", "AEON Substrate status report", MetaCategory::SystemPrimitive, |_arg, _ws| {
+        Self::register_meta_tool(self, "status", "SUSI Substrate status report", MetaCategory::SystemPrimitive, |_arg, _ws| {
             let hardware = HardwareProfiler::get_profile();
-            let mut out = format!("AEON Engine Version: {}\n", crate::AEON_VERSION);
+            let mut out = format!("SUSI Engine Version: {}\n", crate::SUSI_VERSION);
             out.push_str(&format!("System Environment: {} CPUs | RAM: {}GB | {}\n", hardware.cpus, hardware.ram_gb, hardware.gpu_info));
             out.push_str("Status: Operational.\n");
             Ok(out)
         });
 
-        Self::register_meta_tool(self, "identity", "AEON substrate identity report", MetaCategory::SystemPrimitive, |_arg, workspace| {
+        Self::register_meta_tool(self, "identity", "SUSI substrate identity report", MetaCategory::SystemPrimitive, |_arg, workspace| {
             let brain = crate::gawd::brain::AlphaBrainContext::initialize(workspace);
             let mut report = String::new();
-            report.push_str("# aeon Substrate - Identity Report\n\n");
+            report.push_str("# susi Substrate - Identity Report\n\n");
             report.push_str("## 1. CORE CONFIGURATION (Compiled Binary Axiomatic Core)\n");
             report.push_str(&format!("- Version: {}\n", crate::gawd::self_core::AlphaSelf::VERSION));
             report.push_str(&format!("- Core Paradigm: {}\n", crate::gawd::self_core::AlphaSelf::CORE_PARADIGM));
@@ -140,7 +140,7 @@ impl ToolRegistry {
         });
 
         Self::register_meta_tool(self, "self_validate", "Execute autonomous substrate self-validation", MetaCategory::SystemPrimitive, |_arg, workspace| {
-            match crate::daemon::runtime_admin::AeonRuntimeAdmin::execute_autonomous_self_validation(workspace) {
+            match crate::daemon::runtime_admin::SusiRuntimeAdmin::execute_autonomous_self_validation(workspace) {
                 Ok(report) => Ok(format!("# Substrate Self-Validation Successful\n\n{}", report)),
                 Err(e) => Ok(format!("# Substrate Self-Validation Failed\n\nError: {}", e)),
             }
@@ -308,7 +308,7 @@ impl ToolRegistry {
                 }
             }
 
-            Err(EaiError::protocol("No Power-Tier reasoning remotes configured or available. AEON local reasoning active."))
+            Err(EaiError::protocol("No Power-Tier reasoning remotes configured or available. SUSI local reasoning active."))
         });
 
         Self::register_meta_tool(self, "meta_scout_agents", "Discover agent capabilities from connected remotes", MetaCategory::IntelligenceBridge, |_arg, _ws| {
@@ -325,7 +325,7 @@ impl ToolRegistry {
         Self::register_meta_tool(self, "meta_rank_agents", "Report current agent expertise hierarchy", MetaCategory::IntelligenceBridge, |_arg, _ws| {
             let registry = crate::gawd::agents::AgentMetaRegistry::global();
             let agents = registry.list_agents();
-            let mut report = "AEON Expertise Hierarchy:\n\n".to_string();
+            let mut report = "SUSI Expertise Hierarchy:\n\n".to_string();
             for a in agents {
                 report.push_str(&format!("- [AGENT] {} (Base Rank: {:.2}): {}\n", a.name, a.base_rank, a.description));
             }
@@ -368,7 +368,7 @@ impl ToolRegistry {
         tools.extend(GmcpClient::list_external_tools());
 
         if let Some(home) = std::env::var_os("HOME").map(PathBuf::from) {
-            let reflex_dir = home.join(".aeon/reflexes");
+            let reflex_dir = home.join(".susi/reflexes");
             if let Ok(entries) = fs::read_dir(&reflex_dir) {
                 for entry in entries.flatten() {
                     let path = entry.path();
@@ -411,7 +411,7 @@ impl ToolRegistry {
         if name.starts_with("reflex_") {
             let wasm_name = format!("{}.wasm", name.trim_start_matches("reflex_"));
             if let Some(home) = std::env::var_os("HOME").map(PathBuf::from) {
-                let wasm_path = home.join(".aeon/reflexes").join(wasm_name);
+                let wasm_path = home.join(".susi/reflexes").join(wasm_name);
                 if wasm_path.exists() {
                     let arg_str = if let Some(s) = arg.as_str() { s.to_string() } else { arg.to_string() };
                     match crate::native::wasm::WasmHost::execute_reflex(&wasm_path, &arg_str) {
@@ -460,7 +460,7 @@ impl ToolRegistry {
         }
 
         // Distributed Resource Sovereignty: Broadcast to peers
-        if !crate::gawd::amas::AmaSupervisor::broadcast_lock_request(resource_id) {
+        if !crate::gawd::amas::SusiSupervisor::broadcast_lock_request(resource_id) {
             Self::release_meta_lock(resource_id);
             return false;
         }
@@ -481,6 +481,7 @@ impl ToolRegistry {
         registry.locks.insert(resource_id.to_string(), now);
         true
     }
+
 
     pub fn release_meta_lock(resource_id: &str) {
         let registry = Self::global();
@@ -504,7 +505,7 @@ impl ToolRegistry {
         }
 
         if !essential_found {
-            if std::env::var("AEON_VERBOSE").is_ok() {
+            if std::env::var("SUSI_VERBOSE").is_ok() {
                 eprintln!("[GMCP] No external tools configured. Auto-linking essential substrates...");
             }
             let essentials = ["brave_search", "filesystem", "google_search", "github", "google_maps"];

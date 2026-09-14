@@ -1,4 +1,4 @@
-// AEON-Reason: Native Neural Reasoning Substrate
+// SUSI-Reason: Native Neural Reasoning Substrate
 // 100% Rust implementation using Candle for Tier 2 Logic Distillation
 
 use anyhow::{Result, anyhow};
@@ -15,22 +15,22 @@ pub struct ReasoningSample {
     pub timestamp: u64,
 }
 
-/// AEON-Reason Native Tier 2 Model (Distilled Logic)
+/// SUSI-Reason Native Tier 2 Model (Distilled Logic)
 /// 4-Layer Deep Logic Substrate for high-fidelity reasoning emulation.
-pub struct AeonReasoningModel {
+pub struct SusiReasoningModel {
     l1: Linear,
     l2: Linear,
     l3: Linear,
     l4: Linear,
 }
 
-impl AeonReasoningModel {
+impl SusiReasoningModel {
     pub const DIM: usize = 256;
 
     pub fn load(global_dir: &Path) -> Result<Self> {
-        let weights_path = global_dir.join("models/aeon-reason.safetensors");
+        let weights_path = global_dir.join("models/susi-reason.safetensors");
         if !weights_path.exists() {
-            return Err(anyhow!("AEON-Reason weights not found. Run 'aeon train_reason'."));
+            return Err(anyhow!("SUSI-Reason weights not found. Run 'susi train_reason'."));
         }
 
         let device = crate::gemi::hardware::HardwareProfiler::get_candle_device();
@@ -72,7 +72,7 @@ impl AeonReasoningModel {
                 samples.push(Tensor::from_vec(feature_vec, (1, Self::DIM), &device)?);
 
                 // Target: Semantic projection of the successful outcome
-                let target_vec = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(&sample.successful_outcome, None)?;
+                let target_vec = crate::gemi::alpha::SusiAlphaModel::semantic_centroid_projection(&sample.successful_outcome, None)?;
                 // Up-project target to DIM if needed, or use consistent DIM for both
                 // For now, we reuse alpha's projection and pad/repeat to match DIM 256
                 let mut padded_target = vec![0.0f32; Self::DIM];
@@ -97,7 +97,7 @@ impl AeonReasoningModel {
             opt.backward_step(&loss)?;
         }
 
-        let weights_path = global_dir.join("models/aeon-reason.safetensors");
+        let weights_path = global_dir.join("models/susi-reason.safetensors");
         varmap.save(&weights_path)?;
 
         Ok(format!("Substrate Ingestion Motion Successful. Distilled {} experiences into Native Tier 2 Logic Model.", samples.len()))
@@ -105,8 +105,8 @@ impl AeonReasoningModel {
 
     fn project_features(intent: &str, context: &str) -> Result<Vec<f32>> {
         let mut vec = vec![0.0f32; Self::DIM];
-        let i_vec = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(intent, None)?;
-        let c_vec = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(context, None)?;
+        let i_vec = crate::gemi::alpha::SusiAlphaModel::semantic_centroid_projection(intent, None)?;
+        let c_vec = crate::gemi::alpha::SusiAlphaModel::semantic_centroid_projection(context, None)?;
 
         // Interleave for high-density feature mapping
         for (i, &v) in i_vec.iter().enumerate() { vec[i] = v; }

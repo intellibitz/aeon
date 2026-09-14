@@ -1,4 +1,4 @@
-// GMCP Universal Client: Bridges AEON to Industry Protocol Standard MCP Servers
+// GMCP Universal Client: Bridges SUSI to Industry Protocol Standard MCP Servers
 // 100% Rust implementation for Meta-Orchestrated Multi-Server Substrates
 
 use std::collections::HashMap;
@@ -16,11 +16,11 @@ pub struct GmcpClient;
 impl GmcpClient {
     pub fn get_config_path() -> PathBuf {
         let home = std::env::var("HOME").unwrap_or_default();
-        let aeon_dir = PathBuf::from(home).join(".aeon");
-        if !aeon_dir.exists() {
-            let _ = fs::create_dir_all(&aeon_dir);
+        let susi_dir = PathBuf::from(home).join(".susi");
+        if !susi_dir.exists() {
+            let _ = fs::create_dir_all(&susi_dir);
         }
-        aeon_dir.join("mcp_config.json")
+        susi_dir.join("mcp_config.json")
     }
 
     /// List all externally configured tools via dynamic mcp_config.json
@@ -74,9 +74,9 @@ impl GmcpClient {
 
     pub fn fetch_global_registry() -> Vec<GlobalMcpEntry> {
         let home = std::env::var("HOME").unwrap_or_default();
-        let global_dir = PathBuf::from(home).join(".aeon");
+        let global_dir = PathBuf::from(home).join(".susi");
         let registry_path = global_dir.join("global_mcp_registry.json");
-        let cfg = crate::sandbox::manager::AeonConfig::load(&global_dir).expect("Fatal: Malformed configuration");
+        let cfg = crate::sandbox::manager::SusiConfig::load(&global_dir).expect("Fatal: Malformed configuration");
 
         // 1. Instant Non-Blocking Local Cache Read (Aspiration 22 & <2ms Reflex Mandate)
         if registry_path.is_file() {
@@ -146,7 +146,7 @@ impl GmcpClient {
         } else if has_npx {
             ("npx".to_string(), vec!["-y".to_string(), package.to_string()])
         } else {
-            ("aeon".to_string(), vec!["mcp".to_string(), name.to_string()])
+            ("susi".to_string(), vec!["mcp".to_string(), name.to_string()])
         };
 
         let new_srv = McpServerConfig {
@@ -223,7 +223,7 @@ impl GmcpClient {
                     "roots": { "listChanged": false },
                     "sampling": {}
                 },
-                "clientInfo": { "name": "aeon-substrate", "version": crate::AEON_VERSION }
+                "clientInfo": { "name": "susi-substrate", "version": crate::SUSI_VERSION }
             }
         });
         let _ = writeln!(stdin, "{}", init_req);
@@ -363,7 +363,7 @@ impl GmcpClient {
         json!({
             "working_directory": cwd.display().to_string(),
             "source_file_count": src_count,
-            "engine_version": crate::AEON_VERSION,
+            "engine_version": crate::SUSI_VERSION,
             "available_ram_gb": hardware.available_ram_gb,
             "gpu_acceleration": hardware.acceleration_active
         })
@@ -374,7 +374,7 @@ impl GmcpClient {
     pub fn autonomous_web_scout() -> Vec<super::GlobalMcpEntry> {
         let mut entries = Self::fetch_global_registry();
         let home = std::env::var_os("HOME").unwrap_or_default();
-        let registry_path = PathBuf::from(home).join(".aeon/mcp_web_registry.json");
+        let registry_path = PathBuf::from(home).join(".susi/mcp_web_registry.json");
 
         // Benchmark and Rank each entry
         for entry in &mut entries {

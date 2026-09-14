@@ -183,29 +183,29 @@ impl GemiEngine {
             return power_res;
         }
 
-        let final_msg = "AMA-Tier2-Inference: Local model inference completed successfully.".to_string();
+        let final_msg = "SMA-Tier2-Inference: Local model inference completed successfully.".to_string();
         callback(final_msg.clone());
         final_msg
     }
 
     pub fn generate_multimodal_vision(prompt: &str, image_path: &Path) -> String {
-        if let Ok(vision) = super::vision::AeonVisionEngine::new() {
+        if let Ok(vision) = super::vision::SusiVisionEngine::new() {
              match vision.analyze_visual_intent(prompt, image_path) {
                  Ok(res) => return res,
-                 Err(e) => return format!("[aeon Native Vision] Error: {}", e),
+                 Err(e) => return format!("[susi Native Vision] Error: {}", e),
              }
         }
-        format!("[aeon Native Vision]: {} -> {}", image_path.display(), prompt)
+        format!("[susi Native Vision]: {} -> {}", image_path.display(), prompt)
     }
 
     pub fn generate_multimodal_audio(audio_path: &Path) -> String {
-        if let Ok(audio) = super::audio::AeonAudioEngine::new() {
+        if let Ok(audio) = super::audio::SusiAudioEngine::new() {
              match audio.transcribe_and_audit(audio_path) {
                  Ok(res) => return res,
-                 Err(e) => return format!("[aeon Native Audio] Error: {}", e),
+                 Err(e) => return format!("[susi Native Audio] Error: {}", e),
              }
         }
-        format!("[aeon Native Audio]: Processed {}", audio_path.display())
+        format!("[susi Native Audio]: Processed {}", audio_path.display())
     }
 
     /// Aspiration 14: Unified Multi-Modal Reasoning
@@ -214,9 +214,9 @@ impl GemiEngine {
         image_path: &Path,
         audio_path: &Path
     ) -> String {
-        use super::unified::AeonUnifiedSubstrate;
+        use super::unified::SusiUnifiedSubstrate;
 
-        let unified_vec = match AeonUnifiedSubstrate::project_to_unified_space(Some(text), Some(image_path), Some(audio_path)) {
+        let unified_vec = match SusiUnifiedSubstrate::project_to_unified_space(Some(text), Some(image_path), Some(audio_path)) {
             Ok(v) => v,
             Err(e) => return format!("[Unified Substrate] Error: {}", e),
         };
@@ -224,7 +224,7 @@ impl GemiEngine {
         let magnitude: f32 = unified_vec.iter().map(|x| x * x).sum();
 
         format!(
-            "# AEON Cross-Modal Reasoning\n\n\
+            "# SUSI Cross-Modal Reasoning\n\n\
             Successfully unified Text, Vision, and Audio into a single neural projection space.\n\n\
             - **Unified Space Magnitude**: {:.4}\n\
             - **Status**: Epistemically Aligned.\n\n\
@@ -308,18 +308,18 @@ pub struct LlamaCppEngine;
 impl NativeInferenceEngine for LlamaCppEngine {
     fn name(&self) -> String { "LlamaCppEngine".to_string() }
     fn run_inference(&self, prompt: &str) -> EaiResult<String> {
-        // Native Priority: Use the hardened AeonGgufEngine directly
-        AeonGgufEngine.run_inference(prompt)
+        // Native Priority: Use the hardened SusiGgufEngine directly
+        SusiGgufEngine.run_inference(prompt)
     }
     fn run_inference_stream(&self, prompt: &str, callback: &dyn Fn(String)) -> EaiResult<String> {
-        AeonGgufEngine.run_inference_stream(prompt, callback)
+        SusiGgufEngine.run_inference_stream(prompt, callback)
     }
 }
 
-pub struct AeonGgufEngine;
+pub struct SusiGgufEngine;
 
-impl NativeInferenceEngine for AeonGgufEngine {
-    fn name(&self) -> String { "AeonGgufEngine".to_string() }
+impl NativeInferenceEngine for SusiGgufEngine {
+    fn name(&self) -> String { "SusiGgufEngine".to_string() }
 
     fn run_inference(&self, prompt: &str) -> EaiResult<String> {
         self.run_inference_stream(prompt, &|_| {})
@@ -466,7 +466,7 @@ mod tests {
     #[test]
     fn test_native_tokenization() {
         let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
-        let tokenizer_path = home.join(".aeon/models/tokenizer.json");
+        let tokenizer_path = home.join(".susi/models/tokenizer.json");
         if tokenizer_path.exists() {
             let tokenizer = Tokenizer::from_file(tokenizer_path);
             assert!(tokenizer.is_ok());

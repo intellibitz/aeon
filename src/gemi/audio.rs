@@ -1,4 +1,4 @@
-// AEON-Audio: Native Neural Audio Substrate
+// SUSI-Audio: Native Neural Audio Substrate
 // 100% Rust implementation using Candle for Tier 2 Audio Distillation
 
 use anyhow::{Result, anyhow};
@@ -6,13 +6,13 @@ use candle_core::{Tensor, DType, Device};
 use candle_nn::{Linear, Module, VarBuilder, VarMap};
 use std::path::Path;
 
-/// AEON-Audio Engine: Hardware-Saturated Neural Audio Substrate
-pub struct AeonAudioEngine {
+/// SUSI-Audio Engine: Hardware-Saturated Neural Audio Substrate
+pub struct SusiAudioEngine {
     device: Device,
     acoustic_processor: Linear,
 }
 
-impl AeonAudioEngine {
+impl SusiAudioEngine {
     pub const DIM: usize = 256;
 
     pub fn new() -> Result<Self> {
@@ -60,7 +60,7 @@ impl AeonAudioEngine {
         let _feature_vec = features.to_vec2::<f32>()?[0].clone();
 
         Ok(format!(
-            "[aeon Native Audio]: Hardware Saturated on {:?}. Spectral convergence achieved. Distillation complete for {}",
+            "[susi Native Audio]: Hardware Saturated on {:?}. Spectral convergence achieved. Distillation complete for {}",
             self.device, audio_path.display()
         ))
     }

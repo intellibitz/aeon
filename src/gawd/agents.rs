@@ -1,5 +1,5 @@
 // GAWD Agent Fleet: Universal Multi-Agent Swarm Logic
-// RULE 11: Agents must add functionality directly to the aeon engine.
+// RULE 11: Agents must add functionality directly to the susi engine.
 // RULE 31: Substrate Purity & Meta-Only Mandate - Neural Swarm Synthesis
 
 use std::sync::{Arc, RwLock, OnceLock};
@@ -93,7 +93,7 @@ impl HighDensityContextStore {
 /// Optimized for High-Density Context Mapping (Aspiration 6) and Lock-Free Substrate (Aspiration 24).
 pub type MissionBlackboard = Arc<HighDensityContextStore>;
 
-/// Core Intelligence Trait for AEON Swarm Agents
+/// Core Intelligence Trait for SUSI Swarm Agents
 pub trait GawdAgent: Send + Sync {
     fn name(&self) -> String;
     fn rank(&self) -> f32;
@@ -151,10 +151,10 @@ impl GawdAgent for DynamicAgent {
 }
 
 /// Runtime Substrate Preparation Agent (Aspiration 9)
-pub struct AeonRuntimeAgent;
+pub struct SusiRuntimeAgent;
 
-impl GawdAgent for AeonRuntimeAgent {
-    fn name(&self) -> String { "AeonRuntimeAgent".into() }
+impl GawdAgent for SusiRuntimeAgent {
+    fn name(&self) -> String { "SusiRuntimeAgent".into() }
     fn rank(&self) -> f32 { 1.0 }
     fn execute(&self, goal: &str, workspace: &Path, _blackboard: &MissionBlackboard) -> EaiResult<String> {
         let lower = goal.to_lowercase();
@@ -162,7 +162,7 @@ impl GawdAgent for AeonRuntimeAgent {
             return Ok("Runtime environment active for query.".into());
         }
         // 1. Substrate Infrastructure Audit
-        let cloud_env_keys = ["AEON_API_KEY", "MODEL_API_KEY", "EAI_API_KEY", "API_KEY"];
+        let cloud_env_keys = ["SUSI_API_KEY", "MODEL_API_KEY", "EAI_API_KEY", "API_KEY"];
         let cloud_available = cloud_env_keys.iter().any(|k| std::env::var(k).is_ok());
 
         // 2. Local Weight Verification (Rule 31)
@@ -172,7 +172,7 @@ impl GawdAgent for AeonRuntimeAgent {
         // 3. Autonomous Provisioning & Hardware Tuning (Rule 31 & Rule 33)
         if !cloud_available && !valid_local_found {
              let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
-             let cfg = crate::sandbox::manager::AeonConfig::load(&home.join(".aeon")).unwrap_or_default();
+             let cfg = crate::sandbox::manager::SusiConfig::load(&home.join(".susi")).unwrap_or_default();
              crate::gemi::models::ModelManager::install_model(&cfg.alpha_weights_url);
              let _ = crate::gemi::models::ModelManager::ensure_hardware_optimal_models(workspace);
         }
@@ -386,7 +386,7 @@ impl GawdAgent for TensorRtBridgeAgent {
         }
 
         // Local Triton Inference Server Proxy
-        let triton_url = std::env::var("TRITON_API_BASE").unwrap_or_else(|_| "http://localhost:8001/v2/models/aeon_model/generate".to_string());
+        let triton_url = std::env::var("TRITON_API_BASE").unwrap_or_else(|_| "http://localhost:8001/v2/models/susi_model/generate".to_string());
         let body = serde_json::json!({
             "text_input": goal,
             "parameters": { "max_tokens": 512, "bad_words": [], "stop_words": [] }
@@ -424,7 +424,7 @@ impl GawdAgent for LmdeployBridgeAgent {
         // Local LMDeploy Proxy (OpenAI-compatible)
         let lmdeploy_url = std::env::var("LMDEPLOY_API_BASE").unwrap_or_else(|_| "http://localhost:23333/v1".to_string());
         let body = serde_json::json!({
-            "model": "aeon-turbomind",
+            "model": "susi-turbomind",
             "prompt": goal,
             "max_tokens": 512,
             "temperature": 0.0
@@ -553,21 +553,21 @@ impl GawdAgent for AdminAgent {
         let lower_goal = goal.to_lowercase();
 
         let res = if lower_goal.contains("sync") {
-            crate::daemon::admin::AeonAdmin::enforce_version_consistency(workspace)
+            crate::daemon::admin::SusiAdmin::enforce_version_consistency(workspace)
         } else if lower_goal.contains("audit") {
-            crate::daemon::admin::AeonAdmin::audit_compliance(workspace, None)
+            crate::daemon::admin::SusiAdmin::audit_compliance(workspace, None)
         } else if lower_goal.contains("verify") {
-            crate::daemon::admin::AeonAdmin::verify_version_alignment(workspace).map(|_| "Version alignment verified.".to_string())
+            crate::daemon::admin::SusiAdmin::verify_version_alignment(workspace).map(|_| "Version alignment verified.".to_string())
         } else if lower_goal.contains("release") {
-            crate::daemon::admin::AeonAdmin::execute_release(workspace)
+            crate::daemon::admin::SusiAdmin::execute_release(workspace)
         } else if lower_goal.contains("status") || lower_goal.contains("health") {
             let hw = crate::gemi::hardware::HardwareProfiler::get_profile();
-            Ok(format!("Substrate Status: v{} | Hardware: {} | CPUs: {} | RAM: {}GB | Status: Operational", crate::AEON_VERSION, hw.cpu_brand, hw.cpus, hw.ram_gb))
+            Ok(format!("Substrate Status: v{} | Hardware: {} | CPUs: {} | RAM: {}GB | Status: Operational", crate::SUSI_VERSION, hw.cpu_brand, hw.cpus, hw.ram_gb))
         } else if lower_goal.contains("version") {
-             Ok(format!("AEON Engine Version: v{}", crate::AEON_VERSION))
+             Ok(format!("SUSI Engine Version: v{}", crate::SUSI_VERSION))
         } else if lower_goal.contains("identity") {
              let brain = crate::gawd::brain::AlphaBrainContext::initialize(workspace);
-             Ok(format!("# AEON Substrate Identity\n\n{}", brain.inspect_tri_state()))
+             Ok(format!("# SUSI Substrate Identity\n\n{}", brain.inspect_tri_state()))
         } else if lower_goal.contains("list") && lower_goal.contains("models") {
              let models = crate::gemi::models::ModelManager::list_models(workspace);
              let mut out = format!("Active Model Substrates (Count: {})\n\n", models.len());
@@ -577,18 +577,18 @@ impl GawdAgent for AdminAgent {
              Ok(out)
         } else if lower_goal.contains("deep-scan") {
             let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
-            let global_dir = home.join(".aeon");
+            let global_dir = home.join(".susi");
             crate::gemi::models::ModelManager::deep_scan_home_and_register(&global_dir)
         } else if lower_goal.contains("initialize") || lower_goal.contains("install") {
             let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
-            let global_dir = home.join(".aeon");
+            let global_dir = home.join(".susi");
             crate::sandbox::manager::SandboxManager::ensure_global_sandbox(&global_dir)?;
-            Ok("AEON runtime initialized and sandboxed.".to_string())
+            Ok("SUSI runtime initialized and sandboxed.".to_string())
         } else if lower_goal.contains("remove") || lower_goal.contains("uninstall") {
             let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
-            let global_dir = home.join(".aeon");
+            let global_dir = home.join(".susi");
             let _ = std::fs::remove_dir_all(&global_dir);
-            Ok("AEON runtime removed.".to_string())
+            Ok("SUSI runtime removed.".to_string())
         } else {
             Ok("AdminAgent: Monitoring technical intent...".to_string())
         }?;
@@ -616,7 +616,7 @@ impl AgentMetaRegistry {
 
     fn load_or_provision(&self) {
         let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
-        let registry_path = home.join(".aeon/agent_registry.json");
+        let registry_path = home.join(".susi/agent_registry.json");
 
         if registry_path.exists() {
             if let Ok(content) = std::fs::read_to_string(&registry_path) {
@@ -690,7 +690,7 @@ impl AgentMetaRegistry {
                 // Track Mutation Provenance
                 let log_msg = format!("Agent '{}' rank mutation: {:.2} -> {:.2} (Source: {})", name, old_rank, agent.base_rank, source);
                 let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
-                crate::sandbox::manager::AeonAuditLogger::log(&home.join(".aeon"), crate::sandbox::manager::LogLevel::Info, "AGENT_MUTATION", &log_msg);
+                crate::sandbox::manager::SusiAuditLogger::log(&home.join(".susi"), crate::sandbox::manager::LogLevel::Info, "AGENT_MUTATION", &log_msg);
             }
         }
         self.save();
@@ -698,7 +698,7 @@ impl AgentMetaRegistry {
 
     fn save(&self) {
         let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
-        let registry_path = home.join(".aeon/agent_registry.json");
+        let registry_path = home.join(".susi/agent_registry.json");
         let agents = self.agents.read().unwrap();
         let _ = std::fs::write(&registry_path, serde_json::to_string_pretty(&*agents).unwrap_or_default());
     }
@@ -726,7 +726,7 @@ pub struct NeuralAgentFactory;
 impl NeuralAgentFactory {
     pub fn synthesize_specialist(goal: &str, workspace: &Path) -> EaiResult<AgentProfile> {
         let prompt = format!(
-            "MISSION_GOAL: {}\n\n[INSTRUCTION]: You are the AEON Agent Factory. Detect the capability gap and synthesize a NEW specialist agent profile. \
+            "MISSION_GOAL: {}\n\n[INSTRUCTION]: You are the SUSI Agent Factory. Detect the capability gap and synthesize a NEW specialist agent profile. \
             Output in JSON format: {{\"name\": \"...\", \"description\": \"...\", \"categories\": [\"...\"], \"semantic_anchors\": [\"...\"], \"base_rank\": 0.9}}",
             goal
         );
@@ -759,7 +759,7 @@ impl GawdAgentFleet {
     pub fn synthesize_fleet(goal: &str, workspace: &Path) -> Vec<Arc<dyn GawdAgent>> {
         // 1. Mandatory Substrate Guards & Preparation (RUNTIME.md Mandates)
         let mut fleet: Vec<Arc<dyn GawdAgent>> = vec![
-            Arc::new(AeonRuntimeAgent),
+            Arc::new(SusiRuntimeAgent),
             Arc::new(HardwareAgent),
             Arc::new(SafetyAgent),
             Arc::new(SecurityAgent),
@@ -809,7 +809,7 @@ impl GawdAgentFleet {
 
         // Neural Semantic pass: identified via Tier 0 Vector space
         if !lower_goal.contains("admin mission") {
-            if let Ok(goal_vec) = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(goal, Some(&available_agents)) {
+            if let Ok(goal_vec) = crate::gemi::alpha::SusiAlphaModel::semantic_centroid_projection(goal, Some(&available_agents)) {
                 for agent in available_agents {
                     if fleet.len() >= max_agents { break; }
 
@@ -819,7 +819,7 @@ impl GawdAgentFleet {
                     agent_corpus.push(' ');
                     agent_corpus.push_str(&agent.description);
 
-                    if let Ok(agent_vec) = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(&agent_corpus, Some(std::slice::from_ref(&agent))) {
+                    if let Ok(agent_vec) = crate::gemi::alpha::SusiAlphaModel::semantic_centroid_projection(&agent_corpus, Some(std::slice::from_ref(&agent))) {
                         let dot_product: f32 = goal_vec.iter().zip(agent_vec.iter()).map(|(a, b)| a * b).sum();
                         max_similarity = dot_product;
                         if max_similarity > max_global_similarity { max_global_similarity = max_similarity; }
@@ -983,7 +983,7 @@ mod tests {
         for a in &fleet { println!("- Agent: {}", a.name()); }
 
         assert!(!fleet.is_empty());
-        assert!(fleet.iter().any(|a| a.name() == "AeonRuntimeAgent"));
+        assert!(fleet.iter().any(|a| a.name() == "SusiRuntimeAgent"));
         assert!(fleet.iter().any(|a| a.name() == "HardwareAgent"));
         assert!(fleet.iter().any(|a| a.name() == "SearchAgent") ||
                 fleet.iter().any(|a| a.name() == "TranslationAgent") ||

@@ -1,10 +1,10 @@
-// AEON Substrate Evolution Manager
+// SUSI Substrate Evolution Manager
 // RULE 23: Motion Rule Protocol - Test-Driven Evolution Substrate
 
 use std::path::Path;
 use std::process::Command;
 use crate::error::EaiResult;
-use crate::sandbox::manager::AeonAuditLogger;
+use crate::sandbox::manager::SusiAuditLogger;
 use crate::gawd::reflex_synth::ReflexSynthesizer;
 use std::collections::HashMap;
 
@@ -39,7 +39,7 @@ impl EvolutionManager {
              // Substrate Ingestion: Retrain Tier 2 model if experience buffer is full
              let _ = crate::gawd::reason_trainer::ReasoningTrainer::audit_reasoning_substrate(workspace);
 
-             return Ok(format!("# AEON Motion Rule Triggered\n\n\
+             return Ok(format!("# SUSI Motion Rule Triggered\n\n\
                 Test-Driven Evolution has detected a substrate failure and autonomously synthesis a repair.\n\n\
                 - **Target**: {}\n\
                 - **Action**: {}", intent_to_heal, res));
@@ -82,7 +82,7 @@ impl EvolutionManager {
     }
 
     pub fn detect_high_frequency_gap(workspace: &Path) -> String {
-        let log_content = AeonAuditLogger::read_audit_log(workspace, 100);
+        let log_content = SusiAuditLogger::read_audit_log(workspace, 100);
         let mut intent_freq = HashMap::new();
 
         for line in log_content.lines() {

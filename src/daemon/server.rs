@@ -1,4 +1,4 @@
-// Always-On AMA Master Daemon Process Manager
+// Always-On SMA Master Daemon Process Manager
 // 100% Rust implementation managing GMCP (Port 9090), GEMI (Port 9091) & A2A Cluster UDP (Port 9092)
 
 use std::fs;
@@ -19,13 +19,13 @@ use std::sync::{atomic::{AtomicBool, Ordering}, Arc};
 use tracing::{info, warn};
 
 use crate::error::{EaiError, EaiResult};
-use crate::sandbox::manager::AeonConfig;
+use crate::sandbox::manager::SusiConfig;
 use crate::gemi::GemiServer;
 use crate::gmcp::server::GmcpServer;
 use crate::gawd::queue::SubstratePulseQueue;
-use crate::gawd::ama::AmaMasterAgent;
+use crate::gawd::ama::SusiMasterAgent;
 
-pub struct AmaDaemon;
+pub struct SusiDaemon;
 
 pub struct DaemonContext {
     pub shutdown_signal: Arc<AtomicBool>,
@@ -45,7 +45,7 @@ impl DaemonContext {
         thread::spawn(move || {
             if let Ok(mut signals) = Signals::new([SIGTERM, SIGINT]) {
                 for sig in signals.forever() {
-                    eprintln!("[AmaDaemon] Received signal: {}", sig);
+                    eprintln!("[SusiDaemon] Received signal: {}", sig);
                     shutdown.store(true, Ordering::Release);
                 }
             }
@@ -116,9 +116,9 @@ impl DaemonLock {
     }
 }
 
-impl AmaDaemon {
+impl SusiDaemon {
     pub fn get_lock_file(global_dir: &Path) -> PathBuf {
-        global_dir.join("ama.lock")
+        global_dir.join("sma.lock")
     }
 
     pub fn check_status(global_dir: &Path) -> Option<u32> {
@@ -229,7 +229,7 @@ impl AmaDaemon {
         }
 
         let current_exe = std::env::current_exe().ok();
-        let bin_name = if cfg!(target_os = "windows") { "bin/aeon-engine.exe" } else { "bin/aeon-engine" };
+        let bin_name = if cfg!(target_os = "windows") { "bin/susi-engine.exe" } else { "bin/susi-engine" };
         let global_bin = global_dir.join(bin_name);
 
         let bin_to_run = if let Some(ref exe) = current_exe {
@@ -237,18 +237,18 @@ impl AmaDaemon {
         } else if global_bin.exists() {
             global_bin
         } else {
-            PathBuf::from(if cfg!(target_os = "windows") { "aeon.exe" } else { "aeon" })
+            PathBuf::from(if cfg!(target_os = "windows") { "susi.exe" } else { "susi" })
         };
 
         // Binary Integrity Check (Aspiration 4 Hardening)
         match Self::verify_binary_integrity(&bin_to_run, global_dir) {
-            Ok(true) => info!("[AmaDaemon] Binary integrity verified."),
+            Ok(true) => info!("[SusiDaemon] Binary integrity verified."),
             Ok(false) => {
-                warn!("[AmaDaemon] Binary integrity check FAILED. Potential tampering detected or build out of sync.");
+                warn!("[SusiDaemon] Binary integrity check FAILED. Potential tampering detected or build out of sync.");
                 // In a strict production mode, we might abort here.
                 // For local evolution, we log and continue if in 'alpha-world' space.
             }
-            Err(e) => warn!("[AmaDaemon] Could not verify binary integrity: {}", e),
+            Err(e) => warn!("[SusiDaemon] Could not verify binary integrity: {}", e),
         }
 
         let mut cmd = Command::new(&bin_to_run);
@@ -289,26 +289,26 @@ impl AmaDaemon {
         let mut lock = match DaemonLock::acquire(&lock_file_path) {
             Ok(l) => l,
             Err(e) => {
-                eprintln!("[AmaDaemon] Failed to acquire lock: {}. Daemon likely already running.", e);
+                eprintln!("[SusiDaemon] Failed to acquire lock: {}. Daemon likely already running.", e);
                 return;
             }
         };
 
         if let Err(e) = lock.write_pid() {
-            eprintln!("[AmaDaemon] Failed to write PID to lock file: {}", e);
+            eprintln!("[SusiDaemon] Failed to write PID to lock file: {}", e);
             return;
         }
 
         let ctx = DaemonContext::new(lock);
         if let Err(e) = ctx.setup_signal_handlers() {
-            eprintln!("[AmaDaemon] Signal handler setup failed: {}", e);
+            eprintln!("[SusiDaemon] Signal handler setup failed: {}", e);
         }
 
-        let mut cfg = AeonConfig::load(&global_dir).expect("Fatal: Malformed configuration");
+        let mut cfg = SusiConfig::load(&global_dir).expect("Fatal: Malformed configuration");
         let mut config_changed = false;
 
         // Substrate Administration & Hardware Optimization (Pillar 1)
-        crate::daemon::runtime_admin::AeonRuntimeAdmin::start_administration_cycle(&workspace);
+        crate::daemon::runtime_admin::SusiRuntimeAdmin::start_administration_cycle(&workspace);
 
         // 1. Bind GEMI HTTP Server (Port 9091 / Dynamic)
         let (gemi_server, gemi_port) = Self::bind_http_with_fallback(cfg.gemi_port, "GEMI", &workspace);
@@ -333,7 +333,7 @@ impl AmaDaemon {
 
         if config_changed {
             let _ = cfg.save(&global_dir);
-            eprintln!("[AmaDaemon] Port collisions detected. Updated configuration with active ports.");
+            eprintln!("[SusiDaemon] Port collisions detected. Updated configuration with active ports.");
         }
 
         // Spawn services with panic handling
@@ -368,13 +368,13 @@ impl AmaDaemon {
         let workspace_pulse = workspace.clone();
         thread::spawn(move || {
             let queue = SubstratePulseQueue::global();
-            let ama = AmaMasterAgent::new();
+            let ama = SusiMasterAgent::new();
 
             loop {
                 if let Some(pulse) = queue.pop() {
                     // Serialized Execution (Mandate 31)
                     info!("[SubstratePulseQueue] Processing Pulse: {}", pulse.intent);
-                    let _ = ama.solve_stream(&pulse.intent, &workspace_pulse, crate::AEON_VERSION);
+                    let _ = ama.solve_stream(&pulse.intent, &workspace_pulse, crate::SUSI_VERSION);
                 }
                 thread::sleep(Duration::from_millis(100));
             }
@@ -385,7 +385,7 @@ impl AmaDaemon {
             thread::sleep(Duration::from_secs(5));
         }
 
-        eprintln!("[AmaDaemon] Graceful shutdown initiated");
+        eprintln!("[SusiDaemon] Graceful shutdown initiated");
     }
 
     fn bind_http_with_fallback(port: u16, name: &str, workspace: &Path) -> (tiny_http::Server, u16) {
@@ -395,13 +395,13 @@ impl AmaDaemon {
             Err(_) => {
                 let server = tiny_http::Server::http("0.0.0.0:0").expect("Failed to bind to random port");
                 let new_port = server.server_addr().to_ip().unwrap().port();
-                crate::sandbox::manager::AeonAuditLogger::log(
+                crate::sandbox::manager::SusiAuditLogger::log(
                     workspace,
                     crate::sandbox::manager::LogLevel::Warning,
                     "PORT_COLLISION",
                     &format!("{} default port {} occupied. Randomized to {}", name, port, new_port)
                 );
-                eprintln!("[AmaDaemon] {} port collision! Randomized to {}", name, new_port);
+                eprintln!("[SusiDaemon] {} port collision! Randomized to {}", name, new_port);
                 (server, new_port)
             }
         }
@@ -414,13 +414,13 @@ impl AmaDaemon {
             Err(_) => {
                 let socket = std::net::UdpSocket::bind("0.0.0.0:0").expect("Failed to bind random UDP port");
                 let new_port = socket.local_addr().unwrap().port();
-                crate::sandbox::manager::AeonAuditLogger::log(
+                crate::sandbox::manager::SusiAuditLogger::log(
                     workspace,
                     crate::sandbox::manager::LogLevel::Warning,
                     "UDP_PORT_COLLISION",
                     &format!("UDP Discovery port {} occupied. Randomized to {}", port, new_port)
                 );
-                eprintln!("[AmaDaemon] UDP port collision! Randomized to {}", new_port);
+                eprintln!("[SusiDaemon] UDP port collision! Randomized to {}", new_port);
                 (socket, new_port)
             }
         }
@@ -431,8 +431,8 @@ impl AmaDaemon {
         let mut buf = [0u8; 512];
         while let Ok((amt, src)) = socket.recv_from(&mut buf) {
             let msg = String::from_utf8_lossy(&buf[..amt]);
-            if msg.contains("AEON_LAN_PING") {
-                let pong = format!("AEON_LAN_PONG:aeon-daemon-node:{}", gmcp_port);
+            if msg.contains("SUSI_LAN_PING") {
+                let pong = format!("SUSI_LAN_PONG:susi-daemon-node:{}", gmcp_port);
                 let _ = socket.send_to(pong.as_bytes(), src);
             }
         }
@@ -457,20 +457,20 @@ mod tests {
     #[test]
     fn test_lock_file_path() {
         let tmp_dir = std::env::temp_dir();
-        let path = AmaDaemon::get_lock_file(&tmp_dir);
-        assert_eq!(path, tmp_dir.join("ama.lock"));
+        let path = SusiDaemon::get_lock_file(&tmp_dir);
+        assert_eq!(path, tmp_dir.join("sma.lock"));
     }
 
     #[test]
     fn test_daemon_status_and_lifecycle_when_not_running() {
         let tmp_dir = std::env::temp_dir();
-        let lock_file = AmaDaemon::get_lock_file(&tmp_dir);
+        let lock_file = SusiDaemon::get_lock_file(&tmp_dir);
         let _ = std::fs::remove_file(&lock_file);
 
-        let status = AmaDaemon::check_status(&tmp_dir);
+        let status = SusiDaemon::check_status(&tmp_dir);
         assert!(status.is_none());
 
-        let stopped = AmaDaemon::stop_daemon(&tmp_dir);
+        let stopped = SusiDaemon::stop_daemon(&tmp_dir);
         assert!(!stopped);
     }
 }

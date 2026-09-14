@@ -1,9 +1,9 @@
 #![allow(unexpected_cfgs)]
-use aeon_engine::daemon::AmaDaemon;
-use aeon_engine::gawd::ama::AmaMasterAgent;
-use aeon_engine::gemi::server::GemiServer;
-use aeon_engine::gmcp::server::GmcpServer;
-use aeon_engine::AEON_VERSION;
+use susi_engine::daemon::SusiDaemon;
+use susi_engine::gawd::ama::SusiMasterAgent;
+use susi_engine::gemi::server::GemiServer;
+use susi_engine::gmcp::server::GmcpServer;
+use susi_engine::SUSI_VERSION;
 
 use clap::{Parser, Subcommand};
 use std::env;
@@ -15,8 +15,8 @@ const MAX_STDIN_SIZE: usize = 100 * 1024 * 1024;  // Fluid Scaling: 100MB baseli
 const STDIN_TIMEOUT_SECS: u64 = 120; // Increased to 2 minutes
 
 #[derive(Parser)]
-#[command(name = "aeon")]
-#[command(version = AEON_VERSION)]
+#[command(name = "susi")]
+#[command(version = SUSI_VERSION)]
 #[command(about = "EAI: Exponential Intelligence for Any AI - GAWD, GEMI & GMCP Multi-Agent Engine", long_about = None)]
 struct Cli {
     #[command(subcommand)]
@@ -29,11 +29,11 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Start persistent AEON Pulse Shell
+    /// Start persistent SUSI Pulse Shell
     Shell,
-    /// Initialize sandboxed .aeon environment
+    /// Initialize sandboxed .susi environment
     Install,
-    /// Clean up sandboxed .aeon environment
+    /// Clean up sandboxed .susi environment
     Uninstall,
     /// Start native MCP server
     Mcp,
@@ -117,11 +117,11 @@ fn get_home_dir() -> PathBuf {
 }
 
 fn run_shell(workspace: &std::path::Path) {
-    use aeon_engine::gawd::queue::SubstratePulseQueue;
+    use susi_engine::gawd::queue::SubstratePulseQueue;
     let queue = SubstratePulseQueue::global();
-    let ama = AmaMasterAgent::new();
+    let ama = SusiMasterAgent::new();
 
-    println!("AEON Pulse Shell v{} (Glass Box Telemetry Mode Active)", AEON_VERSION);
+    println!("SUSI Pulse Shell v{} (Glass Box Telemetry Mode Active)", SUSI_VERSION);
     println!("Enter pulses to interact with the substrate. Pulses are queued and processed in order.");
     println!("Type 'exit' to quit.");
 
@@ -129,21 +129,21 @@ fn run_shell(workspace: &std::path::Path) {
     std::thread::spawn(move || {
         loop {
             if let Some(pulse) = queue.pop() {
-                let _ = ama.solve_stream(&pulse.intent, &w, AEON_VERSION);
+                let _ = ama.solve_stream(&pulse.intent, &w, SUSI_VERSION);
             }
             std::thread::sleep(std::time::Duration::from_millis(50));
         }
     });
 
     loop {
-        print!("aeon> ");
+        print!("susi> ");
         let _ = io::stdout().flush();
         let mut input = String::new();
         if io::stdin().read_line(&mut input).is_ok() {
             let trimmed = input.trim();
             if trimmed.is_empty() { continue; }
             if trimmed == "exit" || trimmed == "quit" { break; }
-            let _ = queue.ingest(trimmed, &workspace.to_path_buf(), AEON_VERSION);
+            let _ = queue.ingest(trimmed, &workspace.to_path_buf(), SUSI_VERSION);
         } else {
             break;
         }
@@ -166,97 +166,97 @@ fn main() {
         .init();
     let cwd = env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
     let home = get_home_dir();
-    let global_dir = home.join(".aeon");
+    let global_dir = home.join(".susi");
 
     let cli = Cli::parse();
 
     if !matches!(cli.command, Some(Commands::DaemonStart { .. })) {
-        AmaDaemon::ensure_daemon_running(&cwd, &global_dir);
+        SusiDaemon::ensure_daemon_running(&cwd, &global_dir);
     }
 
     if let Some(command) = cli.command {
-        let ama = AmaMasterAgent::new();
+        let ama = SusiMasterAgent::new();
         match command {
             Commands::Shell => run_shell(&cwd),
             Commands::Install => {
-                let answer = ama.solve_clean("admin mission: initialize sandboxed .aeon environment and provision weights", &cwd, AEON_VERSION);
+                let answer = ama.solve_clean("admin mission: initialize sandboxed .susi environment and provision weights", &cwd, SUSI_VERSION);
                 println!("{}", answer);
             }
             Commands::Uninstall => {
-                let answer = ama.solve_clean("admin mission: remove and clean up sandboxed .aeon environment", &cwd, AEON_VERSION);
+                let answer = ama.solve_clean("admin mission: remove and clean up sandboxed .susi environment", &cwd, SUSI_VERSION);
                 println!("{}", answer);
             }
-            Commands::Mcp => GmcpServer::run_stdio(&cwd, AEON_VERSION),
+            Commands::Mcp => GmcpServer::run_stdio(&cwd, SUSI_VERSION),
             Commands::Gemi => {
-                let cfg = aeon_engine::sandbox::manager::AeonConfig::load(&global_dir).expect("Fatal: Malformed configuration");
+                let cfg = susi_engine::sandbox::manager::SusiConfig::load(&global_dir).expect("Fatal: Malformed configuration");
                 let server = tiny_http::Server::http(format!("0.0.0.0:{}", cfg.gemi_port)).expect("Failed to bind GEMI port");
                 GemiServer::start_http_server(cwd.clone(), server);
             }
             Commands::Status => {
-                let answer = ama.solve_clean("status", &cwd, AEON_VERSION);
+                let answer = ama.solve_clean("status", &cwd, SUSI_VERSION);
                 println!("{}", answer);
             }
             Commands::Models => {
-                let answer = ama.solve_clean("models", &cwd, AEON_VERSION);
+                let answer = ama.solve_clean("models", &cwd, SUSI_VERSION);
                 println!("{}", answer);
             }
             Commands::SelectModel { model } => {
                 let intent = format!("admin mission: select and override active model substrate to {}", model);
-                let answer = ama.solve_clean(&intent, &cwd, AEON_VERSION);
+                let answer = ama.solve_clean(&intent, &cwd, SUSI_VERSION);
                 println!("{}", answer);
             }
             Commands::DeepScan => {
-                let answer = ama.solve_clean("admin mission: perform parallel deep-scan of user home for local models and register them", &cwd, AEON_VERSION);
+                let answer = ama.solve_clean("admin mission: perform parallel deep-scan of user home for local models and register them", &cwd, SUSI_VERSION);
                 println!("{}", answer);
             }
             Commands::McpScout => {
-                let answer = ama.solve_clean("admin mission: perform autonomous web-scouting of open-source MCP servers and benchmark them", &cwd, AEON_VERSION);
+                let answer = ama.solve_clean("admin mission: perform autonomous web-scouting of open-source MCP servers and benchmark them", &cwd, SUSI_VERSION);
                 println!("{}", answer);
             }
             Commands::Pulse { intent } => {
                 let intent_str = intent.join(" ");
-                match aeon_engine::daemon::admin::AeonAdmin::ingest_natural_intent(&cwd, &intent_str) {
+                match susi_engine::daemon::admin::SusiAdmin::ingest_natural_intent(&cwd, &intent_str) {
                     Ok(msg) => println!("{}", msg),
                     Err(e) => eprintln!("Pulse ingestion failed: {}", e),
                 }
             }
             Commands::Audit => {
-                let answer = ama.solve_clean("admin mission: perform compliance audit and technical verification", &cwd, AEON_VERSION);
+                let answer = ama.solve_clean("admin mission: perform compliance audit and technical verification", &cwd, SUSI_VERSION);
                 println!("{}", answer);
             }
             Commands::Admin { subcommand } => {
                 match subcommand {
                     AdminCommands::Sync => {
-                        match aeon_engine::daemon::admin::AeonAdmin::enforce_version_consistency(&cwd) {
+                        match susi_engine::daemon::admin::SusiAdmin::enforce_version_consistency(&cwd) {
                             Ok(v) => println!("Version synchronization complete: v{}", v),
                             Err(e) => eprintln!("Sync failed: {}", e),
                         }
                     }
                     AdminCommands::Pulse { intent } => {
                         let intent_str = intent.join(" ");
-                        match aeon_engine::daemon::admin::AeonAdmin::ingest_natural_intent(&cwd, &intent_str) {
+                        match susi_engine::daemon::admin::SusiAdmin::ingest_natural_intent(&cwd, &intent_str) {
                             Ok(msg) => println!("{}", msg),
                             Err(e) => eprintln!("Pulse ingestion failed: {}", e),
                         }
                     }
                     AdminCommands::Audit => {
-                        let answer = ama.solve_clean("admin mission: perform compliance audit and technical verification", &cwd, AEON_VERSION);
+                        let answer = ama.solve_clean("admin mission: perform compliance audit and technical verification", &cwd, SUSI_VERSION);
                         println!("{}", answer);
                     }
                     AdminCommands::Verify => {
-                        let answer = ama.solve_clean("admin mission: verify version alignment across manifest and documents", &cwd, AEON_VERSION);
+                        let answer = ama.solve_clean("admin mission: verify version alignment across manifest and documents", &cwd, SUSI_VERSION);
                         println!("{}", answer);
                     }
                     AdminCommands::Release => {
-                        let answer = ama.solve_clean("admin mission: execute full release orchestration sequence", &cwd, AEON_VERSION);
+                        let answer = ama.solve_clean("admin mission: execute full release orchestration sequence", &cwd, SUSI_VERSION);
                         println!("{}", answer);
                     }
                     AdminCommands::Lint => {
-                        let answer = ama.solve_clean("admin mission: run linting and static analysis (clippy)", &cwd, AEON_VERSION);
+                        let answer = ama.solve_clean("admin mission: run linting and static analysis (clippy)", &cwd, SUSI_VERSION);
                         println!("{}", answer);
                     }
                     AdminCommands::AuditDeps => {
-                        let answer = ama.solve_clean("admin mission: run dependency security audit", &cwd, AEON_VERSION);
+                        let answer = ama.solve_clean("admin mission: run dependency security audit", &cwd, SUSI_VERSION);
                         println!("{}", answer);
                     }
                 }
@@ -266,7 +266,7 @@ fn main() {
                 println!("Workspace build artifacts cleaned.");
             }
             Commands::DaemonStart { .. } => {
-                AmaDaemon::run_daemon_loop(global_dir.clone(), global_dir);
+                SusiDaemon::run_daemon_loop(global_dir.clone(), global_dir);
             }
         }
     } else if !cli.intent.is_empty() {
@@ -286,17 +286,17 @@ fn main() {
             }
         }
 
-        let ama = AmaMasterAgent::new();
-        match aeon_engine::daemon::admin::AeonAdmin::ingest_natural_intent(&cwd, &goal) {
+        let ama = SusiMasterAgent::new();
+        match susi_engine::daemon::admin::SusiAdmin::ingest_natural_intent(&cwd, &goal) {
             Ok(msg) => {
                 info!("Natural intent ingested successfully: {}", msg);
-                let _ = ama.solve_stream(&goal, &cwd, AEON_VERSION);
+                let _ = ama.solve_stream(&goal, &cwd, SUSI_VERSION);
                 std::io::stdout().flush().ok();
                 std::process::exit(0);
             }
             Err(e) => {
                 warn!("Natural intent ingestion failed: {}. Falling back to direct swarm solving.", e);
-                let _ = ama.solve_stream(&goal, &cwd, AEON_VERSION);
+                let _ = ama.solve_stream(&goal, &cwd, SUSI_VERSION);
                 std::io::stdout().flush().ok();
                 std::process::exit(0);
             }
@@ -304,8 +304,8 @@ fn main() {
     } else if !io::stdin().is_terminal() {
         match read_stdin_bounded() {
             Ok(Some(input)) => {
-                let ama = AmaMasterAgent::new();
-                let _ = ama.solve_stream(&input, &cwd, AEON_VERSION);
+                let ama = SusiMasterAgent::new();
+                let _ = ama.solve_stream(&input, &cwd, SUSI_VERSION);
                 std::io::stdout().flush().ok();
                 std::process::exit(0);
             }

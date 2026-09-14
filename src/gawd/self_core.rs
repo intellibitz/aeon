@@ -1,23 +1,23 @@
-// AEON Core Substrate: Compiled Binary Instructions Core
+// SUSI Core Substrate: Compiled Binary Instructions Core
 // Eliminates runtime string parsing by encoding axioms, agent rules, and component topologies
 // directly into strongly-typed compiled Rust data structures and enums.
 
 #[derive(Debug, Clone, Copy)]
-pub enum AeonCoreTier {
+pub enum SusiCoreTier {
     Tier0Reflex,
     Tier1Swarm,
     Tier2Reasoning,
 }
 
 #[derive(Debug, Clone)]
-pub struct AeonComponentSpec {
+pub struct SusiComponentSpec {
     pub name: &'static str,
-    pub tier: AeonCoreTier,
+    pub tier: SusiCoreTier,
     pub description: &'static str,
 }
 
 #[derive(Debug, Clone)]
-pub struct AeonAxiomRule {
+pub struct SusiAxiomRule {
     pub id: usize,
     pub title: &'static str,
     pub imperative: &'static str,
@@ -43,25 +43,25 @@ impl AlphaSelf {
     pub const QUERIES_MD: &'static str = include_str!("../../.agents/QUERIES.md");
     pub const CREATORS_MD: &'static str = include_str!("../../.agents/CREATORS.md");
 
-    pub const RULES: &[AeonAxiomRule] = GEN_RULES;
-    pub const WORKFLOW_STEPS: &[AeonAxiomRule] = GEN_WORKFLOW_STEPS;
-    pub const PULSE_AXIOMS: &[AeonAxiomRule] = GEN_PULSE_AXIOMS;
-    pub const MISSION_PROTOCOLS: &[AeonAxiomRule] = GEN_MISSION_PROTOCOLS;
-    pub const QUERY_PROTOCOLS: &[AeonAxiomRule] = GEN_QUERY_PROTOCOLS;
-    pub const CREATOR_PROTOCOLS: &[AeonAxiomRule] = GEN_CREATOR_PROTOCOLS;
+    pub const RULES: &[SusiAxiomRule] = GEN_RULES;
+    pub const WORKFLOW_STEPS: &[SusiAxiomRule] = GEN_WORKFLOW_STEPS;
+    pub const PULSE_AXIOMS: &[SusiAxiomRule] = GEN_PULSE_AXIOMS;
+    pub const MISSION_PROTOCOLS: &[SusiAxiomRule] = GEN_MISSION_PROTOCOLS;
+    pub const QUERY_PROTOCOLS: &[SusiAxiomRule] = GEN_QUERY_PROTOCOLS;
+    pub const CREATOR_PROTOCOLS: &[SusiAxiomRule] = GEN_CREATOR_PROTOCOLS;
 
     // 5 Pillar Component Topology
-    pub const AOA_COMPONENTS: &[AeonComponentSpec] = GEN_AOA_COMPONENTS;
-    pub const AGENT_COMPONENTS: &[AeonComponentSpec] = GEN_AGENT_COMPONENTS;
-    pub const ENGINE_COMPONENTS: &[AeonComponentSpec] = GEN_ENGINE_COMPONENTS;
-    pub const MODEL_COMPONENTS: &[AeonComponentSpec] = GEN_MODEL_COMPONENTS;
-    pub const MCP_COMPONENTS: &[AeonComponentSpec] = GEN_MCP_COMPONENTS;
-    pub const COMPONENTS: &[AeonComponentSpec] = GEN_COMPONENTS;
+    pub const AOA_COMPONENTS: &[SusiComponentSpec] = GEN_AOA_COMPONENTS;
+    pub const AGENT_COMPONENTS: &[SusiComponentSpec] = GEN_AGENT_COMPONENTS;
+    pub const ENGINE_COMPONENTS: &[SusiComponentSpec] = GEN_ENGINE_COMPONENTS;
+    pub const MODEL_COMPONENTS: &[SusiComponentSpec] = GEN_MODEL_COMPONENTS;
+    pub const MCP_COMPONENTS: &[SusiComponentSpec] = GEN_MCP_COMPONENTS;
+    pub const COMPONENTS: &[SusiComponentSpec] = GEN_COMPONENTS;
 
     #[allow(dead_code)]
     pub fn inspect_compiled_binary_instructions() -> String {
         format!(
-            "AEON Substrate Compiled Binary Instructions:\n- Version: {}\n- Paradigm: {}\n- Hardcoded Axiom Rules: {}\n- AoA Pillar: {}\n- Agents Pillar: {}\n- Engines Pillar: {}\n- Models Pillar: {}\n- MCPs Pillar: {}",
+            "SUSI Substrate Compiled Binary Instructions:\n- Version: {}\n- Paradigm: {}\n- Hardcoded Axiom Rules: {}\n- AoA Pillar: {}\n- Agents Pillar: {}\n- Engines Pillar: {}\n- Models Pillar: {}\n- MCPs Pillar: {}",
             Self::VERSION,
             Self::CORE_PARADIGM,
             Self::RULES.len(),

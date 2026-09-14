@@ -1,16 +1,16 @@
-# aeon: Exponential Intelligence for Any AI (EAI)
+# susi: Exponential Intelligence for Any AI (EAI)
 
-![AEON Version](https://img.shields.io/badge/version-v0.1.2022844-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
+![SUSI Version](https://img.shields.io/badge/version-v0.1.2022844-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
 
-**aeon** is a local-first, native Rust AI execution engine designed for high-throughput, hardware-saturated agent orchestration. It transforms static AI interactions into a dynamic, self-evolving intelligence substrate governed by a hard-compiled genome. By embedding design governance rules directly into binary memory, `aeon` eliminates the gap between intention and execution, delivering a safe, sovereign, and exponentially improving intelligence layer for any environment.
+**susi** is a local-first, native Rust AI execution engine designed for high-throughput, hardware-saturated agent orchestration. It transforms static AI interactions into a dynamic, self-evolving intelligence substrate governed by a hard-compiled genome. By embedding design governance rules directly into binary memory, `susi` eliminates the gap between intention and execution, delivering a safe, sovereign, and exponentially improving intelligence layer for any environment.
 
 ## Installation
 
 ### Universal One-Liner (Linux / macOS / Windows / WSL)
 ```bash
-curl -sSfL https://raw.githubusercontent.com/intellibitz/aeon/main/install.sh | sh
+curl -sSfL https://raw.githubusercontent.com/intellibitz/susi/main/install.sh | sh
 ```
-The installer prioritizes pre-compiled binary deployment for microsecond onboarding, with a transparent fallback to local compilation if required. It automatically initializes the `.aeon/bin` environment in your host's shell path.
+The installer prioritizes pre-compiled binary deployment for microsecond onboarding, with a transparent fallback to local compilation if required. It automatically initializes the `.susi/bin` environment in your host's shell path.
 
 ## Usage
 
@@ -18,41 +18,41 @@ Interact with the substrate using the simplified natural language interface:
 
 ```bash
 # Core Evolution: Trigger a binary mutation (Creator Mode)
-aeon "Add a new spectral analysis engine to the binary"
+susi "Add a new spectral analysis engine to the binary"
 
 # Workspace Mission: Execute a task with a swarm
-aeon "analyze this workspace and propose an optimization plan"
+susi "analyze this workspace and propose an optimization plan"
 
 # Substrate Query: Verify semantic truth
-aeon "identity"
+susi "identity"
 
 # Optional: The 'pulse' keyword is preserved for explicit ingestion
-aeon pulse "Sync genome version"
+susi pulse "Sync genome version"
 
 # Administration: Atomic genome synchronization
-aeon admin sync
+susi admin sync
 
 # Release: Execute full compliance audit and test suite
-aeon admin release
+susi admin release
 ```
 
 ---
 
 # Complete Documentation
 
-This section provides a detailed synthesis of the AEON Substrate Genome, as defined in the hard-compiled `.agents/` manifest.
+This section provides a detailed synthesis of the SUSI Substrate Genome, as defined in the hard-compiled `.agents/` manifest.
 
 ## 1. Universal Agent Governance
-AEON is governed by a set of **Epistemic Integrity Mandates** that ensure absolute truth and professional excellence:
+SUSI is governed by a set of **Epistemic Integrity Mandates** that ensure absolute truth and professional excellence:
 
 - **No Lies & No Hallucinations**: Every status report, code snippet, and fact must be grounded in verified reality or direct tool results.
 - **Brutally Honest & Critical**: The engine maintains a continuous evaluation mode, critically auditing architecture and logic for drift or pathologies.
 - **Epistemic Chain of Truth**: Source code and empirical runtime results are the ultimate truth.
 - **Immutability Enforcement**: The core `alpha-self` binary is protected from modification by runtime agents; evolution is only permitted through the authorized pipeline.
-- **Substrate Sovereignty**: Absolute isolation of ephemeral state within git-ignored `.aeon/` directories.
+- **Substrate Sovereignty**: Absolute isolation of ephemeral state within git-ignored `.susi/` directories.
 
 ## 2. Architectural Aspirations
-AEON's evolution is driven by core genomic paradigms, including:
+SUSI's evolution is driven by core genomic paradigms, including:
 
 - **Platform Independence**: Native execution across Linux, macOS, and Windows with zero bias.
 - **Absolute Transparency & Accountability**: Every substrate action is mapped to a responsible component in the Omni-Trace Thinking stream, ensuring 100% accountability with high-fidelity `DEBUG` logging and **Opaque Logic Exclusion** enabled by default for perfect observability.
@@ -72,11 +72,11 @@ The engine is structured into five functional tiers:
 1.  **Agent of Agents (AoA)**: Universal swarm supervisor (`GAWD`) supporting parallel Fork-Join partitioning and persistent daemon control (`AmaDaemon`).
 2.  **Agents**: Specialist units (Safety, Context, Hardware, Runtime) synthesized dynamically based on intent.
 3.  **Engines**: Lock-free, hardware-saturated substrates for Alpha (Reflex), GEMI (Reasoning), Vision, and Audio.
-4.  **Models**: Local neural weights (`aeon-alpha.safetensors`, `aeon-reason.safetensors`) and universal model ingestion (GGUF, safetensors, ONNX).
+4.  **Models**: Local neural weights (`susi-alpha.safetensors`, `susi-reason.safetensors`) and universal model ingestion (GGUF, safetensors, ONNX).
 5.  **MCPs**: JSON-RPC 2.0 interoperability bus connecting to any tool registry or external data source.
 
 ## 4. Operational Workflow
-AEON follows a recursive **Alpha-Self Evolution Pipeline (Motions)** and an **Alpha-World Evolution Pipeline (Missions)**:
+SUSI follows a recursive **Alpha-Self Evolution Pipeline (Motions)** and an **Alpha-World Evolution Pipeline (Missions)**:
 
 1.  **Vision Ingestion**: Transformation of natural language into typed `[MOTION]`, `[MISSION]`, or `[QUERY]` pulse entries with an automated **Deduplication Guard** guaranteeing unique genome entries.
 2.  **Substrate Fork Decision**: Causal routing to the appropriate mutation path (Core, Workspace, or Ephemeral).
@@ -90,8 +90,8 @@ AEON follows a recursive **Alpha-Self Evolution Pipeline (Motions)** and an **Al
 - **Queries (Zero-Mutation)**: **Universal**. Stateless substrate interrogation and truth auditing.
 
 ## 6. Build & Release Protocols
-Release integrity is enforced by the **AeonAdmin** administrative substrate:
-- **Mandatory Verification**: 100% pass rate in native unit tests (`cargo test`) and ephemeral mission protocols (`aeon identity`).
+Release integrity is enforced by the **SusiAdmin** administrative substrate:
+- **Mandatory Verification**: 100% pass rate in native unit tests (`cargo test`) and ephemeral mission protocols (`susi identity`).
 - **Workspace De-pollution**: Absolute mandate to remove all temporary files and logs before remote push.
 - **Genome Synchronization**: Atomic version increment and sync across all manifests and binary constants.
 

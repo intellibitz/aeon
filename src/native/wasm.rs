@@ -1,4 +1,4 @@
-// AEON Wasm Host Substrate
+// SUSI Wasm Host Substrate
 // RULE 11: Native Integration - High-performance reflex execution environment
 
 use std::path::Path;
@@ -21,7 +21,7 @@ impl WasmHost {
             .map_err(|e| EaiError::process(format!("Failed to load Wasm module: {}", e)))?;
 
         let output = Pipe::new();
-        let mut state_builder = WasiState::new("aeon-reflex");
+        let mut state_builder = WasiState::new("susi-reflex");
         state_builder.arg(arg);
         state_builder.stdout(Box::new(output.clone()));
 

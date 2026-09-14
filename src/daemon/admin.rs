@@ -1,4 +1,4 @@
-// AEON Native Administrative Substrate
+// SUSI Native Administrative Substrate
 // 100% Rust implementation for Full Compliance Enforcement, Version Synchronization & Release Orchestration
 
 use std::fs;
@@ -6,12 +6,12 @@ use std::path::Path;
 use std::process::Command;
 use crate::error::{EaiError, EaiResult};
 
-pub struct AeonAdmin;
+pub struct SusiAdmin;
 
-impl AeonAdmin {
+impl SusiAdmin {
     /// Full Compliance Audit (Rule 15)
     pub fn audit_compliance(workspace: &Path, target: Option<&str>) -> EaiResult<String> {
-        let mut report = "# AEON Compliance Audit\n\n".to_string();
+        let mut report = "# SUSI Compliance Audit\n\n".to_string();
         if let Some(t) = target {
              report.push_str(&format!("Target: {}\n\n", t));
         }
@@ -47,10 +47,10 @@ impl AeonAdmin {
         let gitignore = workspace.join(".gitignore");
         if gitignore.exists() {
             let content = fs::read_to_string(&gitignore)?;
-            if content.contains(".aeon") || content.contains(".aeon/") {
-                report.push_str("- [PASS] Workspace Purity: .aeon is correctly git-ignored.\n");
+            if content.contains(".susi") || content.contains(".susi/") {
+                report.push_str("- [PASS] Workspace Purity: .susi is correctly git-ignored.\n");
             } else {
-                report.push_str("- [FAIL] Workspace Purity: .aeon is NOT git-ignored.\n");
+                report.push_str("- [FAIL] Workspace Purity: .susi is NOT git-ignored.\n");
                 overall_success = false;
             }
         }
@@ -70,8 +70,8 @@ impl AeonAdmin {
         // 4. Binary Integrity Check (Aspiration 4)
         if let Ok(current_exe) = std::env::current_exe() {
             let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
-            let global_dir = home.join(".aeon");
-            match crate::daemon::server::AmaDaemon::verify_binary_integrity(&current_exe, &global_dir) {
+            let global_dir = home.join(".susi");
+            match crate::daemon::server::SusiDaemon::verify_binary_integrity(&current_exe, &global_dir) {
                 Ok(true) => report.push_str("- [PASS] Binary Integrity: Executable hash matches trusted genome.\n"),
                 Ok(false) => {
                     report.push_str("- [FAIL] Binary Integrity: Executable hash MISMATCH. Potential tampering or build drift.\n");
@@ -108,7 +108,7 @@ impl AeonAdmin {
             .ok_or_else(|| EaiError::config("Could not find version in Cargo.toml"))?;
 
         // 1. Sync Native Launcher Cargo.toml
-        let launcher_cargo = workspace.join("src/native/aeon/Cargo.toml");
+        let launcher_cargo = workspace.join("src/native/susi/Cargo.toml");
         if launcher_cargo.exists() {
             let launcher_content = fs::read_to_string(&launcher_cargo)?;
             let mut updated = Vec::new();
@@ -129,7 +129,7 @@ impl AeonAdmin {
             let mut updated = Vec::new();
             for line in readme_content.lines() {
                 if line.contains("https://img.shields.io/badge/version-v") {
-                    let updated_line = format!("![AEON Version](https://img.shields.io/badge/version-v{}-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)", version);
+                    let updated_line = format!("![SUSI Version](https://img.shields.io/badge/version-v{}-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)", version);
                     updated.push(updated_line);
                 } else {
                     updated.push(line.to_string());
@@ -159,7 +159,7 @@ impl AeonAdmin {
         // 4. Update Binary Integrity Hash
         if let Ok(current_exe) = std::env::current_exe() {
             let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
-            let global_dir = home.join(".aeon");
+            let global_dir = home.join(".susi");
             let _ = fs::create_dir_all(&global_dir);
             let hash_file = global_dir.join("binary.hash");
 
@@ -196,7 +196,7 @@ impl AeonAdmin {
             let readme_content = fs::read_to_string(&readme_path)?;
             let expected_badge = format!("version-v{}-blue.svg", version);
             if !readme_content.contains(&expected_badge) {
-                return Err(EaiError::config(format!("README.md version badge is out of sync with Cargo.toml (v{}). Run 'aeon admin sync'.", version)));
+                return Err(EaiError::config(format!("README.md version badge is out of sync with Cargo.toml (v{}). Run 'susi admin sync'.", version)));
             }
         }
 
@@ -208,7 +208,7 @@ impl AeonAdmin {
                 let content = fs::read_to_string(&path)?;
                 let expected_line = format!("* **Current Engine Version**: `v{}`", version);
                 if !content.contains(&expected_line) {
-                    return Err(EaiError::config(format!("{}: version is out of sync with Cargo.toml (v{}). Run 'aeon admin sync'.", file_name, version)));
+                    return Err(EaiError::config(format!("{}: version is out of sync with Cargo.toml (v{}). Run 'susi admin sync'.", file_name, version)));
                 }
             }
         }
@@ -265,7 +265,7 @@ impl AeonAdmin {
 
         // Fast-Path Reflex for Standard Queries/Motions
         if lower == "identity" || lower == "status" || lower == "models" || lower == "version" ||
-           lower.starts_with("aeon status") || lower.starts_with("aeon identity") || lower.starts_with("aeon models") {
+           lower.starts_with("susi status") || lower.starts_with("susi identity") || lower.starts_with("susi models") {
             return ("[QUERY]", "Zero-Mutation Interrogation");
         }
 
@@ -274,7 +274,7 @@ impl AeonAdmin {
         }
 
         // Tier 0 Neural Reflex Attempt via Local Alpha Model
-        if let Ok(reflex_action) = crate::gemi::pulse::AeonPulse::reason(trimmed, workspace) {
+        if let Ok(reflex_action) = crate::gemi::pulse::SusiPulse::reason(trimmed, workspace) {
             let reflex_lower = reflex_action.to_lowercase();
             if reflex_lower.contains("query") || reflex_lower.contains("status") || reflex_lower.contains("identity") {
                 return ("[QUERY]", "Zero-Mutation Interrogation");
@@ -290,16 +290,16 @@ impl AeonAdmin {
     }
 
     /// Ingest a natural language intent and automatically inject it into pulse.md
-    /// Supports both Creator mode (.agents/pulse.md) and World User mode (.aeon/pulse.md).
+    /// Supports both Creator mode (.agents/pulse.md) and World User mode (.susi/pulse.md).
     pub fn ingest_natural_intent(workspace: &Path, intent: &str) -> EaiResult<String> {
         let mut pulse_path = workspace.join(".agents/pulse.md");
 
-        // World User Fallback: If .agents/ is missing, use .aeon/ sandbox
+        // World User Fallback: If .agents/ is missing, use .susi/ sandbox
         if !pulse_path.exists() {
-            pulse_path = workspace.join(".aeon/pulse.md");
+            pulse_path = workspace.join(".susi/pulse.md");
             if !pulse_path.exists() {
                  // Synthesize a new local pulse from hard-compiled genome if missing
-                 let _ = fs::create_dir_all(workspace.join(".aeon"));
+                 let _ = fs::create_dir_all(workspace.join(".susi"));
                  fs::write(&pulse_path, crate::gawd::self_core::AlphaSelf::PULSE_MD)?;
             }
         }
@@ -402,8 +402,8 @@ mod tests {
     #[test]
     fn test_version_alignment_enforcement() {
         let workspace = Path::new(".");
-        // This test ensures that the build fails if developer forgot to run 'aeon admin sync'
-        let result = AeonAdmin::verify_version_alignment(workspace);
+        // This test ensures that the build fails if developer forgot to run 'susi admin sync'
+        let result = SusiAdmin::verify_version_alignment(workspace);
         assert!(result.is_ok(), "Version mismatch detected between Cargo.toml and documentation. Run 'cargo run -- admin sync' to fix.");
     }
 }

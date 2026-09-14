@@ -1,4 +1,4 @@
-// AMAS: Universal EAI Swarm Supervisor
+// SMAS: Universal EAI Swarm Supervisor
 // Tier 1 AOA Protocol governing Exponential Explosive Intelligence Swarms
 
 use std::fs;
@@ -34,16 +34,16 @@ pub struct ClusterPeerNode {
     pub trust_score: f32,
 }
 
-pub struct AmaSupervisor;
+pub struct SusiSupervisor;
 
-impl AmaSupervisor {
+impl SusiSupervisor {
     pub const UDP_DISCOVERY_PORT: u16 = 9092;
 
     pub fn list_cluster_nodes() -> Vec<ClusterPeerNode> {
         static DISCOVERED_PEERS: OnceLock<Arc<RwLock<Vec<ClusterPeerNode>>>> = OnceLock::new();
         let peers_lock = DISCOVERED_PEERS.get_or_init(|| {
             let initial = vec![ClusterPeerNode {
-                node_id: "aeon-local-master".to_string(),
+                node_id: "susi-local-master".to_string(),
                 address: "127.0.0.1:9090".to_string(),
                 node_type: "LOCAL_MASTER".to_string(),
                 is_active: true,
@@ -67,16 +67,16 @@ impl AmaSupervisor {
                     loop {
                         let local_caps = HardwareProfiler::get_caps_string();
                         let registry_checksum = crate::gawd::agents::AgentMetaRegistry::global().get_checksum();
-                        let ping_msg = format!("AEON_PING:{}:{}", local_caps, registry_checksum);
+                        let ping_msg = format!("SUSI_PING:{}:{}", local_caps, registry_checksum);
 
                         if let Ok((amt, src)) = socket.recv_from(&mut buf) {
                             let msg = String::from_utf8_lossy(&buf[..amt]);
-                            if msg.starts_with("AEON_PING") {
-                                let pong_msg = format!("AEON_PONG:{}:{}", local_caps, registry_checksum);
+                            if msg.starts_with("SUSI_PING") {
+                                let pong_msg = format!("SUSI_PONG:{}:{}", local_caps, registry_checksum);
                                 let _ = socket.send_to(pong_msg.as_bytes(), src);
                             }
 
-                            if msg.starts_with("AEON_PONG") || msg.starts_with("AEON_PING") {
+                            if msg.starts_with("SUSI_PONG") || msg.starts_with("SUSI_PING") {
                                  let parts: Vec<&str> = msg.split(':').collect();
                                  let caps = if parts.len() > 1 {
                                      parts[1].split(',').map(|s| s.to_string()).collect()
@@ -98,7 +98,7 @@ impl AmaSupervisor {
                                      p.registry_checksum = checksum;
                                  } else {
                                      peers.push(ClusterPeerNode {
-                                         node_id: format!("aeon-peer-{}", src.ip()),
+                                         node_id: format!("susi-peer-{}", src.ip()),
                                          address: addr_str,
                                          node_type: if caps.contains(&"GPU".to_string()) { "WORKSTATION_NODE".into() } else { "PEER".into() },
                                          is_active: true,
@@ -135,7 +135,7 @@ impl AmaSupervisor {
         let agents = GawdAgentFleet::synthesize_fleet(goal, workspace);
         let fleet_info: Vec<GawdAgentInfo> = agents.iter().map(|a| GawdAgentInfo {
             name: a.name(),
-            provider: "AEON Local".into(),
+            provider: "SUSI Local".into(),
             url: "native://substrate".into(),
             rank: a.rank()
         }).collect();
@@ -151,7 +151,7 @@ impl AmaSupervisor {
         // Cluster Consensus Protocol: Broadcast blackboard to high-tier peers
         let nodes = Self::rank_peers_for_goal(goal);
         for node in nodes.iter().take(2) {
-            if node.node_id != "aeon-local-master" {
+            if node.node_id != "susi-local-master" {
                 let _ = Self::dispatch_peer_task(&node.address, "init_blackboard", goal);
             }
         }
@@ -167,7 +167,7 @@ impl AmaSupervisor {
             if output.contains("[CAPABILITY_GAP]") { has_gap = true; }
             a2a_logs.push(A2AMessage {
                 sender: name,
-                recipient: "AMA-Master".to_string(),
+                recipient: "SMA-Master".to_string(),
                 action: "MISSION_FLUX".to_string(),
                 payload: output,
             });
@@ -181,7 +181,7 @@ impl AmaSupervisor {
             for (name, output) in extra_swarm {
                 a2a_logs.push(A2AMessage {
                     sender: format!("{}_Reinforcement", name),
-                    recipient: "AMA-Master".to_string(),
+                    recipient: "SMA-Master".to_string(),
                     action: "REINFORCEMENT_FLUX".to_string(),
                     payload: output,
                 });
@@ -249,7 +249,7 @@ impl AmaSupervisor {
 
             a2a_logs.push(A2AMessage {
                 sender: "ConsensusMaster".into(),
-                recipient: "AMA-Master".into(),
+                recipient: "SMA-Master".into(),
                 action: "STATE_CONVERGENCE".into(),
                 payload: final_payload,
             });
@@ -351,12 +351,12 @@ impl AmaSupervisor {
         if let Ok(socket) = UdpSocket::bind("0.0.0.0:0") {
             let _ = socket.set_broadcast(true);
             let _ = socket.set_read_timeout(Some(Duration::from_millis(200)));
-            let _ = socket.send_to(b"AEON_LAN_PING", format!("255.255.255.255:{}", Self::UDP_DISCOVERY_PORT));
+            let _ = socket.send_to(b"SUSI_LAN_PING", format!("255.255.255.255:{}", Self::UDP_DISCOVERY_PORT));
 
             let mut buf = [0u8; 512];
             while let Ok((amt, src)) = socket.recv_from(&mut buf) {
                 let msg = String::from_utf8_lossy(&buf[..amt]);
-                if msg.contains("AEON_LAN_ACK") || msg.contains("AEON") {
+                if msg.contains("SUSI_LAN_ACK") || msg.contains("SUSI") {
                     active_peers.push(src.to_string());
                 }
             }
@@ -374,7 +374,7 @@ impl AmaSupervisor {
         // Parallel AOA Synchronization Logic (Rule 2: Saturation)
         // Hardened Limit: Cap concurrent peer syncs to 16 to prevent local resource exhaustion.
         for node in nodes.clone().into_iter().take(16) {
-            if node.node_id == "aeon-local-master" { continue; }
+            if node.node_id == "susi-local-master" { continue; }
             let addr = node.address.clone();
             let p = payload.to_string();
             let nid = node.node_id.clone();
@@ -394,7 +394,7 @@ impl AmaSupervisor {
             }
         }
 
-        let sync_file = workspace.join(".aeon/cluster_sync.json");
+        let sync_file = workspace.join(".susi/cluster_sync.json");
         let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
         let sync_data = serde_json::json!({
             "timestamp": now,
@@ -412,7 +412,7 @@ impl AmaSupervisor {
 
         // Find a workstation node with GPU capability
         let target_node = nodes.iter()
-            .find(|n| n.node_type == "WORKSTATION_NODE" && n.is_active && n.node_id != "aeon-local-master");
+            .find(|n| n.node_type == "WORKSTATION_NODE" && n.is_active && n.node_id != "susi-local-master");
 
         if let Some(node) = target_node {
              let res = Self::dispatch_peer_task(&node.address, "reason", prompt);
@@ -428,7 +428,7 @@ impl AmaSupervisor {
         let payload = serde_json::to_string(checkpoint).unwrap_or_default();
 
         for node in nodes {
-            if node.node_type == "WORKSTATION_NODE" && node.node_id != "aeon-local-master" {
+            if node.node_type == "WORKSTATION_NODE" && node.node_id != "susi-local-master" {
                 let _ = Self::dispatch_peer_task(&node.address, "replicate_state", &payload);
             }
         }
@@ -439,7 +439,7 @@ impl AmaSupervisor {
         let mut checkpoints = Vec::new();
 
         for node in nodes {
-            if node.node_id != "aeon-local-master" {
+            if node.node_id != "susi-local-master" {
                 let res = Self::dispatch_peer_task(&node.address, "get_checkpoints", "");
                 if let Ok(list) = serde_json::from_str::<Vec<NeuralCheckpoint>>(&res) {
                     checkpoints.extend(list);
@@ -460,7 +460,7 @@ impl AmaSupervisor {
             }).to_string();
 
             for node in nodes {
-                if node.node_type == "WORKSTATION_NODE" && node.node_id != "aeon-local-master" {
+                if node.node_type == "WORKSTATION_NODE" && node.node_id != "susi-local-master" {
                     let _ = Self::dispatch_peer_task(&node.address, "replicate_reflex", &payload);
                 }
             }
@@ -472,7 +472,7 @@ impl AmaSupervisor {
         let mut handles = Vec::new();
 
         for node in nodes {
-            if node.node_id == "aeon-local-master" { continue; }
+            if node.node_id == "susi-local-master" { continue; }
             let addr = node.address.clone();
             let rid = resource_id.to_string();
             handles.push(std::thread::spawn(move || {
@@ -497,7 +497,7 @@ mod tests {
     #[test]
     fn test_aspiration_23_universal_swarm_operation() {
         use crate::gawd::agents::{GawdAgent, SafetyAgent, SecurityAgent, HighDensityContextStore};
-        let tmp_dir = std::env::temp_dir().join("aeon_swarm_test_asp23");
+        let tmp_dir = std::env::temp_dir().join("susi_swarm_test_asp23");
         let _ = std::fs::create_dir_all(&tmp_dir);
         let blackboard: MissionBlackboard = Arc::new(HighDensityContextStore::new(10));
 

@@ -1,4 +1,4 @@
-# AEON Runtime Mandates
+# SUSI Runtime Mandates
 
 * **Current Engine Version**: `v0.1.2022844`
 
@@ -7,15 +7,15 @@ This document defines the operational directives for environment establishment, 
 ## 1. Alpha-Self Host Mandates (Foundational Readiness)
 
 1. **Daemon Persistence**: The `AmaDaemon` must sustain a continuous, resilient background process, binding standard MCP interop ports (9090, 9091, 9093) and A2A discovery ports (9092).
-2. **Hardware Interrogation**: The `AeonRuntimeAdmin` must continuously audit CPU/GPU topologies and system RAM to guarantee optimal compute saturation (max 90% utilization) and proactively prevent Out-of-Memory (OOM) events.
+2. **Hardware Interrogation**: The `SusiRuntimeAdmin` must continuously audit CPU/GPU topologies and system RAM to guarantee optimal compute saturation (max 90% utilization) and proactively prevent Out-of-Memory (OOM) events.
 3. **Autonomous Drift Detection**: The substrate must periodically audit itself for capability gaps and trigger the *Motion Rule* (autonomous evolution cycles) without user command.
 4. **Self-Healing Reflex**: The engine must autonomously recover from structural pathologies, port collisions, or memory faults via protocol-based provisioning and hardware re-tuning.
 
 ## 2. Alpha-World Environment Synthesis (Mutable State)
 
-5. **Substrate Priming**: Autonomously provision the highest-ranking open-source neural weights compatible with host hardware profiling (e.g., Llama, Gemma, Mistral) into the `.aeon/models/` vault. Fixed native weight identifiers are deprecated in favor of dynamic performance-based selection.
+5. **Substrate Priming**: Autonomously provision the highest-ranking open-source neural weights compatible with host hardware profiling (e.g., Llama, Gemma, Mistral) into the `.susi/models/` vault. Fixed native weight identifiers are deprecated in favor of dynamic performance-based selection.
 6. **Protocol Linking**: Dynamically bind essential MCP servers (Database, Search, VCS) and registry-discovered external tools to the active workspace.
-7. **Zero-Config Guarantee**: Adapt instantly to workspace-specific environment variables (e.g., `AEON_API_KEY`) and local system constraints without manual user intervention.
+7. **Zero-Config Guarantee**: Adapt instantly to workspace-specific environment variables (e.g., `SUSI_API_KEY`) and local system constraints without manual user intervention.
 8. **Fluid Scaling**: System boundaries (parsing limits, context depth, execution timeouts) must scale fluidly based on hardware availability. Hardware is the only limit; architectural gates are prohibited.
 9. **Registry Hot-Reload**: Validate the dynamic agent registry (`agent_registry.json`) via timestamp-based audits to prevent stale behavior injection during swarm synthesis.
 10. **Lock-Free Mapping**: High-density context mapping and blackboard access must be non-blocking. The engine must utilize lock-free stores to prevent agent wait-states during deep reasoning missions.

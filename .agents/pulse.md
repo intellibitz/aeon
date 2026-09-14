@@ -1,12 +1,12 @@
-# AEON Substrate Validation Genome (PULSE)
+# SUSI Substrate Validation Genome (PULSE)
 
 * **Current Engine Version**: `v0.1.2022844`
 
-This document defines the complete set of validation protocols that anchor the `aeon` genome. Every entry reflects a hard-compiled reflex or an orchestrated meta-behavior.
+This document defines the complete set of validation protocols that anchor the `susi` genome. Every entry reflects a hard-compiled reflex or an orchestrated meta-behavior.
 
 ## 1. Pending Failing Pulse
 
-* `144. [ ] **[MISSION]**: aeon version`
+* `144. [ ] **[MISSION]**: susi version`
 * `144. [ ] **[MISSION]**: query: find dracula lyrics, translate to tamil, show side by side`
 ## 2. Ingested & Resolved Pulse (The Realized Genome)
 
@@ -28,16 +28,16 @@ This document defines the complete set of validation protocols that anchor the `
 15. `[x]` **Substrate Sovereignty**: Isolation boundaries for ephemeral state are enforced.
 16. `[x]` **Alpha-Self Evolution**: The Motion -> Aspiration -> Topology -> Workflow pipeline is the meta-axiom.
 17. `[x]` **Genomic Pulse Formalization**: Renamed master trigger to `pulse.md` to distinguish it from standard unit testing and align with the "Master Pulse" paradigm.
-18. `[x]` **MOTION**: Codify the 'Absolute Transparency' mandate. The AEON genome must ensure that the substrate is 100% transparent. Every reasoning step and internal mutation must be exposed via telemetry, constitutionally prohibiting hidden logic.
-19. `[x]` **MOTION**: Codify the 'Omni-Trace Reasoning' mandate. AEON must include every atomic operation, decision, log, and raw model thinking in its trace to enable perfect evolution audits by Creators and Users.
-20. `[x]` **MOTION**: Implement the 'Synchronous Trace & Display' protocol. AEON's thinking must include streaming model traces and terminate only when results are finalized, gating the result display behind the thinking lifecycle.
-21. `[x]` **MOTION**: Implement the 'Continuous Pulse Cycle' mandate. AEON must support non-blocking pulse ingestion, queueing, and continuous telemetry streaming for every pulse, allowing for real-time course correction.
-22. `[x]` **[MOTION]**: Codify the 'Absolute Accountability' mandate. The AEON genome must ensure 100% accountability for every action, including an explicit "who did what" audit in the Omni-Trace Thinking block.
+18. `[x]` **MOTION**: Codify the 'Absolute Transparency' mandate. The SUSI genome must ensure that the substrate is 100% transparent. Every reasoning step and internal mutation must be exposed via telemetry, constitutionally prohibiting hidden logic.
+19. `[x]` **MOTION**: Codify the 'Omni-Trace Reasoning' mandate. SUSI must include every atomic operation, decision, log, and raw model thinking in its trace to enable perfect evolution audits by Creators and Users.
+20. `[x]` **MOTION**: Implement the 'Synchronous Trace & Display' protocol. SUSI's thinking must include streaming model traces and terminate only when results are finalized, gating the result display behind the thinking lifecycle.
+21. `[x]` **MOTION**: Implement the 'Continuous Pulse Cycle' mandate. SUSI must support non-blocking pulse ingestion, queueing, and continuous telemetry streaming for every pulse, allowing for real-time course correction.
+22. `[x]` **[MOTION]**: Codify the 'Absolute Accountability' mandate. The SUSI genome must ensure 100% accountability for every action, including an explicit "who did what" audit in the Omni-Trace Thinking block.
 23. `[x]` **[MISSION]**: Enable 'Debug-First' evolution by defaulting the substrate log level to DEBUG and ensuring high-fidelity logs are captured in the Omni-Trace Thinking block.
-24. `[x]` **[MOTION]**: Codify the 'Opaque Logic Exclusion' paradigm. AEON must explicitly flag and prohibit non-traceable logic, ensuring 100% accountability in the thinking telemetry.
-25. `[x]` **[MOTION]**: Integrate the 'SOTA Crate Stack' mandate. The AEON genome now constitutionally prefers high-performance crates (Tokio, Rayon, Parking_lot, Crossbeam, Flume, Tracing) for all concurrent and parallel operations.
+24. `[x]` **[MOTION]**: Codify the 'Opaque Logic Exclusion' paradigm. SUSI must explicitly flag and prohibit non-traceable logic, ensuring 100% accountability in the thinking telemetry.
+25. `[x]` **[MOTION]**: Integrate the 'SOTA Crate Stack' mandate. The SUSI genome now constitutionally prefers high-performance crates (Tokio, Rayon, Parking_lot, Crossbeam, Flume, Tracing) for all concurrent and parallel operations.
 26. `[x]` **[MOTION]**: Codify the 'Concurrency Implementation Mandates'. Detailed technical preferences (Tokio defaults, Rayon for data-parallelism, Flume for messaging) are now axiomatized in the genome.
-27. `[x]` **[MISSION]**: Optimize administrative fast-path. Refactored AmaSupervisor and DynamicAgent to bypass neural inference for 'admin' missions, preventing lock contention and deadlock pathologies.
+27. `[x]` **[MISSION]**: Optimize administrative fast-path. Refactored SusiSupervisor and DynamicAgent to bypass neural inference for 'admin' missions, preventing lock contention and deadlock pathologies.
 
 ### 2.2 Architectural Evolution & Aspirations [MOTION]
 18. `[x]` **Platform Independence**: Zero platform bias across Linux, macOS, and Windows.
@@ -71,7 +71,7 @@ This document defines the complete set of validation protocols that anchor the `
 94. `[x]` **Native Kernel Synthesis**: Replaced structural shells in `ReflexInferenceKernel`, `TensorReflexKernel`, and `TurboReflexEngine` with functional Rust kernels using `candle-core`.
 95. `[x]` **Epistemic Delegation**: Implemented Swarm Consensus Verification with a 0.85 threshold to allow trusting open-source vendors when local empirical proof is unavailable.
 96. `[x]` **SOTA Weights Paradigm**: Generalized Runtime Mandate 5 to enforce autonomous SOTA weight provisioning based on hardware profiling, deprecating static native identifiers.
-97. `[x]` **Autonomous MCP Scouting**: Enhanced `MetaMcpServer` pillar with web-scouting capabilities. AEON now autonomously benchmarks and ranks open-source MCP servers using trust scores and latency metrics.
+97. `[x]` **Autonomous MCP Scouting**: Enhanced `MetaMcpServer` pillar with web-scouting capabilities. SUSI now autonomously benchmarks and ranks open-source MCP servers using trust scores and latency metrics.
 98. `[x]` **SOTA Library Scouting**: Implemented `LibraryScoutAgent` to autonomously discover and recommend high-performing open-source Rust crates to solve detected capability gaps.
 99. `[x]` **Constraint-Free Evolution**: Implemented a constitutional mandate (Aspiration 20) for the substrate to autonomously identify and report technical bottlenecks, ensuring zero-gatekeeping of system potential.
 100. `[x]` **Fluid Intent Scaling**: Removed artificial limits on user input, STDIN, and token generation. Implemented hardware-aware scaling and 10-minute fluid execution leases.
@@ -82,12 +82,12 @@ This document defines the complete set of validation protocols that anchor the `
 105. `[x]` **Universal Decoupled Concurrency**: Codified the mandate (Aspiration 27) for non-blocking I/O, Reactor/Proactor event loops, lock-free work-stealing deques, and zero-copy ring buffers.
 
 ### 2.3 Structural Topology & Pillars [MOTION]
-36. `[x]` **AoA Coordination**: GAWD/AmaDaemon parallel dispatcher is functional.
-37. `[x]` **Administrative Authority**: AeonAdmin compliance and release orchestration is active.
-38. `[x]` **Runtime Authority**: AeonRuntimeAdmin hardware and model provisioning is active.
+36. `[x]` **AoA Coordination**: GAWD/SusiDaemon parallel dispatcher is functional.
+37. `[x]` **Administrative Authority**: SusiAdmin compliance and release orchestration is active.
+38. `[x]` **Runtime Authority**: SusiRuntimeAdmin hardware and model provisioning is active.
 39. `[x]` **Evolution Authority**: EvolutionManager autonomous self-healing is active.
 40. `[x]` **Specialist Units**: Runtime, Hardware, Safety, and Context agents are operational.
-41. `[x]` **Reflex Engines**: AEON-Alpha intent classification is microsecond-ready.
+41. `[x]` **Reflex Engines**: SUSI-Alpha intent classification is microsecond-ready.
 42. `[x]` **Inference Engines**: Universal execution and GEMI reasoning bridges are functional.
 43. `[x]` **Multimodal Engines**: Hardware-saturated Vision and Audio substrates are operational.
 44. `[x]` **Neural Weights**: Native Alpha and Reasoning models are provisioned.
@@ -95,7 +95,7 @@ This document defines the complete set of validation protocols that anchor the `
 
 ### 2.4 Build, Release & Deployment [MOTION]
 46. `[x]` **Build Optimization**: Lightning-fast compilation with maximum hardware saturation.
-47. `[x]` **Workspace Purity**: Absolute isolation of build artifacts in .aeon/ directories.
+47. `[x]` **Workspace Purity**: Absolute isolation of build artifacts in .susi/ directories.
 48. `[x]` **Motion Rule Verification**: Mandatory cargo check and native test pass before release.
 49. `[x]` **Release Gatekeeper**: Automated enforcement of tests and compliance audits.
 50. `[x]` **Genome Synchronization**: Atomic version sync across all manifests and .agents files.
@@ -131,23 +131,23 @@ This document defines the complete set of validation protocols that anchor the `
 73. `[x]` **Health Interrogation**: Daemon, engine, and thread status reporting.
 74. `[x]` **Model Roster**: vault and registry roster reporting without modification.
 75. `[x]` **Ephemeral Analytics**: Rapid text/vision/audio analysis directly to stdout.
-76. `[x]` **Interaction Alignment**: Synced [CREATORS.md](file:///home/ramadoss/Projects/AI/aeon/.agents/CREATORS.md) command syntax with the new Axiomatic Pulse Ingestion engine.
-77. `[x]` **CLI Unification**: Unified aeon CLI usage; natural language intents now automatically trigger pulse ingestion.
-78. `[x]` **Sovereign Ingestion**: Enabled Substrate-Sovereign Pulse Ingestion; binary now synthesizes pulse.md in .aeon/ if source is missing.
+76. `[x]` **Interaction Alignment**: Synced [CREATORS.md](file:///home/ramadoss/Projects/AI/susi/.agents/CREATORS.md) command syntax with the new Axiomatic Pulse Ingestion engine.
+77. `[x]` **CLI Unification**: Unified susi CLI usage; natural language intents now automatically trigger pulse ingestion.
+78. `[x]` **Sovereign Ingestion**: Enabled Substrate-Sovereign Pulse Ingestion; binary now synthesizes pulse.md in .susi/ if source is missing.
 79. `[x]` **Sovereign Boundary**: Formalized Sovereign Boundary; Motions are Creator-Only, World Users evolve via Substrate Ingestion.
 80. `[x]` **Federated Merge**: Formalized Federated Contribution Reflex and Aspiration 18 for Global Intelligence.
-81. `[x]` **README Update**: Updated [README.md](file:///home/ramadoss/Projects/AI/aeon/README.md) to reflect Federated Experience Aggregation and Global Intelligence Aggregation.
-82. `[x]` **README Restructuring**: Restructured [README.md](file:///home/ramadoss/Projects/AI/aeon/README.md) to include expansive, detailed documentation synthesized from the full .agents genome.
+81. `[x]` **README Update**: Updated [README.md](file:///home/ramadoss/Projects/AI/susi/README.md) to reflect Federated Experience Aggregation and Global Intelligence Aggregation.
+82. `[x]` **README Restructuring**: Restructured [README.md](file:///home/ramadoss/Projects/AI/susi/README.md) to include expansive, detailed documentation synthesized from the full .agents genome.
 83. `[x]` **[MISSION]**: models: Local model discovery is optimized to avoid recursive full home folder scans, and correctly parses the active override configuration safely.
 
 ### 2.8 Latest Swarm & Hardware Optimizations
-105. `[x]` **MISSION**: Implement the Recursive Swarm Parallelism (Fork-Join) protocol. Refactored AmaMasterAgent to support parallel partition-solve-join sequence. Updated MissionPlanner to support parallel partitioning.
+105. `[x]` **MISSION**: Implement the Recursive Swarm Parallelism (Fork-Join) protocol. Refactored SusiMasterAgent to support parallel partition-solve-join sequence. Updated MissionPlanner to support parallel partitioning.
 106. `[x]` **QUERY**: split and report status and version in parallel
-107. `[x]` **MISSION**: Finalized the '<2ms Ultra-Reflex' substrate. Implemented high-resolution latency guards in AmaMasterAgent and AeonAlphaModel. Enforced sub-2ms constraint on critical execution paths with Axiomatic logging for violations. Optimized semantic projection and hardware profiling to satisfy the instant-intelligence mandate.
+107. `[x]` **MISSION**: Finalized the '<2ms Ultra-Reflex' substrate. Implemented high-resolution latency guards in SusiMasterAgent and SusiAlphaModel. Enforced sub-2ms constraint on critical execution paths with Axiomatic logging for violations. Optimized semantic projection and hardware profiling to satisfy the instant-intelligence mandate.
 108. `[x]` **MOTION**: Enforce the '<2ms Ultra-Reflex' mandate across the substrate. 100% of internal operations must be measured and optimized for sub-2ms latency. Transition slow path initialization to lazy-async background threads.
-109. `[x]` **MISSION**: Finalized the Lock-Free Substrate transition. Refactored PagedKVStore, RadixAttentionStore, AgentMetaRegistry, MissionBlackboard, and DiscoveredPeers to use RwLock concurrency primitives. Updated AeonAlphaModel and GemiEngine to eliminate recursive deadlocks and wait-state hangs during semantic centroid projection and reasoning synthesis. The AEON substrate is now non-blocking and optimized for high-density multi-threaded swarm execution.
+109. `[x]` **MISSION**: Finalized the Lock-Free Substrate transition. Refactored PagedKVStore, RadixAttentionStore, AgentMetaRegistry, MissionBlackboard, and DiscoveredPeers to use RwLock concurrency primitives. Updated SusiAlphaModel and GemiEngine to eliminate recursive deadlocks and wait-state hangs during semantic centroid projection and reasoning synthesis. The SUSI substrate is now non-blocking and optimized for high-density multi-threaded swarm execution.
 110. `[x]` **QUERY**: identity
-118. `[x]` **MOTION**: Codify the 'Lock-Free Substrate' mandate. The AEON genome must ensure that the substrate is free of blocking thread locks. All critical path data structures (KV Stores, Registries, Blackboards) must transition to lock-free concurrency primitives or non-blocking message-passing architectures to ensure zero execution stall.
+118. `[x]` **MOTION**: Codify the 'Lock-Free Substrate' mandate. The SUSI genome must ensure that the substrate is free of blocking thread locks. All critical path data structures (KV Stores, Registries, Blackboards) must transition to lock-free concurrency primitives or non-blocking message-passing architectures to ensure zero execution stall.
 120. `[x]` **QUERY**: status
 139. `[x]` **MISSION**: reason Hi
 140. `[x]` **MISSION**: find dracula lyrics

@@ -1,19 +1,19 @@
-// AEON Security & Violation Detector
+// SUSI Security & Violation Detector
 // 100% Rust implementation for detecting credential leaks and exfiltration
 // RULE 7: No Secret Leaks - Zero tolerance for tokens, credentials, or keys.
 // RULE 31: Substrate Purity Hardening - Dynamic Pattern Loading
 
 use std::path::{Path, PathBuf};
 use crate::error::{EaiError, EaiResult};
-use crate::sandbox::manager::AeonConfig;
+use crate::sandbox::manager::SusiConfig;
 
 pub struct SecurityDetector;
 
 impl SecurityDetector {
     pub fn audit_action(_tool_name: &str, arg: &str, _workspace: &Path) -> EaiResult<()> {
         let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
-        let global_dir = home.join(".aeon");
-        let cfg = AeonConfig::load(&global_dir).expect("Fatal: Malformed configuration");
+        let global_dir = home.join(".susi");
+        let cfg = SusiConfig::load(&global_dir).expect("Fatal: Malformed configuration");
         let patterns = &cfg.governance;
 
         let lower_arg = arg.to_lowercase();

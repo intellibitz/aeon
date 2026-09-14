@@ -1,4 +1,4 @@
-// AEON Substrate Pulse Queue
+// SUSI Substrate Pulse Queue
 // Mandate 30: Non-Blocking Pulse Ingestion & Mandate 31: Serialized Pulse Execution
 
 use std::sync::{Mutex, OnceLock};

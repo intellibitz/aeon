@@ -1,4 +1,4 @@
-// AEON-Pulse: Tier 0 Native Bootstrap Brain
+// SUSI-Pulse: Tier 0 Native Bootstrap Brain
 // 100% Neural implementation - Zero Hardcoded Heuristics (Rule 31)
 
 use anyhow::{Result, anyhow};
@@ -6,9 +6,9 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, RwLock};
 use std::collections::HashMap;
 use once_cell::sync::Lazy;
-use super::alpha::AeonAlphaModel;
+use super::alpha::SusiAlphaModel;
 
-pub struct AeonPulse;
+pub struct SusiPulse;
 
 static REFLEX_CACHE: Lazy<Arc<RwLock<HashMap<String, String>>>> = Lazy::new(|| {
     Arc::new(RwLock::new(HashMap::new()))
@@ -18,20 +18,20 @@ static CURRENT_FINGERPRINT: Lazy<Arc<RwLock<String>>> = Lazy::new(|| {
     Arc::new(RwLock::new(String::new()))
 });
 
-impl AeonPulse {
+impl SusiPulse {
     /// Pure Neural Intent Resolution
     pub fn reason(prompt: &str, workspace: &Path) -> Result<String> {
         let prompt_trimmed = prompt.trim();
 
         let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
-        let global_dir = home.join(".aeon");
+        let global_dir = home.join(".susi");
 
         // Neural Synchronization (Cache Invalidation)
         {
-            let fingerprint = AeonAlphaModel::get_model_fingerprint(&global_dir);
+            let fingerprint = SusiAlphaModel::get_model_fingerprint(&global_dir);
             let mut current = CURRENT_FINGERPRINT.write().unwrap();
             if *current != fingerprint {
-                if workspace.join(".agents").exists() && std::env::var("AEON_VERBOSE").is_ok() {
+                if workspace.join(".agents").exists() && std::env::var("SUSI_VERBOSE").is_ok() {
                     eprintln!("[Tier 0 Reflex] Neural substrate evolved. Invalidating cache...");
                 }
                 *current = fingerprint;
@@ -49,10 +49,10 @@ impl AeonPulse {
         }
 
         let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
-        let global_dir = home.join(".aeon");
+        let global_dir = home.join(".susi");
 
         // Neural Reflex Attempt
-        if let Ok(model) = AeonAlphaModel::load(&global_dir) {
+        if let Ok(model) = SusiAlphaModel::load(&global_dir) {
             match model.predict_intent(prompt_trimmed) {
                 Ok(neural_action) => {
                     let mut final_action = neural_action;

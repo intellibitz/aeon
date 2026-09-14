@@ -18,7 +18,7 @@ fn main() {
     let creators_md_raw = fs::read_to_string(".agents/CREATORS.md").unwrap_or_default();
     let readme_md_raw = fs::read_to_string("README.md").unwrap_or_default();
 
-    // AEON Version Synchronization Hook (Aspiration 1)
+    // SUSI Version Synchronization Hook (Aspiration 1)
     let cargo_toml = fs::read_to_string("Cargo.toml").expect("Missing Cargo.toml");
     let version = cargo_toml.lines()
         .find(|l| l.trim().starts_with("version = \""))
@@ -41,7 +41,7 @@ fn main() {
         let mut updated = Vec::new();
         for line in readme_md_raw.lines() {
             if line.contains("https://img.shields.io/badge/version-v") {
-                updated.push(format!("![AEON Version](https://img.shields.io/badge/version-v{}-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)", version));
+                updated.push(format!("![SUSI Version](https://img.shields.io/badge/version-v{}-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)", version));
             } else {
                 updated.push(line.to_string());
             }
@@ -55,16 +55,16 @@ fn main() {
     let mut generated_code = String::new();
 
     // 1. AGENTS.md -> GEN_AGENT_RULES (1-15)
-    generated_code.push_str("pub const GEN_AGENT_RULES: &[AeonAxiomRule] = &[\n");
+    generated_code.push_str("pub const GEN_AGENT_RULES: &[SusiAxiomRule] = &[\n");
     for line in agents_md.lines() {
         if let Some(rule) = parse_list_item(line) {
-            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0, rule.1, rule.2));
+            generated_code.push_str(&format!("    SusiAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0, rule.1, rule.2));
         }
     }
     generated_code.push_str("];\n\n");
 
     // 2. ASPIRATIONS.md -> GEN_ENGINE_AXIOMS (20-39)
-    generated_code.push_str("pub const GEN_ENGINE_AXIOMS: &[AeonAxiomRule] = &[\n");
+    generated_code.push_str("pub const GEN_ENGINE_AXIOMS: &[SusiAxiomRule] = &[\n");
     let mut current_id = None;
     let mut current_title = None;
     for line in aspirations_md.lines() {
@@ -76,7 +76,7 @@ fn main() {
         } else if line.trim().starts_with("* **Core Paradigm**:") {
             if let (Some(id), Some(title)) = (current_id, current_title.take()) {
                 let paradigm = line.split_once(':').unwrap().1.trim();
-                generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", id + 20, title, paradigm));
+                generated_code.push_str(&format!("    SusiAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", id + 20, title, paradigm));
                 current_id = None;
             }
         }
@@ -84,75 +84,75 @@ fn main() {
     generated_code.push_str("];\n\n");
 
     // 3. BUILD.md -> GEN_DEPLOYMENT_RULES (30-49)
-    generated_code.push_str("pub const GEN_DEPLOYMENT_RULES: &[AeonAxiomRule] = &[\n");
+    generated_code.push_str("pub const GEN_DEPLOYMENT_RULES: &[SusiAxiomRule] = &[\n");
     for line in build_md.lines() {
         if let Some(rule) = parse_list_item(line) {
-            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 30, rule.1, rule.2));
+            generated_code.push_str(&format!("    SusiAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 30, rule.1, rule.2));
         }
     }
     generated_code.push_str("];\n\n");
 
     // 4. RUNTIME.md -> GEN_RUNTIME_MANDATES (40-59)
-    generated_code.push_str("pub const GEN_RUNTIME_MANDATES: &[AeonAxiomRule] = &[\n");
+    generated_code.push_str("pub const GEN_RUNTIME_MANDATES: &[SusiAxiomRule] = &[\n");
     for line in runtime_md.lines() {
         if let Some(rule) = parse_list_item(line) {
-            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 40, rule.1, rule.2));
+            generated_code.push_str(&format!("    SusiAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 40, rule.1, rule.2));
         }
     }
     generated_code.push_str("];\n\n");
 
     // 5. pulse.md -> GEN_PULSE_AXIOMS (60-79)
-    generated_code.push_str("pub const GEN_PULSE_AXIOMS: &[AeonAxiomRule] = &[\n");
+    generated_code.push_str("pub const GEN_PULSE_AXIOMS: &[SusiAxiomRule] = &[\n");
     for line in pulse_md.lines() {
         if let Some(rule) = parse_list_item(line) {
-            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 60, rule.1, rule.2));
+            generated_code.push_str(&format!("    SusiAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 60, rule.1, rule.2));
         }
     }
     generated_code.push_str("];\n\n");
 
     // 6. WORKFLOW.md -> GEN_WORKFLOW_STEPS (80-99)
-    generated_code.push_str("pub const GEN_WORKFLOW_STEPS: &[AeonAxiomRule] = &[\n");
+    generated_code.push_str("pub const GEN_WORKFLOW_STEPS: &[SusiAxiomRule] = &[\n");
     for line in workflow_md.lines() {
         if let Some(rule) = parse_list_item(line) {
-            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 80, rule.1, rule.2));
+            generated_code.push_str(&format!("    SusiAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 80, rule.1, rule.2));
         }
     }
     generated_code.push_str("];\n\n");
 
     // 7. MISSIONS.md -> GEN_MISSION_PROTOCOLS (100-119)
-    generated_code.push_str("pub const GEN_MISSION_PROTOCOLS: &[AeonAxiomRule] = &[\n");
+    generated_code.push_str("pub const GEN_MISSION_PROTOCOLS: &[SusiAxiomRule] = &[\n");
     for line in missions_md.lines() {
         if let Some(rule) = parse_list_item(line) {
-            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 100, rule.1, rule.2));
+            generated_code.push_str(&format!("    SusiAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 100, rule.1, rule.2));
         }
     }
     generated_code.push_str("];\n\n");
 
     // 8. QUERIES.md -> GEN_QUERY_PROTOCOLS (120-139)
-    generated_code.push_str("pub const GEN_QUERY_PROTOCOLS: &[AeonAxiomRule] = &[\n");
+    generated_code.push_str("pub const GEN_QUERY_PROTOCOLS: &[SusiAxiomRule] = &[\n");
     for line in queries_md.lines() {
         if let Some(rule) = parse_list_item(line) {
-            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 120, rule.1, rule.2));
+            generated_code.push_str(&format!("    SusiAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 120, rule.1, rule.2));
         }
     }
     generated_code.push_str("];\n\n");
 
     // 9. CREATORS.md -> GEN_CREATOR_PROTOCOLS (140-159)
-    generated_code.push_str("pub const GEN_CREATOR_PROTOCOLS: &[AeonAxiomRule] = &[\n");
+    generated_code.push_str("pub const GEN_CREATOR_PROTOCOLS: &[SusiAxiomRule] = &[\n");
     for line in creators_md.lines() {
         if let Some(rule) = parse_list_item(line) {
-            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 140, rule.1, rule.2));
+            generated_code.push_str(&format!("    SusiAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 140, rule.1, rule.2));
         }
     }
     generated_code.push_str("];\n\n");
 
     // 10. TOPOLOGY.md -> Pillar-based Components
     let mut current_pillar = "";
-    generated_code.push_str("pub const GEN_AOA_COMPONENTS: &[AeonComponentSpec] = &[\n");
-    let mut agents = String::from("pub const GEN_AGENT_COMPONENTS: &[AeonComponentSpec] = &[\n");
-    let mut engines = String::from("pub const GEN_ENGINE_COMPONENTS: &[AeonComponentSpec] = &[\n");
-    let mut models = String::from("pub const GEN_MODEL_COMPONENTS: &[AeonComponentSpec] = &[\n");
-    let mut mcps = String::from("pub const GEN_MCP_COMPONENTS: &[AeonComponentSpec] = &[\n");
+    generated_code.push_str("pub const GEN_AOA_COMPONENTS: &[SusiComponentSpec] = &[\n");
+    let mut agents = String::from("pub const GEN_AGENT_COMPONENTS: &[SusiComponentSpec] = &[\n");
+    let mut engines = String::from("pub const GEN_ENGINE_COMPONENTS: &[SusiComponentSpec] = &[\n");
+    let mut models = String::from("pub const GEN_MODEL_COMPONENTS: &[SusiComponentSpec] = &[\n");
+    let mut mcps = String::from("pub const GEN_MCP_COMPONENTS: &[SusiComponentSpec] = &[\n");
 
     for line in topology_md.lines() {
         if line.starts_with("## 1. Agent of Agents") { current_pillar = "aoa"; }
@@ -163,11 +163,11 @@ fn main() {
 
         if let Some(comp) = parse_topology_item(line) {
             let tier = match comp.2.as_str() {
-                "0" => "AeonCoreTier::Tier0Reflex",
-                "2" => "AeonCoreTier::Tier2Reasoning",
-                _ => "AeonCoreTier::Tier1Swarm",
+                "0" => "SusiCoreTier::Tier0Reflex",
+                "2" => "SusiCoreTier::Tier2Reasoning",
+                _ => "SusiCoreTier::Tier1Swarm",
             };
-            let entry = format!("    AeonComponentSpec {{ name: {:?}, tier: {}, description: {:?} }},\n", comp.0, tier, comp.1);
+            let entry = format!("    SusiComponentSpec {{ name: {:?}, tier: {}, description: {:?} }},\n", comp.0, tier, comp.1);
             match current_pillar {
                 "aoa" => generated_code.push_str(&entry),
                 "agents" => agents.push_str(&entry),
@@ -189,24 +189,24 @@ fn main() {
     generated_code.push_str(&mcps);
 
     // Combined COMPONENTS for legacy support
-    generated_code.push_str("pub const GEN_COMPONENTS: &[AeonComponentSpec] = &[\n");
+    generated_code.push_str("pub const GEN_COMPONENTS: &[SusiComponentSpec] = &[\n");
     for line in topology_md.lines() {
         if let Some(comp) = parse_topology_item(line) {
             let tier = match comp.2.as_str() {
-                "0" => "AeonCoreTier::Tier0Reflex",
-                "2" => "AeonCoreTier::Tier2Reasoning",
-                _ => "AeonCoreTier::Tier1Swarm",
+                "0" => "SusiCoreTier::Tier0Reflex",
+                "2" => "SusiCoreTier::Tier2Reasoning",
+                _ => "SusiCoreTier::Tier1Swarm",
             };
-            generated_code.push_str(&format!("    AeonComponentSpec {{ name: {:?}, tier: {}, description: {:?} }},\n", comp.0, tier, comp.1));
+            generated_code.push_str(&format!("    SusiComponentSpec {{ name: {:?}, tier: {}, description: {:?} }},\n", comp.0, tier, comp.1));
         }
     }
     generated_code.push_str("];\n\n");
 
     // 8. Unified RULES List
-    generated_code.push_str("pub const GEN_RULES: &[AeonAxiomRule] = &[\n");
+    generated_code.push_str("pub const GEN_RULES: &[SusiAxiomRule] = &[\n");
     for line in agents_md.lines() {
         if let Some(rule) = parse_list_item(line) {
-            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0, rule.1, rule.2));
+            generated_code.push_str(&format!("    SusiAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0, rule.1, rule.2));
         }
     }
     let mut current_id = None;
@@ -220,44 +220,44 @@ fn main() {
         } else if line.trim().starts_with("* **Core Paradigm**:") {
             if let (Some(id), Some(title)) = (current_id, current_title.take()) {
                 let paradigm = line.split_once(':').unwrap().1.trim();
-                generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", id + 20, title, paradigm));
+                generated_code.push_str(&format!("    SusiAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", id + 20, title, paradigm));
                 current_id = None;
             }
         }
     }
     for line in build_md.lines() {
         if let Some(rule) = parse_list_item(line) {
-            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 30, rule.1, rule.2));
+            generated_code.push_str(&format!("    SusiAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 30, rule.1, rule.2));
         }
     }
     for line in runtime_md.lines() {
         if let Some(rule) = parse_list_item(line) {
-            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 40, rule.1, rule.2));
+            generated_code.push_str(&format!("    SusiAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 40, rule.1, rule.2));
         }
     }
     for line in pulse_md.lines() {
         if let Some(rule) = parse_list_item(line) {
-            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 60, rule.1, rule.2));
+            generated_code.push_str(&format!("    SusiAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 60, rule.1, rule.2));
         }
     }
     for line in workflow_md.lines() {
         if let Some(rule) = parse_list_item(line) {
-            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 80, rule.1, rule.2));
+            generated_code.push_str(&format!("    SusiAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 80, rule.1, rule.2));
         }
     }
     for line in missions_md.lines() {
         if let Some(rule) = parse_list_item(line) {
-            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 100, rule.1, rule.2));
+            generated_code.push_str(&format!("    SusiAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 100, rule.1, rule.2));
         }
     }
     for line in queries_md.lines() {
         if let Some(rule) = parse_list_item(line) {
-            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 120, rule.1, rule.2));
+            generated_code.push_str(&format!("    SusiAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 120, rule.1, rule.2));
         }
     }
     for line in creators_md.lines() {
         if let Some(rule) = parse_list_item(line) {
-            generated_code.push_str(&format!("    AeonAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 140, rule.1, rule.2));
+            generated_code.push_str(&format!("    SusiAxiomRule {{ id: {}, title: {:?}, imperative: {:?} }},\n", rule.0 + 140, rule.1, rule.2));
         }
     }
     generated_code.push_str("];\n");

@@ -83,8 +83,8 @@ impl ModelManager {
         if list.is_empty() {
              list.push(ModelInfo {
                 name: "Native Rust Logic".to_string(),
-                registry: "aeon Native".to_string(),
-                model_id: "aeon-native-synthesis".to_string(),
+                registry: "SUSI Native".to_string(),
+                model_id: "susi-native-synthesis".to_string(),
                 description: "Deterministic protocol-level reasoning".to_string(),
                 is_local: true,
                 tier: ModelTier::Reflex,
@@ -99,9 +99,9 @@ impl ModelManager {
 
     pub fn set_selected_model(model_name: &str) -> Result<String, String> {
         let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
-        let aeon_dir = home.join(".aeon");
-        let _ = fs::create_dir_all(&aeon_dir);
-        let model_file = aeon_dir.join("selected_model_override.txt");
+        let susi_dir = home.join(".susi");
+        let _ = fs::create_dir_all(&susi_dir);
+        let model_file = susi_dir.join("selected_model_override.txt");
         fs::write(&model_file, model_name.trim()).map_err(|e| e.to_string())?;
         Ok(format!("Selected active model override set to: '{}'", model_name.trim()))
     }
@@ -159,7 +159,7 @@ impl ModelManager {
 
     pub fn get_selected_model() -> Option<String> {
         let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
-        let override_file = home.join(".aeon/selected_model_override.txt");
+        let override_file = home.join(".susi/selected_model_override.txt");
         if let Ok(content) = fs::read_to_string(&override_file) {
             let trimmed = content.trim();
             if !trimmed.is_empty() { return Some(trimmed.to_string()); }
@@ -170,23 +170,23 @@ impl ModelManager {
 
     pub fn set_selected_engine(engine_name: &str) -> Result<String, String> {
         let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
-        let aeon_dir = home.join(".aeon");
-        let _ = fs::create_dir_all(&aeon_dir);
-        let engine_file = aeon_dir.join("selected_engine.txt");
+        let susi_dir = home.join(".susi");
+        let _ = fs::create_dir_all(&susi_dir);
+        let engine_file = susi_dir.join("selected_engine.txt");
         fs::write(&engine_file, engine_name.trim()).map_err(|e| e.to_string())?;
         Ok(format!("Active execution engine set to: '{}'", engine_name.trim()))
     }
 
     pub fn get_selected_engine() -> Option<String> {
         let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
-        let engine_file = home.join(".aeon/selected_engine.txt");
+        let engine_file = home.join(".susi/selected_engine.txt");
         fs::read_to_string(&engine_file).ok().map(|s| s.trim().to_string())
     }
 
     pub fn get_active_engine_and_model() -> (String, String) {
         let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
-        let global_dir = home.join(".aeon");
-        let cfg = crate::sandbox::manager::AeonConfig::load(&global_dir).expect("Fatal: Malformed configuration");
+        let global_dir = home.join(".susi");
+        let cfg = crate::sandbox::manager::SusiConfig::load(&global_dir).expect("Fatal: Malformed configuration");
         let model = Self::get_selected_model().unwrap_or(cfg.default_model);
         let engine = Self::get_selected_engine().unwrap_or(cfg.default_engine);
         (engine, model)
@@ -197,8 +197,8 @@ impl ModelManager {
         if p.is_file() { return Some(p); }
 
         let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
-        let aeon_models = home.join(".aeon/models");
-        if let Ok(entries) = std::fs::read_dir(&aeon_models) {
+        let susi_models = home.join(".susi/models");
+        if let Ok(entries) = std::fs::read_dir(&susi_models) {
             for entry in entries.flatten() {
                 let path = entry.path();
                 if path.to_string_lossy().contains(model_id) && path.is_file() { return Some(path); }
@@ -216,7 +216,7 @@ impl ModelManager {
     }
 
     pub fn verify_model_integrity(model_path: &Path) -> EaiResult<()> {
-        if model_path.to_string_lossy().contains("aeon-native-synthesis") {
+        if model_path.to_string_lossy().contains("susi-native-synthesis") {
             return Ok(()); // Native logic is part of the binary
         }
 
@@ -251,7 +251,7 @@ impl ModelManager {
         }
 
         let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
-        let default_tokenizer = home.join(".aeon/models/tokenizer.json");
+        let default_tokenizer = home.join(".susi/models/tokenizer.json");
         if default_tokenizer.exists() { return Some(default_tokenizer); }
 
         // Deep Search for Tokenizer
@@ -335,8 +335,8 @@ impl ModelManager {
         let mut discovered = Vec::new();
         let mut visited = std::collections::HashSet::new();
         let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_default();
-        let global_dir = home.join(".aeon");
-        let cfg = crate::sandbox::manager::AeonConfig::load(&global_dir).expect("Fatal: Malformed configuration");
+        let global_dir = home.join(".susi");
+        let cfg = crate::sandbox::manager::SusiConfig::load(&global_dir).expect("Fatal: Malformed configuration");
 
         if workspace.is_dir() { Self::recursive_scan_model_dir(workspace, &mut discovered, &mut visited, 0); }
         let global_models_dir = global_dir.join("models");
@@ -434,7 +434,7 @@ impl ModelManager {
             let _ = h.join();
         }
 
-        let mut cfg = crate::sandbox::manager::AeonConfig::load(global_dir)?;
+        let mut cfg = crate::sandbox::manager::SusiConfig::load(global_dir)?;
         let mut new_paths_added = 0;
 
         let lock = found_folders.read().unwrap();
@@ -483,7 +483,7 @@ impl ModelManager {
 
     pub fn install_model(query_or_url: &str) -> String {
         let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
-        let models_dir = home.join(".aeon/models");
+        let models_dir = home.join(".susi/models");
         if let Err(e) = fs::create_dir_all(&models_dir) {
             return format!("ERROR: Failed to create models directory: {}", e);
         }
@@ -499,7 +499,7 @@ impl ModelManager {
         if target.starts_with("http") {
             let file_name = target.split('/').next_back().unwrap_or("model.gguf");
             let dest_path = models_dir.join(file_name);
-            match ureq::get(target).set("User-Agent", "AEON/0.1").call() {
+            match ureq::get(target).set("User-Agent", "SUSI/0.1").call() {
                 Ok(resp) => {
                     let total_size = resp.header("Content-Length")
                         .and_then(|s| s.parse::<u64>().ok())
@@ -547,7 +547,7 @@ impl ModelManager {
 
     pub fn save_download_progress(model_name: &str, bytes: u64, total: u64, status: &str) {
         let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
-        let progress_file = home.join(".aeon/download_progress.json");
+        let progress_file = home.join(".susi/download_progress.json");
         let record = ModelDownloadProgress {
             model_name: model_name.to_string(), bytes_downloaded: bytes, expected_bytes: total,
             percentage: if total > 0 { (bytes as f32 / total as f32) * 100.0 } else { 0.0 }, status: status.to_string(),
@@ -585,7 +585,7 @@ impl ModelManager {
 
     pub fn ensure_hardware_optimal_models(workspace: &Path) -> EaiResult<String> {
         let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
-        let global_dir = home.join(".aeon");
+        let global_dir = home.join(".susi");
 
         // 1. Deep Scan System / Home for Local Models (Rule 31 & Aspiration 5)
         let existing = Self::scan_system_for_local_models(workspace);
@@ -637,7 +637,7 @@ mod tests {
 
     #[test]
     fn test_universal_format_recognition() {
-        let tmp_dir = std::env::temp_dir().join("aeon_model_test_v2");
+        let tmp_dir = std::env::temp_dir().join("susi_model_test_v2");
         let _ = fs::create_dir_all(&tmp_dir);
         let sf_path = tmp_dir.join("test.safetensors");
         let _ = fs::write(&sf_path, vec![0u8; 2_000_000]);

@@ -1,34 +1,33 @@
-# aeon: 1-Line Universal Windows Installer (PowerShell)
-# 100% Sandboxed - 100% Native Executable - 0 JVM, 0 Git, 0 Gradle Dependency
+# SUSI Micro-Substrate Installer for Windows
+# Tier 0 Onboarding Protocol: Zero-Config Deployment
 
-$ErrorActionPreference = "Stop"
+$SusiRepo = "https://github.com/intellibitz/susi"
+$ReleaseUrl = "$SusiRepo/releases/latest/download"
+$HomeDir = [Environment]::GetFolderPath("UserProfile")
+$GlobalDir = Join-Path $HomeDir ".susi"
+$GlobalBinDir = Join-Path $GlobalDir "bin"
 
-$GlobalAeonDir = Join-Path $HOME ".aeon"
-$GlobalBinDir = Join-Path $GlobalAeonDir "bin"
-$GlobalModelsDir = Join-Path $GlobalAeonDir "models"
+# Ensure substrate structure exists
+if (-not (Test-Path $GlobalBinDir)) {
+    New-Item -ItemType Directory -Force -Path $GlobalBinDir | Out-Null
+}
 
-New-Item -ItemType Directory -Force -Path $GlobalBinDir | Out-Null
-New-Item -ItemType Directory -Force -Path $GlobalModelsDir | Out-Null
+Write-Host "[susi] Initializing 100% Sandboxed Native AI Runtime (Repo: $SusiRepo)..." -ForegroundColor Cyan
 
-$AeonRepo = if ($env:AEON_REPO) { $env:AEON_REPO } else { "intellibitz/aeon" }
-$ReleaseUrl = "https://github.com/$AeonRepo/releases/latest/download"
-
-Write-Host "[aeon] Initializing 100% Sandboxed Native AI Runtime (Repo: $AeonRepo)..." -ForegroundColor Cyan
-
-$LauncherExePath = Join-Path $GlobalBinDir "aeon.exe"
-$EngineExePath = Join-Path $GlobalBinDir "aeon-engine.exe"
+$LauncherExePath = Join-Path $GlobalBinDir "susi.exe"
+$EngineExePath = Join-Path $GlobalBinDir "susi-engine.exe"
 
 $Installed = $false
 
 # 1. Try Binary Download First (Lightning Fast)
 if ($null -eq $env:LOCAL_SOURCE) {
-    Write-Host "🔐 Fetching latest aeon executables..." -ForegroundColor Yellow
+    Write-Host "🔐 Fetching latest susi executables..." -ForegroundColor Yellow
 
-    $LauncherBinary = "aeon-windows-x86_64.exe"
-    $EngineBinary = "aeon-engine-windows-x86_64.exe"
+    $LauncherBinary = "susi-windows-x86_64.exe"
+    $EngineBinary = "susi-engine-windows-x86_64.exe"
 
-    Stop-Process -Name "aeon" -ErrorAction SilentlyContinue
-    Stop-Process -Name "aeon-engine" -ErrorAction SilentlyContinue
+    Stop-Process -Name "susi" -ErrorAction SilentlyContinue
+    Stop-Process -Name "susi-engine" -ErrorAction SilentlyContinue
 
     try {
         Invoke-WebRequest -Uri "$ReleaseUrl/$LauncherBinary" -OutFile $LauncherExePath -UseBasicParsing
@@ -42,10 +41,10 @@ if ($null -eq $env:LOCAL_SOURCE) {
 
 # 2. Fallback to Source Build
 if (-not $Installed -and (Get-Command "cargo" -ErrorAction SilentlyContinue)) {
-    Write-Host "[aeon Native] Compiling standalone Rust AI engine & launcher..." -ForegroundColor Yellow
+    Write-Host "[susi Native] Compiling standalone Rust AI engine & launcher..." -ForegroundColor Yellow
 
-    Stop-Process -Name "aeon" -ErrorAction SilentlyContinue
-    Stop-Process -Name "aeon-engine" -ErrorAction SilentlyContinue
+    Stop-Process -Name "susi" -ErrorAction SilentlyContinue
+    Stop-Process -Name "susi-engine" -ErrorAction SilentlyContinue
 
     # Build Engine
     Write-Host "  Building engine..." -ForegroundColor Gray
@@ -53,12 +52,12 @@ if (-not $Installed -and (Get-Command "cargo" -ErrorAction SilentlyContinue)) {
 
     # Build Launcher
     Write-Host "  Building launcher..." -ForegroundColor Gray
-    Push-Location "src/native/aeon"
+    Push-Location "src/native/susi"
     cargo build --release | Out-Null
     Pop-Location
 
-    $EngineSrc = "target\release\aeon-engine.exe"
-    $LauncherSrc = "src\native\aeon\target\release\aeon.exe"
+    $EngineSrc = "target\release\susi-engine.exe"
+    $LauncherSrc = "src\native\susi\target\release\susi.exe"
 
     if ((Test-Path $EngineSrc) -and (Test-Path $LauncherSrc)) {
         Copy-Item $EngineSrc $EngineExePath -Force
@@ -76,10 +75,11 @@ if (-not $Installed) {
 # 3. PATH Automation (0-Effort Onboarding)
 $UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
 if ($UserPath -notlike "*$GlobalBinDir*") {
-    Write-Host "[aeon] Automatically adding '$GlobalBinDir' to User PATH..." -ForegroundColor Cyan
+    Write-Host "[susi] Automatically adding '$GlobalBinDir' to User PATH..." -ForegroundColor Cyan
     [Environment]::SetEnvironmentVariable("Path", "$GlobalBinDir;$UserPath", "User")
     $env:Path = "$GlobalBinDir;$env:Path"
     Write-Host "  ✅ User PATH updated!" -ForegroundColor Green
 }
 
-Write-Host "`n🎉 Global aeon is ready! Type 'aeon status' or 'aeon mcp' to verify." -ForegroundColor Green
+Write-Host "`n🎉 Global susi is ready! Type 'susi status' or 'susi mcp' to verify." -ForegroundColor Green
+Write-Host "Restart your terminal to use the 'susi' command." -ForegroundColor Gray

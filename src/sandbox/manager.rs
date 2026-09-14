@@ -1,4 +1,4 @@
-// aeon Sandbox Manager: Neural Checkpoints, Memory & State Isolation
+// susi Sandbox Manager: Neural Checkpoints, Memory & State Isolation
 // 100% Rust implementation for sandboxed execution environment
 
 use std::fs;
@@ -54,7 +54,7 @@ pub struct GovernancePatterns {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]
-pub struct AeonConfig {
+pub struct SusiConfig {
     pub gmcp_port: u16,
     pub gmcp_http_port: u16,
     pub gemi_port: u16,
@@ -62,7 +62,7 @@ pub struct AeonConfig {
     pub default_engine: String,
     pub default_model: String,
     pub auto_download_models: bool,
-    pub aeon_repo: String,
+    pub susi_repo: String,
     pub mcp_registry_url: String,
     pub bootstrap_mcp_servers: Vec<GlobalMcpEntry>,
     pub cloud_scout_timeout_secs: u64,
@@ -73,18 +73,18 @@ pub struct AeonConfig {
     pub governance: GovernancePatterns,
 }
 
-impl Default for AeonConfig {
+impl Default for SusiConfig {
     fn default() -> Self {
-        AeonConfig {
+        SusiConfig {
             gmcp_port: 9090,
             gmcp_http_port: 9093,
             gemi_port: 9091,
             udp_discovery_port: 9092,
-            default_engine: "aeon-offline".to_string(),
-            default_model: "aeon-alpha".to_string(),
+            default_engine: "susi-offline".to_string(),
+            default_model: "susi-alpha".to_string(),
             auto_download_models: true,
-            aeon_repo: "intellibitz/aeon".to_string(),
-            mcp_registry_url: "https://raw.githubusercontent.com/intellibitz/aeon/main/registry.json".to_string(),
+            susi_repo: "intellibitz/susi".to_string(),
+            mcp_registry_url: "https://raw.githubusercontent.com/intellibitz/susi/main/registry.json".to_string(),
             bootstrap_mcp_servers: vec![
                 GlobalMcpEntry { name: "database".to_string(), description: "Standard Protocol SQL Database Server".to_string(), package: "mcp-server-postgres".to_string(), category: "database".to_string(), trust_score: Some(0.95), latency_ms: Some(10) },
                 GlobalMcpEntry { name: "search".to_string(), description: "Standard Protocol Web Search Server".to_string(), package: "mcp-server-search".to_string(), category: "search".to_string(), trust_score: Some(0.90), latency_ms: Some(50) },
@@ -94,7 +94,7 @@ impl Default for AeonConfig {
             beacon_interval_secs: 30,
             local_scan_paths: Vec::new(),
             agent_rank_threshold: 0.6,
-            alpha_weights_url: "https://huggingface.co/intellibitz/aeon-alpha/resolve/main/aeon-alpha.safetensors".to_string(),
+            alpha_weights_url: "https://huggingface.co/intellibitz/susi-alpha/resolve/main/susi-alpha.safetensors".to_string(),
             governance: GovernancePatterns {
                 destructive_commands: vec![
                     "rm -rf /".to_string(),
@@ -140,7 +140,7 @@ impl Default for AeonConfig {
 
 pub struct SandboxManager;
 
-impl AeonConfig {
+impl SusiConfig {
     pub fn get_config_path(global_dir: &Path) -> PathBuf {
         global_dir.join("config.json")
     }
@@ -168,9 +168,9 @@ impl SandboxManager {
         if !global_dir.exists() {
             fs::create_dir_all(global_dir).map_err(|e| EaiError::filesystem(e.to_string()))?;
         }
-        let config_path = AeonConfig::get_config_path(global_dir);
+        let config_path = SusiConfig::get_config_path(global_dir);
         if !config_path.exists() {
-            let default_cfg = AeonConfig::default();
+            let default_cfg = SusiConfig::default();
             let json = serde_json::to_string_pretty(&default_cfg).unwrap();
             fs::write(config_path, json).map_err(|e| EaiError::filesystem(e.to_string()))?;
         }
@@ -178,16 +178,16 @@ impl SandboxManager {
     }
 
     pub fn save_mission_checkpoint(workspace: &Path, checkpoint: &NeuralCheckpoint) {
-        let aeon_dir = workspace.join(".aeon");
-        if !aeon_dir.exists() {
-            let _ = fs::create_dir_all(&aeon_dir);
+        let susi_dir = workspace.join(".susi");
+        if !susi_dir.exists() {
+            let _ = fs::create_dir_all(&susi_dir);
         }
-        let checkpoint_file = workspace.join(".aeon/mission_checkpoint.json");
+        let checkpoint_file = workspace.join(".susi/mission_checkpoint.json");
         let _ = fs::write(checkpoint_file, serde_json::to_string_pretty(checkpoint).unwrap_or_default());
     }
 
     pub fn check_interrupted_checkpoint(workspace: &Path) -> Option<NeuralCheckpoint> {
-        let checkpoint_file = workspace.join(".aeon/mission_checkpoint.json");
+        let checkpoint_file = workspace.join(".susi/mission_checkpoint.json");
         if checkpoint_file.is_file() {
             if let Ok(content) = fs::read_to_string(checkpoint_file) {
                 return serde_json::from_str(&content).ok();
@@ -197,15 +197,15 @@ impl SandboxManager {
     }
 }
 
-pub struct AeonMemory;
+pub struct SusiMemory;
 
-impl AeonMemory {
+impl SusiMemory {
     pub fn save_interaction(workspace: &Path, intent: &str, outcome: &str) {
-        let aeon_dir = workspace.join(".aeon");
-        if !aeon_dir.exists() {
-            let _ = fs::create_dir_all(&aeon_dir);
+        let susi_dir = workspace.join(".susi");
+        if !susi_dir.exists() {
+            let _ = fs::create_dir_all(&susi_dir);
         }
-        let memory_file = workspace.join(".aeon/memory.jsonl");
+        let memory_file = workspace.join(".susi/memory.jsonl");
 
         // Structured Memory Validation
         if intent.trim().is_empty() || outcome.trim().is_empty() { return; }
@@ -216,7 +216,7 @@ impl AeonMemory {
             "timestamp": std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0),
             "provenance": {
                 "workspace": workspace.display().to_string(),
-                "engine_version": crate::AEON_VERSION,
+                "engine_version": crate::SUSI_VERSION,
             }
         });
         if let Ok(mut f) = fs::OpenOptions::new().create(true).append(true).open(memory_file) {
@@ -226,7 +226,7 @@ impl AeonMemory {
 
         // Substrate Ingestion Motion: Stage successful reasoning for distillation
         if outcome.len() > 50 && !outcome.contains("[FAIL]") && !outcome.contains("error") {
-            let exp_file = workspace.join(".aeon/reasoning_experience.jsonl");
+            let exp_file = workspace.join(".susi/reasoning_experience.jsonl");
             let exp_entry = serde_json::json!({
                 "intent": intent,
                 "blackboard_context": "converged",
@@ -252,19 +252,19 @@ pub enum LogLevel {
     Trace,
 }
 
-pub struct AeonAuditLogger;
+pub struct SusiAuditLogger;
 
-impl AeonAuditLogger {
+impl SusiAuditLogger {
     pub fn log_event(workspace: &Path, event_type: &str, details: &str) {
         Self::log(workspace, LogLevel::Info, event_type, details);
     }
 
     pub fn log(workspace: &Path, level: LogLevel, event_type: &str, details: &str) {
-        let aeon_dir = workspace.join(".aeon");
-        if !aeon_dir.exists() {
-            let _ = fs::create_dir_all(&aeon_dir);
+        let susi_dir = workspace.join(".susi");
+        if !susi_dir.exists() {
+            let _ = fs::create_dir_all(&susi_dir);
         }
-        let audit_file = workspace.join(".aeon/audit.log");
+        let audit_file = workspace.join(".susi/audit.log");
         let ts = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
 
         let log_entry = serde_json::json!({
@@ -282,7 +282,7 @@ impl AeonAuditLogger {
     }
 
     pub fn read_audit_log(workspace: &Path, limit: usize) -> String {
-        let audit_file = workspace.join(".aeon/audit.log");
+        let audit_file = workspace.join(".susi/audit.log");
         if let Ok(content) = fs::read_to_string(audit_file) {
             let lines: Vec<&str> = content.lines().collect();
             let start = if lines.len() > limit { lines.len() - limit } else { 0 };
@@ -292,11 +292,11 @@ impl AeonAuditLogger {
     }
 }
 
-pub struct AeonBackupManager;
+pub struct SusiBackupManager;
 
-impl AeonBackupManager {
+impl SusiBackupManager {
     pub fn backup_work(workspace: &Path) -> EaiResult<String> {
-        let backups_dir = workspace.join(".aeon/backups");
+        let backups_dir = workspace.join(".susi/backups");
         let _ = fs::create_dir_all(&backups_dir);
         let ts = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
@@ -346,25 +346,25 @@ mod tests {
         SandboxManager::save_mission_checkpoint(ws, &cp);
         let loaded = SandboxManager::check_interrupted_checkpoint(ws);
         assert!(loaded.is_some());
-        let _ = fs::remove_dir_all(ws.join(".aeon"));
+        let _ = fs::remove_dir_all(ws.join(".susi"));
     }
 
     #[test]
-    fn test_aeon_config_lifecycle() {
+    fn test_susi_config_lifecycle() {
         let dir = Path::new("test_cfg");
         let _ = fs::create_dir_all(dir);
         let _ = SandboxManager::ensure_global_sandbox(dir);
-        let cfg = AeonConfig::load(dir).expect("Failed to load config");
+        let cfg = SusiConfig::load(dir).expect("Failed to load config");
         assert_eq!(cfg.gmcp_port, 9090);
         let _ = fs::remove_dir_all(dir);
     }
 
     #[test]
-    fn test_aeon_memory_lifecycle() {
+    fn test_susi_memory_lifecycle() {
         let ws = Path::new("test_mem");
         let _ = fs::create_dir_all(ws);
-        AeonMemory::save_interaction(ws, "hello", "world");
-        let memory_file = ws.join(".aeon/memory.jsonl");
+        SusiMemory::save_interaction(ws, "hello", "world");
+        let memory_file = ws.join(".susi/memory.jsonl");
         assert!(memory_file.is_file());
         let _ = fs::remove_dir_all(ws);
     }

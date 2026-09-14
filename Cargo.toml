@@ -1,10 +1,12 @@
 [package]
-name = "aeon-engine"
+name = "susi-engine"
 version = "0.1.2022844"
 edition = "2021"
-authors = ["IntelliBitz", "Muthu Ramadoss", "AEON EAI Core"]
-description = "aeon-engine: EAI: Exponential Intelligence for Any AI. - GAWD, GEMI & GMCP Multi-Agent Engine"
+authors = ["IntelliBitz", "Muthu Ramadoss", "SUSI EAI Core"]
+description = "susi-engine: EAI: Exponential Intelligence for Any AI. - GAWD, GEMI & GMCP Multi-Agent Engine"
 license = "Apache-2.0"
+repository = "https://github.com/intellibitz/susi"
+homepage = "https://github.com/intellibitz/susi"
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }

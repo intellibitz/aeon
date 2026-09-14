@@ -113,7 +113,7 @@ impl ProtocolDispatcher for GmcpProtocolHandler {
                         "capabilities": {
                             "tools": { "listChanged": false }
                         },
-                        "serverInfo": { "name": "aeon-substrate", "version": crate::AEON_VERSION }
+                        "serverInfo": { "name": "susi-substrate", "version": crate::SUSI_VERSION }
                     }
                 }).to_string()
             }

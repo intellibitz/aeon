@@ -1,4 +1,4 @@
-// AEON-Vision: Native Neural Vision Substrate
+// SUSI-Vision: Native Neural Vision Substrate
 // 100% Rust implementation using Candle for Tier 2 Vision Distillation
 
 use anyhow::{Result, anyhow};
@@ -6,13 +6,13 @@ use candle_core::{Tensor, DType, Device};
 use candle_nn::{Linear, Module, VarBuilder, VarMap};
 use std::path::Path;
 
-/// AEON-Vision Engine: Hardware-Saturated Neural Vision Substrate
-pub struct AeonVisionEngine {
+/// SUSI-Vision Engine: Hardware-Saturated Neural Vision Substrate
+pub struct SusiVisionEngine {
     device: Device,
     feature_extractor: Linear,
 }
 
-impl AeonVisionEngine {
+impl SusiVisionEngine {
     pub const DIM: usize = 512;
 
     pub fn new() -> Result<Self> {
@@ -55,13 +55,13 @@ impl AeonVisionEngine {
         }
 
         // Semantic Fusion: (Aspiration 8) Combining Visual Features with Text Intent
-        let text_vec = crate::gemi::alpha::AeonAlphaModel::semantic_centroid_projection(prompt, None)?;
+        let text_vec = crate::gemi::alpha::SusiAlphaModel::semantic_centroid_projection(prompt, None)?;
 
         // Simulating the "Axiomatic Alignment" of vision
         let similarity: f32 = feature_vec.iter().zip(text_vec.iter()).map(|(a, b)| a * b).sum();
 
         Ok(format!(
-            "[aeon Native Vision]: Hardware Saturated on {:?}. Visual/Text Alignment: {:.4}. Analysis complete for {}",
+            "[susi Native Vision]: Hardware Saturated on {:?}. Visual/Text Alignment: {:.4}. Analysis complete for {}",
             self.device, similarity, image_path.display()
         ))
     }

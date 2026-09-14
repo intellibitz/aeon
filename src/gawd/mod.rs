@@ -14,4 +14,4 @@ pub mod security;
 pub mod self_core;
 pub mod truth;
 
-pub use ama::AmaMasterAgent;
+pub use ama::SusiMasterAgent;

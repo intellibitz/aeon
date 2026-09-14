@@ -1,4 +1,4 @@
-// AEON WASI Sandbox: High-Security Tool Isolation
+// SUSI WASI Sandbox: High-Security Tool Isolation
 // 100% Rust implementation for Enterprise-Scale Execution Boundaries
 
 use wasmer::{Instance, Module, Store};
@@ -15,7 +15,7 @@ impl WasiSandbox {
         let module = Module::new(&store, wasm_bytes).map_err(|e| EaiError::process(format!("WASM Module Error: {}", e)))?;
 
         // Restricted Filesystem Access
-        let mut wasi_state_builder = WasiState::new("aeon-isolated-tool");
+        let mut wasi_state_builder = WasiState::new("susi-isolated-tool");
         wasi_state_builder
             .args(args)
             .preopen_dir(workspace).map_err(|e| EaiError::process(format!("WASI Preopen Error: {}", e)))?;

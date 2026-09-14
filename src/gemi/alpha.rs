@@ -1,4 +1,4 @@
-// AEON-Alpha: Native Neural Intelligence Substrate
+// SUSI-Alpha: Native Neural Intelligence Substrate
 // 100% Rust implementation using Candle for Tier 0 Reflex Distillation
 
 use anyhow::{Result, anyhow};
@@ -14,29 +14,29 @@ pub struct DistillationStaged {
     pub timestamp: u64,
 }
 
-/// AEON-Alpha Intent Classifier (Neural Reflex)
-pub struct AeonAlphaModel {
+/// SUSI-Alpha Intent Classifier (Neural Reflex)
+pub struct SusiAlphaModel {
     fc1: Linear,
     fc2: Linear,
 }
 
-impl AeonAlphaModel {
+impl SusiAlphaModel {
     pub const DIM: usize = 128;
 
     pub fn global() -> &'static Self {
-        static MODEL: std::sync::OnceLock<AeonAlphaModel> = std::sync::OnceLock::new();
+        static MODEL: std::sync::OnceLock<SusiAlphaModel> = std::sync::OnceLock::new();
         eprintln!("[Alpha] Accessing global...");
         MODEL.get_or_init(|| {
             eprintln!("[Alpha] Loading...");
             let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
-            Self::load(&home.join(".aeon")).expect("Failed to load AEON-Alpha global substrate")
+            Self::load(&home.join(".susi")).expect("Failed to load SUSI-Alpha global substrate")
         })
     }
 
     pub fn load(global_dir: &Path) -> Result<Self> {
-        let weights_path = global_dir.join("models/aeon-alpha.safetensors");
+        let weights_path = global_dir.join("models/susi-alpha.safetensors");
         if !weights_path.exists() {
-            return Err(anyhow!("AEON-Alpha weights not found"));
+            return Err(anyhow!("SUSI-Alpha weights not found"));
         }
 
         let device = crate::gemi::hardware::HardwareProfiler::get_candle_device();
@@ -135,7 +135,7 @@ impl AeonAlphaModel {
         }
 
         // Atomic Model Save (Rule 13 Hardening)
-        let weights_path = global_dir.join("models/aeon-alpha.safetensors");
+        let weights_path = global_dir.join("models/susi-alpha.safetensors");
         let tmp_path = weights_path.with_extension("tmp");
         varmap.save(&tmp_path)?;
         std::fs::rename(tmp_path, weights_path)?;
@@ -144,7 +144,7 @@ impl AeonAlphaModel {
     }
 
     pub fn get_model_fingerprint(global_dir: &Path) -> String {
-        let weights_path = global_dir.join("models/aeon-alpha.safetensors");
+        let weights_path = global_dir.join("models/susi-alpha.safetensors");
         if let Ok(meta) = std::fs::metadata(weights_path) {
             return format!("{:?}", meta.modified().unwrap());
         }
@@ -289,7 +289,7 @@ mod tests {
 
     #[test]
     fn test_list_dynamic_intents() {
-        let intents = AeonAlphaModel::list_dynamic_intents();
+        let intents = SusiAlphaModel::list_dynamic_intents();
         assert!(!intents.is_empty());
         // Must be sorted and contain foundational intents
         assert!(intents.contains(&"status".to_string()));
@@ -298,9 +298,9 @@ mod tests {
 
     #[test]
     fn test_semantic_centroid_projection_determinism() {
-        let vec1 = AeonAlphaModel::semantic_centroid_projection("check engine status", None).unwrap();
-        let vec2 = AeonAlphaModel::semantic_centroid_projection("check engine status", None).unwrap();
-        assert_eq!(vec1.len(), AeonAlphaModel::DIM);
+        let vec1 = SusiAlphaModel::semantic_centroid_projection("check engine status", None).unwrap();
+        let vec2 = SusiAlphaModel::semantic_centroid_projection("check engine status", None).unwrap();
+        assert_eq!(vec1.len(), SusiAlphaModel::DIM);
         assert_eq!(vec1, vec2);
     }
 }

@@ -1,4 +1,4 @@
-// AEON Truth Transformer: Formal Verification Substrate
+// SUSI Truth Transformer: Formal Verification Substrate
 // RULE 15: Truth & Hallucination Sovereignty - Native Candle Verification
 // RULE 31: Substrate Purity Hardening - Meta Reality Verification
 
@@ -6,9 +6,9 @@ use std::path::Path;
 use candle_core::{Device, Tensor};
 use crate::error::{EaiError, EaiResult};
 
-pub struct AeonTruthAgent;
+pub struct SusiTruthAgent;
 
-impl AeonTruthAgent {
+impl SusiTruthAgent {
     /// Formal Verification Reflex
     /// Validates tool output against physical workspace reality before user delivery.
     pub fn verify_mission_reality(_goal: &str, _tool_name: &str, result: &str, workspace: &Path) -> EaiResult<String> {
@@ -48,7 +48,7 @@ impl AeonTruthAgent {
                 if let Some(score_str) = result.split("[CONVERGENCE_SCORE: ").nth(1).and_then(|s| s.split(']').next()) {
                     if let Ok(score) = score_str.parse::<f32>() {
                         if score >= 0.85 {
-                             crate::sandbox::manager::AeonAuditLogger::log_event(workspace, "EPISTEMIC_DELEGATION", &format!("Local verification failed but Swarm Consensus (Score: {}) accepted. Proceeding.", score));
+                             crate::sandbox::manager::SusiAuditLogger::log_event(workspace, "EPISTEMIC_DELEGATION", &format!("Local verification failed but Swarm Consensus (Score: {}) accepted. Proceeding.", score));
                              return Ok(format!("{} (Verified via Epistemic Delegation)", result));
                         }
                     }
@@ -88,6 +88,6 @@ pub struct TruthTransformer;
 
 impl TruthTransformer {
     pub fn verify_mission_reality(goal: &str, tool_name: &str, result: &str, workspace: &Path) -> EaiResult<String> {
-        AeonTruthAgent::verify_mission_reality(goal, tool_name, result, workspace)
+        SusiTruthAgent::verify_mission_reality(goal, tool_name, result, workspace)
     }
 }

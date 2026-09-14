@@ -1,4 +1,4 @@
-// AEON Runtime Administrator: Substrate Maintenance & Hardware Optimization
+// SUSI Runtime Administrator: Substrate Maintenance & Hardware Optimization
 // Sole Purpose: Interrogate hardware, provision models, and ensure peak execution state.
 
 use std::path::Path;
@@ -7,16 +7,16 @@ use std::time::Duration;
 use crate::error::EaiResult;
 use crate::gemi::hardware::HardwareProfiler;
 use crate::gemi::models::ModelManager;
-use crate::sandbox::manager::AeonConfig;
+use crate::sandbox::manager::SusiConfig;
 
-pub struct AeonRuntimeAdmin;
+pub struct SusiRuntimeAdmin;
 
-impl AeonRuntimeAdmin {
+impl SusiRuntimeAdmin {
     /// Active Background Administration Loop
     pub fn start_administration_cycle(workspace: &Path) {
         let ws = workspace.to_path_buf();
         thread::spawn(move || {
-            let ama = crate::gawd::ama::AmaMasterAgent::new();
+            let ama = crate::gawd::ama::SusiMasterAgent::new();
             loop {
                 // Mandate: Use Swarm for all runtime mandates
                 let _ = ama.process_intent("perform full substrate audit, hardware optimization, and evolutionary maintenance", &ws);
@@ -36,8 +36,8 @@ impl AeonRuntimeAdmin {
 
         // 2. Model Provisioning & Optimization
         let home = std::env::var_os("HOME").map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
-        let global_dir = home.join(".aeon");
-        let cfg = AeonConfig::load(&global_dir).expect("Fatal: Malformed configuration");
+        let global_dir = home.join(".susi");
+        let cfg = SusiConfig::load(&global_dir).expect("Fatal: Malformed configuration");
 
         if cfg.auto_download_models {
             eprintln!("[Runtime Admin] Auditing model substrate...");

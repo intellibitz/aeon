@@ -142,7 +142,7 @@ impl HardwareProfiler {
             caps.push("CPU".to_string());
         }
         caps.push(format!("{}GB", profile.ram_gb));
-        caps.push(format!("{}V", crate::AEON_VERSION));
+        caps.push(format!("{}V", crate::SUSI_VERSION));
         caps.join(",")
     }
 
@@ -305,8 +305,8 @@ impl HardwareProfiler {
             ModelLadderStep {
                 step: 1,
                 label: "1.5B Parameters (Fast Local Edge)",
-                hf_repo: "aeon-alpha/aeon-alpha-1.5b-instruct-v0.1-GGUF",
-                hf_file: "aeon-alpha-1.5b-instruct-q4_k_m.gguf",
+                hf_repo: "susi-alpha/susi-alpha-1.5b-instruct-v0.1-GGUF",
+                hf_file: "susi-alpha-1.5b-instruct-q4_k_m.gguf",
             },
         ];
 
@@ -314,32 +314,32 @@ impl HardwareProfiler {
             ladder.push(ModelLadderStep {
                 step: 2,
                 label: "7B Parameters (Mid-Range Desktop)",
-                hf_repo: "aeon-alpha/aeon-alpha-7b-instruct-v0.1-GGUF",
-                hf_file: "aeon-alpha-7b-instruct-q4_k_m.gguf",
+                hf_repo: "susi-alpha/susi-alpha-7b-instruct-v0.1-GGUF",
+                hf_file: "susi-alpha-7b-instruct-q4_k_m.gguf",
             });
         }
         if ram_gb >= 16 {
             ladder.push(ModelLadderStep {
                 step: 3,
                 label: "14B Parameters (High-Accuracy Workstation)",
-                hf_repo: "aeon-alpha/aeon-alpha-14b-instruct-v0.1-GGUF",
-                hf_file: "aeon-alpha-14b-instruct-q4_k_m.gguf",
+                hf_repo: "susi-alpha/susi-alpha-14b-instruct-v0.1-GGUF",
+                hf_file: "susi-alpha-14b-instruct-q4_k_m.gguf",
             });
         }
         if ram_gb >= 32 {
             ladder.push(ModelLadderStep {
                 step: 4,
                 label: "32B Parameters (High-End Workstation)",
-                hf_repo: "aeon-alpha/aeon-alpha-32b-instruct-v0.1-GGUF",
-                hf_file: "aeon-alpha-32b-instruct-q4_k_m.gguf",
+                hf_repo: "susi-alpha/susi-alpha-32b-instruct-v0.1-GGUF",
+                hf_file: "susi-alpha-32b-instruct-q4_k_m.gguf",
             });
         }
         if ram_gb >= 64 {
             ladder.push(ModelLadderStep {
                 step: 5,
                 label: "72B Parameters (Ultra-Capacity Workstation)",
-                hf_repo: "aeon-alpha/aeon-alpha-72b-instruct-v0.1-GGUF",
-                hf_file: "aeon-alpha-72b-instruct-q4_k_m.gguf",
+                hf_repo: "susi-alpha/susi-alpha-72b-instruct-v0.1-GGUF",
+                hf_file: "susi-alpha-72b-instruct-q4_k_m.gguf",
             });
         }
 

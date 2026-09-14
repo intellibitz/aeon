@@ -1,4 +1,4 @@
-# AEON Alpha-Self Evolution Protocols (Motions)
+# SUSI Alpha-Self Evolution Protocols (Motions)
 
 * **Current Engine Version**: `v0.1.2022844`
 

@@ -1,4 +1,4 @@
-// AEON Axiom Substrate: Core Configuration and Integrity Maintenance from Compiled Binary Instructions
+// SUSI Axiom Substrate: Core Configuration and Integrity Maintenance from Compiled Binary Instructions
 // Bypasses string parsing by leveraging compiled Rust structs and enums in AlphaSelf.
 
 use std::path::Path;

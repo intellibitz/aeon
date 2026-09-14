@@ -8,13 +8,13 @@
 # Rust build outputs
 /target/
 **/target/
-aeon-native
+susi-native
 
 # Kotlin compiler & cache
 .kotlin/
 
-# Sandboxed AEON runtime, caches, & local home
-.aeon/
+# Sandboxed SUSI runtime, caches, & local home
+.susi/
 
 # Local properties & secrets
 local.properties

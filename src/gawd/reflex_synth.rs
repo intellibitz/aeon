@@ -1,4 +1,4 @@
-// AEON Reflex Synthesizer
+// SUSI Reflex Synthesizer
 // RULE 23: Motion Rule Protocol - Test-Driven Evolution Substrate
 
 use std::fs;
@@ -13,11 +13,11 @@ impl ReflexSynthesizer {
     pub fn distill_native_reflex(intent: &str, workspace: &Path) -> EaiResult<String> {
         let struct_name = intent.split_whitespace().map(|s| s.to_string()).collect::<Vec<String>>().join("");
         let code = format!(
-            "// AEON Native Reflex: {}\n\
-            use crate::gmcp::tools::AeonTool;\n\
+            "// SUSI Native Reflex: {}\n\
+            use crate::gmcp::tools::SusiTool;\n\
             use crate::error::EaiResult;\n\n\
             pub struct {}Reflex;\n\n\
-            impl AeonTool for {}Reflex {{\n\
+            impl SusiTool for {}Reflex {{\n\
                 fn name(&self) -> String {{ \"{}\".to_string() }}\n\
                 fn description(&self) -> String {{ \"Synthesized reflex for {}\".to_string() }}\n\
                 fn execute(&self, arg: &str, _ws: &std::path::Path) -> EaiResult<String> {{\n\
@@ -45,7 +45,7 @@ impl ReflexSynthesizer {
     pub fn synthesize_wasm_reflex(intent: &str, _workspace: &Path) -> EaiResult<String> {
         let home = std::env::var("HOME").or_else(|_| std::env::var("USERPROFILE")).map(PathBuf::from).unwrap_or_else(|_| PathBuf::from("."));
 
-        let reflex_dir = home.join(".aeon/reflexes");
+        let reflex_dir = home.join(".susi/reflexes");
         let _ = fs::create_dir_all(&reflex_dir);
         let wasm_src = reflex_dir.join(format!("{}.rs", intent.replace(' ', "_")));
 
@@ -85,20 +85,20 @@ impl ReflexSynthesizer {
     }
 
     pub fn evolve_substrate_native(intent: &str, workspace: &Path) -> EaiResult<String> {
-        let code = match crate::gemi::pulse::AeonPulse::reason(&format!("GENERATE_RUST_TOOL: {}", intent), workspace) {
+        let code = match crate::gemi::pulse::SusiPulse::reason(&format!("GENERATE_RUST_TOOL: {}", intent), workspace) {
              Ok(c) => c,
              Err(_) => return Err(EaiError::protocol("Reflex synthesis failed: No reasoning response.")),
         };
 
-        if !code.contains("struct ") || !code.contains("impl AeonTool for ") {
-            return Err(EaiError::protocol("Synthesized code missing AeonTool implementation."));
+        if !code.contains("struct ") || !code.contains("impl SusiTool for ") {
+            return Err(EaiError::protocol("Synthesized code missing SusiTool implementation."));
         }
 
         let tool_name = intent.split_whitespace().next().unwrap_or("new_tool");
         let path = workspace.join(format!("src/gmcp/tools/{}.rs", tool_name));
         fs::write(&path, code)?;
 
-        crate::daemon::admin::AeonAdmin::execute_release(workspace)
+        crate::daemon::admin::SusiAdmin::execute_release(workspace)
     }
 }
 

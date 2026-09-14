@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use std::thread;
 use serde_json::json;
 
-use crate::gawd::ama::AmaMasterAgent;
+use crate::gawd::ama::SusiMasterAgent;
 use crate::gmcp::tools::ToolRegistry;
 use crate::gemi::models::ModelManager;
 
@@ -43,8 +43,8 @@ impl GemiServer {
                         (Method::Get, "/" | "/v1" | "/v1/" | "/health" | "/app" | "/favicon.ico") => {
                             let api_status = json!({
                                 "object": "api_status",
-                                "name": "AEON OpenAI-Compatible REST Substrate",
-                                "version": crate::AEON_VERSION,
+                                "name": "SUSI OpenAI-Compatible REST Substrate",
+                                "version": crate::SUSI_VERSION,
                                 "status": "active",
                                 "endpoints": [
                                     "/v1/chat/completions",
@@ -63,7 +63,7 @@ impl GemiServer {
                             let models = ModelManager::list_models(&w_thread);
                             let json_models: Vec<serde_json::Value> = models
                                 .iter()
-                                .map(|m| json!({"id": m.model_id, "object": "model", "owned_by": "aeon"}))
+                                .map(|m| json!({"id": m.model_id, "object": "model", "owned_by": "susi"}))
                                 .collect();
                             let payload_val = json!({"object": "list", "data": json_models});
                             let payload = serde_json::to_string(&payload_val).unwrap_or_default();
@@ -72,14 +72,14 @@ impl GemiServer {
                                 .with_header(Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).unwrap())
                                 .with_header(Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap()))
                         }
-                        (Method::Get, "/well-known/aeon") => {
+                        (Method::Get, "/well-known/susi") => {
                             let hardware = crate::gemi::hardware::HardwareProfiler::get_profile();
                             let (engine, model) = crate::gemi::models::ModelManager::get_active_engine_and_model();
                             let tools = ToolRegistry::list_tools();
 
                             let info = json!({
-                                "version": crate::AEON_VERSION,
-                                "identity": "AEON Intelligence Substrate",
+                                "version": crate::SUSI_VERSION,
+                                "identity": "SUSI Intelligence Substrate",
                                 "engine": engine,
                                 "model": model,
                                 "hardware": {
@@ -99,11 +99,11 @@ impl GemiServer {
                         (Method::Post, path) if path.starts_with("/v1/chat/completions") || path.starts_with("/chat/completions") || path.starts_with("/v1/completions") || path == "/" || path == "/v1" || path == "/v1/" => {
                             let is_streaming = b_thread.contains("\"stream\":true") || b_thread.contains("\"stream\": true") || b_thread.contains("stream");
                             let active_model = crate::gemi::models::ModelManager::get_selected_model()
-                                .unwrap_or_else(|| "aeon-native-synthesis".to_string());
+                                .unwrap_or_else(|| "susi-native-synthesis".to_string());
                             let model_name = active_model.as_str();
 
                             let user_prompt = extract_prompt_from_json(&b_thread).unwrap_or_else(|| "list workspace health".to_string());
-                            crate::sandbox::manager::AeonAuditLogger::log_event(&w_thread, "WEB_MISSION_START", &user_prompt);
+                            crate::sandbox::manager::SusiAuditLogger::log_event(&w_thread, "WEB_MISSION_START", &user_prompt);
 
                             let trimmed_prompt = user_prompt.trim();
                             let clean_cmd = trimmed_prompt.trim_start_matches('/').trim_start_matches(':');
@@ -114,9 +114,9 @@ impl GemiServer {
                             let content = if ToolRegistry::exists(&tool_name) {
                                 ToolRegistry::execute_tool(&tool_name, &serde_json::json!(tool_arg), &w_thread)
                             } else {
-                                let ama = AmaMasterAgent::new();
-                                let final_resp = ama.solve_clean(trimmed_prompt, &w_thread, crate::AEON_VERSION);
-                                crate::sandbox::manager::AeonMemory::save_interaction(&w_thread, trimmed_prompt, &final_resp);
+                                let ama = SusiMasterAgent::new();
+                                let final_resp = ama.solve_clean(trimmed_prompt, &w_thread, crate::SUSI_VERSION);
+                                crate::sandbox::manager::SusiMemory::save_interaction(&w_thread, trimmed_prompt, &final_resp);
                                 final_resp
                             };
 
@@ -125,9 +125,9 @@ impl GemiServer {
                                 let json_content = serde_json::to_string(&content).unwrap_or_default();
 
                                 let sse_data = format!(
-                                    "data: {{\"id\":\"chatcmpl-aeon-{}\",\"object\":\"chat.completion.chunk\",\"created\":{},\"model\":\"{}\",\"choices\":[{{\"index\":0,\"delta\":{{\"role\":\"assistant\"}},\"finish_reason\":null}}]}}\n\n\
-                                     data: {{\"id\":\"chatcmpl-aeon-{}\",\"object\":\"chat.completion.chunk\",\"created\":{},\"model\":\"{}\",\"choices\":[{{\"index\":0,\"delta\":{{\"content\":{}}},\"finish_reason\":null}}]}}\n\n\
-                                     data: {{\"id\":\"chatcmpl-aeon-{}\",\"object\":\"chat.completion.chunk\",\"created\":{},\"model\":\"{}\",\"choices\":[{{\"index\":0,\"delta\":{{}},\"finish_reason\":\"stop\"}}]}}\n\n\
+                                    "data: {{\"id\":\"chatcmpl-susi-{}\",\"object\":\"chat.completion.chunk\",\"created\":{},\"model\":\"{}\",\"choices\":[{{\"index\":0,\"delta\":{{\"role\":\"assistant\"}},\"finish_reason\":null}}]}}\n\n\
+                                     data: {{\"id\":\"chatcmpl-susi-{}\",\"object\":\"chat.completion.chunk\",\"created\":{},\"model\":\"{}\",\"choices\":[{{\"index\":0,\"delta\":{{\"content\":{}}},\"finish_reason\":null}}]}}\n\n\
+                                     data: {{\"id\":\"chatcmpl-susi-{}\",\"object\":\"chat.completion.chunk\",\"created\":{},\"model\":\"{}\",\"choices\":[{{\"index\":0,\"delta\":{{}},\"finish_reason\":\"stop\"}}]}}\n\n\
                                      data: [DONE]\n\n",
                                     now, now, model_name, now, now, model_name, json_content, now, now, model_name
                                 );
@@ -138,7 +138,7 @@ impl GemiServer {
                                     .with_header(Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap()))
                             } else {
                                 let payload = json!({
-                                    "id": format!("chatcmpl-aeon-{}", std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0)),
+                                    "id": format!("chatcmpl-susi-{}", std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0)),
                                     "object": "chat.completion",
                                     "created": 1700000000,
                                     "model": model_name,

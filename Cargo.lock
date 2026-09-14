@@ -24,44 +24,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
 
 [[package]]
-name = "aeon-engine"
-version = "0.1.2022844"
-dependencies = [
- "anyhow",
- "base64 0.22.1",
- "candle-core",
- "candle-nn",
- "candle-transformers",
- "clap",
- "console-subscriber",
- "dashmap",
- "hf-hub",
- "hound",
- "image",
- "indicatif",
- "libc",
- "log",
- "md5",
- "once_cell",
- "reqwest",
- "rustyline",
- "serde",
- "serde_json",
- "sha2",
- "shlex 1.3.0",
- "signal-hook",
- "tiny_http",
- "tokenizers",
- "tokio",
- "tracing",
- "tracing-subscriber",
- "ureq",
- "wasmer",
- "wasmer-wasi",
- "winapi",
-]
-
-[[package]]
 name = "ahash"
 version = "0.7.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4530,6 +4492,44 @@ name = "subtle"
 version = "2.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
+
+[[package]]
+name = "susi-engine"
+version = "0.1.2022844"
+dependencies = [
+ "anyhow",
+ "base64 0.22.1",
+ "candle-core",
+ "candle-nn",
+ "candle-transformers",
+ "clap",
+ "console-subscriber",
+ "dashmap",
+ "hf-hub",
+ "hound",
+ "image",
+ "indicatif",
+ "libc",
+ "log",
+ "md5",
+ "once_cell",
+ "reqwest",
+ "rustyline",
+ "serde",
+ "serde_json",
+ "sha2",
+ "shlex 1.3.0",
+ "signal-hook",
+ "tiny_http",
+ "tokenizers",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "ureq",
+ "wasmer",
+ "wasmer-wasi",
+ "winapi",
+]
 
 [[package]]
 name = "syn"

@@ -1,6 +1,6 @@
-# AEON Project Contributors
+# SUSI Project Contributors
 
-AEON is created and maintained by a collaboration of human creators and AI co-creators:
+SUSI is created and maintained by a collaboration of human creators and AI co-creators:
 
 ## Core Creators & Contributors
 - **IntelliBitz** ([@intellibitz](https://github.com/intellibitz)) - Founder & Lead Maintainer
