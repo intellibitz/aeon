@@ -862,6 +862,7 @@ impl GawdAgentFleet {
     pub fn dispatch_explosive_swarm(goal: String, workspace: PathBuf, blackboard: MissionBlackboard) -> Vec<(String, String)> {
         use std::io::Write;
         let agents = Self::synthesize_fleet(&goal, &workspace);
+        let agents_len = agents.len();
         let mut results = Vec::new();
         let (tx, rx) = std::sync::mpsc::channel();
 
@@ -878,14 +879,20 @@ impl GawdAgentFleet {
                     let _ = sub_tx.send(res);
                 });
 
-                let res = sub_rx.recv_timeout(std::time::Duration::from_secs(600))
-                    .unwrap_or_else(|_| sub_rx.recv().unwrap_or_else(|_| "[TIMEOUT] Agent execution exceeded hardware limit.".to_string()));
+                let res = match sub_rx.recv_timeout(std::time::Duration::from_secs(60)) {
+                    Ok(r) => r,
+                    Err(_) => "[TIMEOUT] Agent execution exceeded hardware limit (60s).".to_string(),
+                };
                 let _ = tx_clone.send((name, res));
             });
         }
         drop(tx);
 
+        let mut received_count = 0;
+        let total_agents = agents_len; // Use the local variable
+
         while let Ok((name, res)) = rx.recv() {
+            received_count += 1;
             if !res.trim().is_empty() && !res.contains("Query reflex audited") {
                 // Stream detailed component trace live into thinking block
                 let line_count = res.lines().count();
@@ -894,9 +901,13 @@ impl GawdAgentFleet {
                 } else {
                     println!("- [Swarm Flux Trace] {}: {}", name, res.trim());
                 }
-                let _ = std::io::stdout().flush();
             }
             results.push((name, res));
+
+            if received_count < total_agents {
+                 // println!("- [Swarm Status] {}/{} agents converged...", received_count, total_agents);
+            }
+            let _ = std::io::stdout().flush();
         }
 
         results

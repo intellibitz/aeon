@@ -22,6 +22,8 @@ use crate::error::{EaiError, EaiResult};
 use crate::sandbox::manager::AeonConfig;
 use crate::gemi::GemiServer;
 use crate::gmcp::server::GmcpServer;
+use crate::gawd::queue::SubstratePulseQueue;
+use crate::gawd::ama::AmaMasterAgent;
 
 pub struct AmaDaemon;
 
@@ -359,6 +361,22 @@ impl AmaDaemon {
                 Self::start_udp_discovery_server(udp_socket, gmcp_actual_port);
             })) {
                 eprintln!("[UDP] Thread panicked: {:?}", e);
+            }
+        });
+
+        // Aspiration 32: Continuous Interaction Substrate Worker
+        let workspace_pulse = workspace.clone();
+        thread::spawn(move || {
+            let queue = SubstratePulseQueue::global();
+            let ama = AmaMasterAgent::new();
+
+            loop {
+                if let Some(pulse) = queue.pop() {
+                    // Serialized Execution (Mandate 31)
+                    info!("[SubstratePulseQueue] Processing Pulse: {}", pulse.intent);
+                    let _ = ama.solve_stream(&pulse.intent, &workspace_pulse, crate::AEON_VERSION);
+                }
+                thread::sleep(Duration::from_millis(100));
             }
         });
 

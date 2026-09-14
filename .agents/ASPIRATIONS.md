@@ -1,6 +1,6 @@
 # AEON Architectural Aspirations
 
-* **Current Engine Version**: `v0.1.2022836`
+* **Current Engine Version**: `v0.1.2022837`
 
 This document defines the structural roadmap and evolution goals of the `aeon` substrate.
 
@@ -153,3 +153,28 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
   3. **Parallel Processing**: Recursive Fork-Join, Map-Reduce data parallelism, Actor model scheduling, SIMD/SIMT data parallelism, and pipeline stage overlapping.
   4. **Decoupled Messaging**: Pub-Sub, Request-Reply, Actor/CSP channels, Reactive Streams with backpressure, LMAX Disruptor zero-copy ring buffers, and Raft/Paxos consensus.
   5. **Low-Level Supporting Primitives**: Work-stealing & fair scheduling, consistent hashing load balancing, vector clocks / Lamport causality, phi-accrual failure detection, and token-bucket flow control.
+
+---
+
+### [Aspiration 28] Absolute Transparency Substrate
+* **Core Paradigm**: The "Glass Box" mandate. 100% of substrate operations, reasoning traces, hardware utilization, and agent recruitment metrics must be exposed via high-fidelity, non-blocking telemetry channels. The substrate is constitutionally prohibited from executing opaque or hidden logic.
+
+---
+
+### [Aspiration 29] Full Spectrum Thinking Substrate
+* **Core Paradigm**: The "Universal Trace" mandate. AEON must synthesize a comprehensive neural narrative that captures every atomic decision, component activation, and model-level reasoning reflex. This data must be structured to enable autonomous evolution, allowing Creators and Users to audit the exact logic path that led to any given workspace state.
+
+---
+
+### [Aspiration 30] Synchronous Trace & Display Protocol
+* **Core Paradigm**: The "Wait-for-Truth" mandate. AEON must ensure that its internal thinking block (containing streaming model traces and substrate logs) is the primary interactive surface during mission execution. The finalized, verified result is only presented once the entire thinking lifecycle has reached convergence and the model interaction has ceased.
+
+---
+
+### [Aspiration 31] Universal Async Pulse Pipeline
+* **Core Paradigm**: The "Zero-Blocking" mandate. AEON must implement a decoupled, asynchronous pipeline for pulse ingestion. Users/Creators must be able to inject corrective or new intents at any microsecond without stalling the engine's current execution thread.
+
+---
+
+### [Aspiration 32] Continuous Interaction Substrate
+* **Core Paradigm**: The "Fluid Execution" mandate. AEON must maintain a persistent execution loop that manages a queue of pulses, providing full Omni-Trace telemetry and result streaming for every individual pulse, ensuring a unified and traceable evolution path.

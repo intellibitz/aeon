@@ -4,6 +4,7 @@ pub mod brain;
 pub mod ama;
 pub mod amas;
 pub mod pkb;
+pub mod queue;
 pub mod reflex_synth;
 pub mod reflex_trainer;
 pub mod reason_trainer;

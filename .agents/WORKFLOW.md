@@ -1,16 +1,18 @@
 # AEON Operational Workflow
 
-* **Current Engine Version**: `v0.1.2022836`
+* **Current Engine Version**: `v0.1.2022837`
 
 This document defines the Meta-Workflow for substrate evolution and the Federated Parallelism logic of the active `aeon` engine.
 
 ## 1. The Creator Evolution Pipeline (Meta-Workflow)
 
-1. **Vision Ingestion (`pulse.md`)**: Every Creator instruction is immediately formalized as a typed test entry:
+1. **Pulse Ingestion**: AEON accepts natural language intents (Pulses) via a non-blocking asynchronous listener.
+2. **Pulse Queueing**: Every pulse is injected into the `SubstratePulseQueue`. If the engine is active, the pulse is staged; otherwise, it is immediately promoted to the execution context.
+3. **Vision Ingestion (`pulse.md`)**: Upon promotion, the pulse is formalized as a typed test entry:
     - `[MOTION]`: Triggers `alpha-self` core mutation (Rust/Binary).
     - `[MISSION]`: Triggers `alpha-user` workspace mutation (Files/Distillation).
     - `[QUERY]`: Triggers ephemeral truth verification (Stateless Analytics).
-2. **Substrate Fork Decision**: The `GAWD` orchestrator identifies the type prefix and routes the vision to the appropriate evolutionary path.
+4. **Substrate Fork Decision**: The `GAWD` orchestrator identifies the type prefix and routes the vision to the appropriate evolutionary path.
 
 ### 1a. Alpha-Self Mutation Path (Core Evolution)
 3. **Architectural Mapping (`ASPIRATIONS.md`)**: The vision demands a new or refined architectural goal.
@@ -48,3 +50,17 @@ This document defines the Meta-Workflow for substrate evolution and the Federate
 22. **Substrate Ingestion**: Successful reasoning is staged and distilled into the **Native Tier 2 Reasoning Model** to close the loop between experience and memory.
 23. **Autonomous Drift Correction**: The `EvolutionManager` audits the mission logs for capability gaps and triggers autonomous synthesis to heal the substrate.
 24. **Decoupled Swarm Messaging Mechanics**: High-throughput communication between swarm agents operates via Reactor/Proactor event loops, lock-free work-stealing queues, and zero-copy ring buffers, enforcing credit-based backpressure and sub-2ms response convergence.
+
+## 5. Phase D: Omni-Trace Thinking Synthesis (The Universal Trace)
+
+25. **Omni-Trace Accumulation**: Throughout the swarm execution, every atomic event (tool call, agent state change, decision fork, model inference trace) is captured in a high-density, non-blocking telemetry buffer.
+26. **Thinking Synthesis**: Upon mission completion, the `GAWD` orchestrator re-synthesizes the telemetry buffer into a structured natural language "Thinking" block. This block must include the raw model reasoning, logs, warnings, and error recovery paths.
+27. **Streaming Trace Protocol**: AEON must stream the model's internal thinking and raw output tokens directly into the active thinking block as they are generated. This real-time trace ensures zero-latency transparency for Creators and Users.
+28. **Result Presentation Gate**: The user-facing result is gated behind the thinking process. Results are only displayed once the model stream terminates and the substrate verifies the epistemic chain of truth.
+29. **Evolutionary Feedback Loop**: The Omni-Trace is exposed to the user and Creator as the primary mechanism for substrate evolution. It serves as the definitive record for identifying architectural gaps and capability drift.
+
+## 6. Phase E: Continuous Pulse Cycle (Fluid Interaction)
+
+30. **Pulse Transition**: Upon completion of a pulse (Result Displayed), the `GAWD` orchestrator immediately interrogates the `SubstratePulseQueue` for the next entry.
+31. **Recursive Correction**: If a new pulse is received during execution, it is evaluated for "Correction Priority". Corrective pulses (e.g., "stop", "change direction") can preempt or modify the active mission blackboard state.
+32. **Unified Session Telemetry**: All pulses in a single interaction session are linked in a unified telemetry stream, allowing for cross-pulse reasoning and context persistence.

@@ -62,10 +62,48 @@ fn get_home_dir() -> PathBuf {
         .unwrap_or_else(|| PathBuf::from("."))
 }
 
+fn run_shell(workspace: &std::path::Path) {
+    use aeon_engine::gawd::queue::SubstratePulseQueue;
+    let queue = SubstratePulseQueue::global();
+    let ama = AmaMasterAgent::new();
+
+    println!("AEON Pulse Shell v{} (Glass Box Telemetry Mode Active)", AEON_VERSION);
+    println!("Enter pulses to interact with the substrate. Pulses are queued and processed in order.");
+    println!("Type 'exit' to quit.");
+
+    // Worker thread for pulse processing
+    let w = workspace.to_path_buf();
+    std::thread::spawn(move || {
+        loop {
+            if let Some(pulse) = queue.pop() {
+                let _ = ama.solve_stream(&pulse.intent, &w, AEON_VERSION);
+            }
+            std::thread::sleep(std::time::Duration::from_millis(50));
+        }
+    });
+
+    loop {
+        print!("aeon> ");
+        let _ = io::stdout().flush();
+        let mut input = String::new();
+        if io::stdin().read_line(&mut input).is_ok() {
+            let trimmed = input.trim();
+            if trimmed.is_empty() { continue; }
+            if trimmed == "exit" || trimmed == "quit" { break; }
+
+            // Non-Blocking Ingestion (Aspiration 31)
+            let _ = queue.ingest(trimmed, &workspace.to_path_buf(), AEON_VERSION);
+        } else {
+            break;
+        }
+    }
+}
+
 fn print_help() {
     println!("aeon v{}", AEON_VERSION);
     println!("Usage: aeon [COMMAND | INTENT]\n");
     println!("Commands & Intents:");
+    println!("  shell                    Start persistent AEON Pulse Shell");
     println!("  version, -v, --version   Print version");
     println!("  help, -h, --help         Show help");
     println!("  install                  Initialize sandboxed .aeon environment");
@@ -141,6 +179,9 @@ fn main() {
             let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(std::path::PathBuf::from).unwrap_or_else(|| std::path::PathBuf::from("."));
             let global_dir = home.join(".aeon");
             let _ = aeon_engine::gemi::reasoning::AeonReasoningModel::train_from_experience(&global_dir);
+        }
+        "shell" => {
+            run_shell(&cwd);
         }
         "help" | "-h" | "--help" => {
             print_help();

@@ -2,6 +2,7 @@
 // 100% Pure Rust implementation for Dynamic MCP Server Proxying, Meta Tool Routing & Wasm Reflexes
 
 use std::fs;
+use std::io::Write;
 use std::path::{Path, PathBuf, Component};
 use std::process::Command;
 use std::sync::{Arc, RwLock, OnceLock};
@@ -206,16 +207,23 @@ impl ToolRegistry {
             let args = shlex::split(clean).ok_or_else(|| EaiError::protocol("Invalid shell syntax"))?;
             if args.is_empty() { return Err(EaiError::protocol("Command cannot be empty")); }
 
+            println!("- [Substrate Operation] Executing: {}", clean);
+            let _ = std::io::stdout().flush();
+
+            // Set GIT_TERMINAL_PROMPT=0 to prevent interactive hangs (Aspiration 28 Transparency)
             let out = Command::new(&args[0])
                 .args(&args[1..])
+                .env("GIT_TERMINAL_PROMPT", "0")
                 .current_dir(workspace)
                 .output()
                 .map_err(|e| EaiError::process(format!("Exec failed: {}", e)))?;
 
             let stdout = String::from_utf8_lossy(&out.stdout).to_string();
             let stderr = String::from_utf8_lossy(&out.stderr).to_string();
+
             if !out.status.success() {
-                Err(EaiError::process(stderr))
+                let err_msg = if stderr.is_empty() { "Command failed with zero output (potential hang/kill)".to_string() } else { stderr };
+                Err(EaiError::process(err_msg))
             } else {
                 Ok(stdout)
             }

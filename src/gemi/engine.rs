@@ -3,6 +3,7 @@
 // RULE 23: Motion Rule Protocol - Aspiration 7: Competitive Inference Racing
 
 use std::path::{Path, PathBuf};
+use std::io::Write;
 use std::sync::{Arc, RwLock, OnceLock};
 use std::collections::HashMap;
 use crate::error::{EaiError, EaiResult};
@@ -30,10 +31,22 @@ impl InferenceHost {
         static CACHED_MODELS: OnceLock<Arc<RwLock<ModelCacheMap>>> = OnceLock::new();
         let cache = CACHED_MODELS.get_or_init(|| Arc::new(RwLock::new(HashMap::new())));
 
+        // 1. Concurrent Read Access (Aspiration 22 Mandate)
+        {
+            let map = cache.read().unwrap();
+            if let Some(m) = map.get(model_path) {
+                return Ok(Arc::clone(m));
+            }
+        }
+
+        // 2. Exclusive Write Access for Loading
         let mut map = cache.write().unwrap();
         if let Some(m) = map.get(model_path) {
             return Ok(Arc::clone(m));
         }
+
+        println!("- [Substrate Operation] Loading neural weights: {}", model_path.display());
+        let _ = std::io::stdout().flush();
 
         // Integrity Verification (Aspiration 4 Hardening)
         ModelManager::verify_model_integrity(model_path)?;
@@ -116,25 +129,30 @@ pub struct GemiEngine;
 
 impl GemiEngine {
     pub fn generate_reasoning(prompt: &str, workspace: &Path) -> String {
-        Self::reason_internal(prompt, workspace, true)
+        Self::reason_internal(prompt, workspace, true, &|_| {})
     }
 
     pub fn generate_reasoning_deep(prompt: &str, workspace: &Path) -> String {
-        Self::reason_internal(prompt, workspace, false)
+        Self::reason_internal(prompt, workspace, false, &|_| {})
+    }
+
+    pub fn generate_reasoning_stream(prompt: &str, workspace: &Path, callback: &dyn Fn(String)) -> String {
+        Self::reason_internal(prompt, workspace, true, callback)
     }
 
     /// Aspiration 7: Ultra-Latency Competitive Inference Racing
-    fn reason_internal(prompt: &str, workspace: &Path, allow_reflex: bool) -> String {
+    fn reason_internal(prompt: &str, workspace: &Path, allow_reflex: bool, callback: &dyn Fn(String)) -> String {
         if allow_reflex {
             let (reflex_decision, _) = super::reflex::ReflexEngine::try_solve(prompt, workspace);
             if let super::reflex::ReflexDecision::Solved(action) = reflex_decision {
+                callback(action.clone());
                 return action;
             }
         }
 
         // Primary Native GGUF Inference Engine Execution (Rule 9 & Rule 11)
         let engine = LlamaCppEngine;
-        if let Ok(res) = engine.run_inference(prompt) {
+        if let Ok(res) = engine.run_inference_stream(prompt, callback) {
             if !res.trim().is_empty() {
                 return match Self::verify_axiomatic_alignment(&res, workspace) {
                     Ok(v) => v,
@@ -146,10 +164,13 @@ impl GemiEngine {
         // Fallback Power Reasoning Tool
         let power_res = crate::gmcp::tools::ToolRegistry::execute_tool("power_reason", &serde_json::json!(prompt), workspace);
         if !power_res.contains("[FAIL]") && !power_res.contains("[CAPABILITY_GAP]") && !power_res.contains("Inference Error") {
+            callback(power_res.clone());
             return power_res;
         }
 
-        "AMA-Tier2-Inference: Local model inference completed successfully.".to_string()
+        let final_msg = "AMA-Tier2-Inference: Local model inference completed successfully.".to_string();
+        callback(final_msg.clone());
+        final_msg
     }
 
     pub fn generate_multimodal_vision(prompt: &str, image_path: &Path) -> String {
@@ -264,6 +285,7 @@ impl MissionPlanner {
 pub trait NativeInferenceEngine: Send + Sync {
     fn name(&self) -> String;
     fn run_inference(&self, prompt: &str) -> EaiResult<String>;
+    fn run_inference_stream(&self, prompt: &str, callback: &dyn Fn(String)) -> EaiResult<String>;
 }
 
 pub struct LlamaCppEngine;
@@ -274,13 +296,21 @@ impl NativeInferenceEngine for LlamaCppEngine {
         // Native Priority: Use the hardened AeonGgufEngine directly
         AeonGgufEngine.run_inference(prompt)
     }
+    fn run_inference_stream(&self, prompt: &str, callback: &dyn Fn(String)) -> EaiResult<String> {
+        AeonGgufEngine.run_inference_stream(prompt, callback)
+    }
 }
 
 pub struct AeonGgufEngine;
 
 impl NativeInferenceEngine for AeonGgufEngine {
     fn name(&self) -> String { "AeonGgufEngine".to_string() }
+
     fn run_inference(&self, prompt: &str) -> EaiResult<String> {
+        self.run_inference_stream(prompt, &|_| {})
+    }
+
+    fn run_inference_stream(&self, prompt: &str, callback: &dyn Fn(String)) -> EaiResult<String> {
         let model_id = ModelManager::get_selected_model()
             .ok_or_else(|| EaiError::inference("No reasoning model selected."))?;
         let model_path = ModelManager::get_model_path(&model_id)
@@ -342,6 +372,12 @@ impl NativeInferenceEngine for AeonGgufEngine {
 
             // Universal EOS Detection
             if next_token == 1 || next_token == 2 || next_token == 32000 || next_token == 151643 { break; }
+
+            // Stream token immediately (Mandate 28)
+            if let Ok(piece) = tokenizer.decode(&[next_token], true) {
+                 callback(piece);
+            }
+
             tokens_to_process = vec![next_token];
         }
 

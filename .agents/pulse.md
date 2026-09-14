@@ -1,6 +1,6 @@
 # AEON Substrate Validation Genome (PULSE)
 
-* **Current Engine Version**: `v0.1.2022836`
+* **Current Engine Version**: `v0.1.2022837`
 
 This document defines the complete set of validation protocols that anchor the `aeon` genome. Every entry reflects a hard-compiled reflex or an orchestrated meta-behavior.
 
@@ -27,6 +27,10 @@ This document defines the complete set of validation protocols that anchor the `
 15. `[x]` **Substrate Sovereignty**: Isolation boundaries for ephemeral state are enforced.
 16. `[x]` **Creator Pipeline**: The Motion -> Aspiration -> Topology -> Workflow pipeline is the meta-axiom.
 17. `[x]` **Genomic Pulse Formalization**: Renamed master trigger to `pulse.md` to distinguish it from standard unit testing and align with the "Master Pulse" paradigm.
+18. `[x]` **MOTION**: Codify the 'Absolute Transparency' mandate. The AEON genome must ensure that the substrate is 100% transparent. Every reasoning step and internal mutation must be exposed via telemetry, constitutionally prohibiting hidden logic.
+19. `[x]` **MOTION**: Codify the 'Omni-Trace Reasoning' mandate. AEON must include every atomic operation, decision, log, and raw model thinking in its trace to enable perfect evolution audits by Creators and Users.
+20. `[x]` **MOTION**: Implement the 'Synchronous Trace & Display' protocol. AEON's thinking must include streaming model traces and terminate only when results are finalized, gating the result display behind the thinking lifecycle.
+21. `[x]` **MOTION**: Implement the 'Continuous Pulse Cycle' mandate. AEON must support non-blocking pulse ingestion, queueing, and continuous telemetry streaming for every pulse, allowing for real-time course correction.
 
 ### 2.2 Architectural Evolution & Aspirations [MOTION]
 18. `[x]` **Platform Independence**: Zero platform bias across Linux, macOS, and Windows.

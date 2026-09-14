@@ -3,6 +3,7 @@
 // Agents must not simulate or "fake" aeon capabilities by performing logic themselves.
 
 use std::path::Path;
+use std::io::Write;
 use serde::{Deserialize, Serialize};
 use crate::error::EaiResult;
 use super::agents::GawdAgentInfo;
@@ -109,14 +110,19 @@ impl AmaMasterAgent {
         println!("- [Hardware Profile] {} CPUs ({}) | {}GB RAM | GPU: {}", hw.cpus, hw.cpu_brand, hw.ram_gb, hw.gpu_info);
         println!("- [Substrate Surface] {} Meta-Tools Registered", tools_count);
         println!("- [Goal Intent] {}", goal);
+
+        // Phase D: Omni-Trace thinking Synthesis (Aspiration 29)
+        println!("\n[UNIVERSAL TRACE START]");
         let _ = std::io::stdout().flush();
 
         let start = std::time::Instant::now();
-        let res = self.solve(goal, workspace, version);
+
+        // Real-time trace injection (Mandate 28 & Aspiration 30)
+        let res = self.solve_with_streaming_trace(goal, workspace, version);
+
         let elapsed = start.elapsed();
 
-        println!("- [Swarm Execution Latency] {:?} (Aspiration 25 Guard Checked)", elapsed);
-        let _ = std::io::stdout().flush();
+        println!("\n- [Swarm Execution Latency] {:?} (Aspiration 25 Guard Checked)", elapsed);
 
         if elapsed.as_millis() > 2 {
              crate::sandbox::manager::AeonAuditLogger::log(
@@ -151,6 +157,55 @@ impl AmaMasterAgent {
                 err_msg
             }
         }
+    }
+
+    /// realized the 'Omni-Trace' mandate by exposing streaming tokens within thinking.
+    fn solve_with_streaming_trace(&self, goal: &str, workspace: &Path, _version: &str) -> EaiResult<AmaMissionReport> {
+        let goal = self.sanitize_input(goal)?;
+
+        // 1. Swarm Supervision
+        println!("- [Swarm Synthesis] Synthesizing specialist fleet...");
+        let _ = std::io::stdout().flush();
+        let (interactions, agents) = super::amas::AmaSupervisor::supervise_mission(&goal, workspace);
+
+        println!("- [Swarm Execution] Dispatching parallel agents...");
+        let _ = std::io::stdout().flush();
+        for msg in &interactions {
+            if msg.sender != "ConsensusMaster" {
+                println!("- [Swarm Flux] {}: {}", msg.sender, msg.payload.chars().take(100).collect::<String>());
+            }
+        }
+
+        let swarm_context = super::amas::AmaSupervisor::gather_weighted_wisdom(&interactions, &agents);
+
+        println!("- [Truth Convergence] Synthesis active. Ingesting model reasoning trace...");
+        let _ = std::io::stdout().flush();
+
+        let reasoning_prompt = format!(
+            "MISSION_GOAL: {}\n\nLOCAL_SWARM_CONTEXT:\n{}\n\n[INSTRUCTION]: Resolve this mission. Output finalized verified actions.",
+            goal, swarm_context
+        );
+
+        // Aspiration 30: Synchronous Trace (Thinking block contains streaming tokens)
+        let final_answer = crate::gemi::engine::GemiEngine::generate_reasoning_stream(&reasoning_prompt, workspace, &|token| {
+            print!("{}", token);
+            let _ = std::io::stdout().flush();
+        });
+
+        println!("\n- [Substrate Verification] Finalizing epistemic chain...");
+        let _ = std::io::stdout().flush();
+
+        // Axiomatic & Reality verification (Mandate 29 Gate)
+        let verified = crate::gemi::engine::GemiEngine::verify_axiomatic_alignment(&final_answer, workspace)?;
+        let verified_final = super::truth::TruthTransformer::verify_mission_reality(&goal, "AMA_SOLVE", &verified, workspace)?;
+
+        Ok(AmaMissionReport {
+            goal: goal.to_string(),
+            status: "COMPLETE".to_string(),
+            agents,
+            interactions,
+            final_answer: verified_final,
+        })
     }
 
     pub fn solve(&self, goal: &str, workspace: &Path, version: &str) -> EaiResult<AmaMissionReport> {

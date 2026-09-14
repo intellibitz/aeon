@@ -224,7 +224,12 @@ impl AmaSupervisor {
                     "MISSION_GOAL: {}\n\n[WEIGHTED_WISDOM]:\n{}\n\n[INSTRUCTION]: Resolve conflicts using rank-weighted priority and synthesize a unified high-fidelity mission answer.",
                     goal, weighted_wisdom
                 );
-                crate::gemi::engine::GemiEngine::generate_reasoning(&consensus_prompt, workspace)
+                println!("- [Consensus Master] Synthesizing swarm wisdom...");
+                let _ = std::io::stdout().flush();
+                crate::gemi::engine::GemiEngine::generate_reasoning_stream(&consensus_prompt, workspace, &|token| {
+                    print!("{}", token);
+                    let _ = std::io::stdout().flush();
+                })
             };
 
             // Epistemic Delegation: Calculate Convergence Score based on agent count and consensus matching
@@ -255,19 +260,24 @@ impl AmaSupervisor {
     }
 
     pub fn gather_weighted_wisdom(interactions: &[A2AMessage], _agents: &[GawdAgentInfo]) -> String {
-        // Technical Mission Protocol: Prioritize AdminAgent and Specialized results
+        // Technical Mission Protocol: Prioritize ConsensusMaster and AdminAgent results
+        let mut consensus_result = None;
         let mut admin_result = None;
         let mut wisdom = Vec::new();
+
         for msg in interactions {
-            if msg.sender == "AdminAgent" {
+            if msg.sender == "ConsensusMaster" {
+                consensus_result = Some(msg.payload.clone());
+            } else if msg.sender == "AdminAgent" {
                 admin_result = Some(msg.payload.clone());
             }
+
             if !msg.payload.contains("FAILURE") && !msg.payload.contains("GAP") && !msg.payload.is_empty() {
-                wisdom.push(msg.payload.clone());
+                wisdom.push(format!("[{}]: {}", msg.sender, msg.payload));
             }
         }
 
-        admin_result.unwrap_or_else(|| {
+        consensus_result.or(admin_result).unwrap_or_else(|| {
             if wisdom.is_empty() {
                 "No valid wisdom gathered from swarm.".to_string()
             } else {

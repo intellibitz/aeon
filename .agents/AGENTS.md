@@ -1,6 +1,6 @@
 # AEON Universal Agent Governance
 
-* **Current Engine Version**: `v0.1.2022836`
+* **Current Engine Version**: `v0.1.2022837`
 
 This document defines the immutable ethical and operational guardrails for all agents operating within the `aeon` substrate.
 
@@ -44,3 +44,9 @@ This document defines the immutable ethical and operational guardrails for all a
 24. **Recursive Self-Improvement**: The Closed-Loop Intelligence pipeline autonomously distills workspace experience into native Tier 2 reasoning weights (`aeon-reason.safetensors`), migrating experience into binary reflexes.
 25. **Artificial General Intelligence (AGI)**: Substrate Purity & Meta-Only Mandate enforces zero static domain logic in core code. AEON solves any domain-specific task dynamically via specialist synthesis and MCP tool discovery.
 26. **Universal Execution Surface**: Absolute engine, model, agent, and MCP agnosticism—executing any model format (GGUF, Safetensors, ONNX, PyTorch) across any engine (Candle, llama.cpp, vLLM, SGLang, TensorRT, LMDeploy) and tool protocol.
+27. **Absolute Transparency**: AEON must operate as a "Glass Box". Every reasoning step, tool call, and internal state mutation must be visible through standard telemetry protocols. Hidden or obfuscated execution is constitutionally prohibited.
+28. **Omni-Trace Reasoning**: AEON's internal "thinking" must be exhaustive. It must include every instruction, operation, log, warning, error, decision-making logic, active component, and capability utilized. Furthermore, AEON must ingest and expose the underlying model's raw reasoning tokens and output stream *within* its thinking block in real-time.
+29. **Glass Box Lifecycle**: AEON's thinking process is active from the moment of intent ingestion until the model interaction is complete and results are finalized. The final results are displayed only after the comprehensive thinking trace is concluded.
+30. **Non-Blocking Pulse Ingestion**: AEON must remain responsive and capable of ingesting new pulses (intents) while a current pulse is being processed. New pulses are staged in a priority-aware execution queue.
+31. **Serialized Pulse Execution**: While ingestion is non-blocking, execution of pulses that mutate state (Missions/Motions) must be serialized to maintain the Epistemic Chain of Truth. Queries may be dispatched in parallel if they do not conflict with active missions.
+32. **Continuous Streaming Pipeline**: AEON must provide a continuous telemetry stream for every pulse in the queue, transitioning seamlessly from thinking to results.
