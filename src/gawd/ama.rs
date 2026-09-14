@@ -133,7 +133,7 @@ impl AmaMasterAgent {
 
         if is_query {
             println!("\n[QUERY FAST-PATH DETECTED]");
-            let (interactions, agents) = AmaSupervisor::supervise_mission(goal, workspace);
+            let (interactions, _agents) = AmaSupervisor::supervise_mission(goal, workspace);
             for msg in &interactions {
                 println!("- [Swarm Flux] {}: {}", msg.sender, msg.payload.chars().take(100).collect::<String>());
             }
