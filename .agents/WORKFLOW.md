@@ -1,29 +1,29 @@
 # AEON Operational Workflow
 
-* **Current Engine Version**: `v0.1.2022842`
+* **Current Engine Version**: `v0.1.2022843`
 
 This document defines the Meta-Workflow for substrate evolution and the Federated Parallelism logic of the active `aeon` engine.
 
-## 1. The Creator Evolution Pipeline (Meta-Workflow)
+## 1. The Alpha-Self Evolution Pipeline (Motions)
 
 1. **Pulse Ingestion**: AEON accepts natural language intents (Pulses) via a non-blocking asynchronous listener.
 2. **Pulse Queueing**: Every pulse is injected into the `SubstratePulseQueue`. If the engine is active, the pulse is staged; otherwise, it is immediately promoted to the execution context.
 3. **Vision Ingestion (`pulse.md`)**: Upon promotion, the pulse is formalized as a typed test entry:
     - `[MOTION]`: Triggers `alpha-self` core mutation (Rust/Binary).
-    - `[MISSION]`: Triggers `alpha-user` workspace mutation (Files/Distillation).
+    - `[MISSION]`: Triggers `alpha-world` workspace mutation (Files/Distillation).
     - `[QUERY]`: Triggers ephemeral truth verification (Stateless Analytics).
 4. **Substrate Fork Decision**: The `GAWD` orchestrator identifies the type prefix and routes the vision to the appropriate evolutionary path.
 
-### 1a. Alpha-Self Mutation Path (Core Evolution)
+### 1a. Alpha-Self Evolution Path (Core)
 3. **Architectural Mapping (`ASPIRATIONS.md`)**: The vision demands a new or refined architectural goal.
 4. **Structural Definition (`TOPOLOGY.md`)**: The aspiration materializes as a specific component or pillar within the substrate topology.
 5. **Operational Logic (`WORKFLOW.md`)**: The core component's interaction mechanics and parallel behaviors are defined.
 6. **Core Synthesis (`BUILD.md`)**: The workflow triggers the build sequence directly to evolve the `alpha-self`.
 
-### 1b. Alpha-User Mutation Path (Mission & Runtime Evolution)
+### 1b. Alpha-World Evolution Path (Mission & Runtime)
 7. **Runtime Mandate (`RUNTIME.md`)**: The vision alters the baseline environment (hardware settings, model defaults) without mutating core traits.
 8. **Mission Protocol (`MISSIONS.md`)**: The vision demands new capabilities for workspace manipulation, artifact generation, or experience staging (modifying the `.aeon/` mutable state).
-9. **State Synthesis**: The updated rules trigger a fast-path compilation, evolving the `alpha-user` operational boundaries.
+9. **State Synthesis**: The updated rules trigger a fast-path compilation, evolving the `alpha-world` operational boundaries.
 
 ### 1c. Ephemeral Execution Path (Zero-Mutation)
 10. **Query Protocol (`QUERIES.md`)**: Defined as stateless queries.
@@ -54,7 +54,7 @@ This document defines the Meta-Workflow for substrate evolution and the Federate
 ## 5. Phase D: Omni-Trace Thinking Synthesis (The Universal Trace)
 
 25. **Omni-Trace Accumulation**: Throughout the swarm execution, every atomic event (tool call, agent state change, decision fork, model inference trace) is captured in a high-density, non-blocking telemetry buffer.
-26. **Thinking Synthesis**: Upon mission completion, the `GAWD` orchestrator re-synthesizes the telemetry buffer into a structured natural language "Thinking" block. This block must include the raw model reasoning, logs, warnings, and error recovery paths.
+26. **Thinking Synthesis**: Upon mission completion, the `GAWD` orchestrator re-synthesizes the telemetry buffer into a structured natural language "Thinking" block. This block must include the raw model reasoning, logs, warnings, error recovery paths, and a comprehensive accountability audit mapping every action to its responsible agent or component.
 27. **Streaming Trace Protocol**: AEON must stream the model's internal thinking and raw output tokens directly into the active thinking block as they are generated. This real-time trace ensures zero-latency transparency for Creators and Users.
 28. **Result Presentation Gate**: The user-facing result is gated behind the thinking process. Results are only displayed once the model stream terminates and the substrate verifies the epistemic chain of truth.
 29. **Evolutionary Feedback Loop**: The Omni-Trace is exposed to the user and Creator as the primary mechanism for substrate evolution. It serves as the definitive record for identifying architectural gaps and capability drift.

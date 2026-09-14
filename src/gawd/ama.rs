@@ -118,6 +118,7 @@ impl AmaMasterAgent {
 
         use crate::gawd::self_core::AlphaSelf;
         println!("- [Core Paradigm] {}", AlphaSelf::CORE_PARADIGM);
+        println!("- [Log Level] DEBUG (Glass Box Evolution Mode)");
 
         println!("\n[GENOMIC MANDATES]");
         for rule in AlphaSelf::RULES.iter().filter(|r| r.title.contains("Universal") || r.title.contains("Agnosticism")) {

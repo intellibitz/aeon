@@ -1,8 +1,8 @@
-# AEON Alpha-User Mutation Protocols (Missions)
+# AEON Alpha-World Evolution Protocols (Missions)
 
-* **Current Engine Version**: `v0.1.2022842`
+* **Current Engine Version**: `v0.1.2022843`
 
-This document defines the mutable execution paths for the `aeon` substrate. These protocols operate within the `alpha-user` space, allowing the swarm to generate artifacts, manipulate the workspace, and distill experience without modifying the hard-compiled `alpha-self` core.
+This document defines the mutable execution paths for the `aeon` substrate. These protocols operate within the `alpha-world` space, allowing the swarm to generate artifacts, manipulate the workspace, and distill experience without modifying the hard-compiled `alpha-self` core.
 
 ## 1. Dynamic Task Fulfillment
 

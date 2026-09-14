@@ -1,8 +1,8 @@
 # AEON Runtime Mandates
 
-* **Current Engine Version**: `v0.1.2022842`
+* **Current Engine Version**: `v0.1.2022843`
 
-This document defines the operational directives for environment establishment, maintenance, and safety across both the `alpha-self` (core host) and `alpha-user` (mutable workspace) boundaries.
+This document defines the operational directives for environment establishment, maintenance, and safety across both the `alpha-self` (core host) and `alpha-world` (mutable workspace) boundaries.
 
 ## 1. Alpha-Self Host Mandates (Foundational Readiness)
 
@@ -11,7 +11,7 @@ This document defines the operational directives for environment establishment, 
 3. **Autonomous Drift Detection**: The substrate must periodically audit itself for capability gaps and trigger the *Motion Rule* (autonomous evolution cycles) without user command.
 4. **Self-Healing Reflex**: The engine must autonomously recover from structural pathologies, port collisions, or memory faults via protocol-based provisioning and hardware re-tuning.
 
-## 2. Alpha-User Environment Synthesis (Mutable State)
+## 2. Alpha-World Environment Synthesis (Mutable State)
 
 5. **Substrate Priming**: Autonomously provision the highest-ranking open-source neural weights compatible with host hardware profiling (e.g., Llama, Gemma, Mistral) into the `.aeon/models/` vault. Fixed native weight identifiers are deprecated in favor of dynamic performance-based selection.
 6. **Protocol Linking**: Dynamically bind essential MCP servers (Database, Search, VCS) and registry-discovered external tools to the active workspace.

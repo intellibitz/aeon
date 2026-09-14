@@ -248,6 +248,8 @@ pub enum LogLevel {
     Warning,
     Error,
     Axiomatic,
+    Debug,
+    Trace,
 }
 
 pub struct AeonAuditLogger;

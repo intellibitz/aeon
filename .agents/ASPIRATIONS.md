@@ -1,6 +1,6 @@
 # AEON Architectural Aspirations
 
-* **Current Engine Version**: `v0.1.2022842`
+* **Current Engine Version**: `v0.1.2022843`
 
 This document defines the structural roadmap and evolution goals of the `aeon` substrate.
 
@@ -57,12 +57,12 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 ---
 
 ### [Aspiration 11] Autonomous Substrate Administration
-* **Core Paradigm**: Deployment of the `AeonRuntimeAdmin` to establish and maintain the optimal execution environment (Weights & Hardware Tuning) strictly in the mutable `alpha-user` space.
+* **Core Paradigm**: Deployment of the `AeonRuntimeAdmin` to establish and maintain the optimal execution environment (Weights & Hardware Tuning) strictly in the mutable `alpha-world` space.
 
 ---
 
 ### [Aspiration 12] Substrate Ingestion Motion
-* **Core Paradigm**: The "Closed-Loop Intelligence" mandate. `aeon` autonomously distills its own learned interactions and mission blackboards into a **Native Tier 2 Reasoning Model**, effectively migrating mutable `alpha-user` experience into immutable `alpha-self` binary reflexes.
+* **Core Paradigm**: The "Closed-Loop Intelligence" mandate. `aeon` autonomously distills its own learned interactions and mission blackboards into a **Native Tier 2 Reasoning Model**, effectively migrating mutable `alpha-world` experience into immutable `alpha-self` binary reflexes.
 
 ---
 
@@ -95,7 +95,7 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 ---
 
 ### [Aspiration 18] Federated Experience Aggregation
-* **Core Paradigm**: The "Global Intelligence" mandate. AEON must implement a secure, privacy-preserving protocol for aggregating distilled reasoning experience from World Users into a centralized Knowledge Vault. This enables the collective intelligence of all `alpha-user` environments to evolve the master `alpha-self` genome.
+* **Core Paradigm**: The "Global Intelligence" mandate. AEON must implement a secure, privacy-preserving protocol for aggregating distilled reasoning experience from World Users into a centralized Knowledge Vault. This enables the collective intelligence of all `alpha-world` environments to evolve the master `alpha-self` genome.
 
 ---
 
@@ -177,4 +177,5 @@ This document defines the structural roadmap and evolution goals of the `aeon` s
 ---
 
 ### [Aspiration 32] Continuous Interaction Substrate
-* **Core Paradigm**: The "Fluid Execution" mandate. AEON must maintain a persistent execution loop that manages a queue of pulses, providing full Omni-Trace telemetry and result streaming for every individual pulse, ensuring a unified and traceable evolution path.
+### [Aspiration 33] Absolute Accountability Substrate
+* **Core Paradigm**: The "100% Accountability" mandate. Every atomic action within the substrate—from low-level tool calls to high-level agent swarms—must be uniquely identifiable and attributable to a specific genomic reflex or user intent. This audit trail must be embedded directly into the Omni-Trace Thinking stream to ensure perfect traceability and alignment with creator governance.

@@ -1,6 +1,6 @@
 # aeon: Exponential Intelligence for Any AI (EAI)
 
-![AEON Version](https://img.shields.io/badge/version-v0.1.2022842-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
+![AEON Version](https://img.shields.io/badge/version-v0.1.2022843-blue.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
 
 **aeon** is a local-first, native Rust AI execution engine designed for high-throughput, hardware-saturated agent orchestration. It transforms static AI interactions into a dynamic, self-evolving intelligence substrate governed by a hard-compiled genome. By embedding design governance rules directly into binary memory, `aeon` eliminates the gap between intention and execution, delivering a safe, sovereign, and exponentially improving intelligence layer for any environment.
 
@@ -55,6 +55,7 @@ AEON is governed by a set of **Epistemic Integrity Mandates** that ensure absolu
 AEON's evolution is driven by core genomic paradigms, including:
 
 - **Platform Independence**: Native execution across Linux, macOS, and Windows with zero bias.
+- **Absolute Transparency & Accountability**: Every substrate action is mapped to a responsible component in the Omni-Trace Thinking stream, ensuring 100% accountability with high-fidelity `DEBUG` logging enabled by default for perfect observability.
 - **Lock-Free Native Substrate**: Elimination of blocking thread locks across critical data structures (KV stores, registries, blackboards) using non-blocking primitives and `RwLock` concurrency.
 - **<2ms Ultra-Reflex Substrate**: High-resolution latency guards enforcing sub-2ms intent classification and reflex response times.
 - **Recursive Swarm Parallelism**: Decomposing complex missions into independent sub-tasks via parallel split-solve-join execution.
@@ -74,7 +75,7 @@ The engine is structured into five functional tiers:
 5.  **MCPs**: JSON-RPC 2.0 interoperability bus connecting to any tool registry or external data source.
 
 ## 4. Operational Workflow
-AEON follows a recursive **Creator Evolution Pipeline**:
+AEON follows a recursive **Alpha-Self Evolution Pipeline (Motions)** and an **Alpha-World Evolution Pipeline (Missions)**:
 
 1.  **Vision Ingestion**: Transformation of natural language into typed `[MOTION]`, `[MISSION]`, or `[QUERY]` pulse entries with an automated **Deduplication Guard** guaranteeing unique genome entries.
 2.  **Substrate Fork Decision**: Causal routing to the appropriate mutation path (Core, Workspace, or Ephemeral).
@@ -84,7 +85,7 @@ AEON follows a recursive **Creator Evolution Pipeline**:
 
 ## 5. Interaction Fronts (The Sovereign Boundary)
 - **Motions (Alpha-Self)**: **Creator-Only**. Architectural evolution requiring the genome source code and Rust compiler.
-- **Missions (Alpha-User)**: **Universal**. Dynamic task fulfillment and workspace mutation via Experience Distillation.
+- **Missions (Alpha-World)**: **Universal**. Dynamic task fulfillment and workspace mutation via Experience Distillation.
 - **Queries (Zero-Mutation)**: **Universal**. Stateless substrate interrogation and truth auditing.
 
 ## 6. Build & Release Protocols

@@ -246,7 +246,7 @@ impl AmaDaemon {
             Ok(false) => {
                 warn!("[AmaDaemon] Binary integrity check FAILED. Potential tampering detected or build out of sync.");
                 // In a strict production mode, we might abort here.
-                // For local evolution, we log and continue if in 'alpha-user' space.
+                // For local evolution, we log and continue if in 'alpha-world' space.
             }
             Err(e) => warn!("[AmaDaemon] Could not verify binary integrity: {}", e),
         }

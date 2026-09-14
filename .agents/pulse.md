@@ -1,6 +1,6 @@
 # AEON Substrate Validation Genome (PULSE)
 
-* **Current Engine Version**: `v0.1.2022842`
+* **Current Engine Version**: `v0.1.2022843`
 
 This document defines the complete set of validation protocols that anchor the `aeon` genome. Every entry reflects a hard-compiled reflex or an orchestrated meta-behavior.
 
@@ -26,12 +26,14 @@ This document defines the complete set of validation protocols that anchor the `
 13. `[x]` **Dynamic Intent Resolution**: Anti-hardcoding mandate for query matchers is realized.
 14. `[x]` **Reality Grounding**: Automated correction of user assumptions against empirical paths.
 15. `[x]` **Substrate Sovereignty**: Isolation boundaries for ephemeral state are enforced.
-16. `[x]` **Creator Pipeline**: The Motion -> Aspiration -> Topology -> Workflow pipeline is the meta-axiom.
+16. `[x]` **Alpha-Self Evolution**: The Motion -> Aspiration -> Topology -> Workflow pipeline is the meta-axiom.
 17. `[x]` **Genomic Pulse Formalization**: Renamed master trigger to `pulse.md` to distinguish it from standard unit testing and align with the "Master Pulse" paradigm.
 18. `[x]` **MOTION**: Codify the 'Absolute Transparency' mandate. The AEON genome must ensure that the substrate is 100% transparent. Every reasoning step and internal mutation must be exposed via telemetry, constitutionally prohibiting hidden logic.
 19. `[x]` **MOTION**: Codify the 'Omni-Trace Reasoning' mandate. AEON must include every atomic operation, decision, log, and raw model thinking in its trace to enable perfect evolution audits by Creators and Users.
 20. `[x]` **MOTION**: Implement the 'Synchronous Trace & Display' protocol. AEON's thinking must include streaming model traces and terminate only when results are finalized, gating the result display behind the thinking lifecycle.
 21. `[x]` **MOTION**: Implement the 'Continuous Pulse Cycle' mandate. AEON must support non-blocking pulse ingestion, queueing, and continuous telemetry streaming for every pulse, allowing for real-time course correction.
+22. `[x]` **[MOTION]**: Codify the 'Absolute Accountability' mandate. The AEON genome must ensure 100% accountability for every action, including an explicit "who did what" audit in the Omni-Trace Thinking block.
+23. `[x]` **[MISSION]**: Enable 'Debug-First' evolution by defaulting the substrate log level to DEBUG and ensuring high-fidelity logs are captured in the Omni-Trace Thinking block.
 
 ### 2.2 Architectural Evolution & Aspirations [MOTION]
 18. `[x]` **Platform Independence**: Zero platform bias across Linux, macOS, and Windows.
@@ -51,7 +53,7 @@ This document defines the complete set of validation protocols that anchor the `
 32. `[x]` **Self-Validation**: Autonomous foundational readiness testing on host hardware.
 33. `[x]` **Unified Interaction Interface**: Every user vision anchored in a verifiable typed test entry.
 34. `[x]` **Axiomatic Pulse Ingestion**: The binary possesses a native reflex to classify intents and inject them into `pulse.md`.
-35. `[x]` **Federated Experience Aggregation**: Aggregation of distilled reasoning from alpha-user environments to evolve the global genome.
+35. `[x]` **Federated Experience Aggregation**: Aggregation of distilled reasoning from alpha-world environments to evolve the global genome.
 84. `[x]` **Deep Model Scan**: Implemented `deep-scan` subcommand for parallel home-wide model discovery and automatic configuration registration.
 85. `[x]` **Candle Upgrade**: Updated `candle-core`, `candle-nn`, and `candle-transformers` to `v0.8.4` for latest spectral mapping and architectural optimizations.
 86. `[x]` **Provenance Bypass**: Implemented manual local model selection bypass to allow trust-neutral iterative testing.
@@ -112,9 +114,9 @@ This document defines the complete set of validation protocols that anchor the `
 
 ### 2.6 Meta-Workflow Logic [MOTION]
 64. `[x]` **Vision Ingestion**: Transformation of natural language into typed validation protocols.
-65. `[x]` **Fork Decision**: Causal routing to Alpha-Self, Alpha-User, or Ephemeral paths.
-66. `[x]` **Core Mutation Pipeline**: Motion -> Aspiration -> Topology -> Workflow -> Build sequence.
-67. `[x]` **Mission Protocol**: Workspace manipulation and experience distillation logic.
+65. `[x]` **Fork Decision**: Causal routing to Alpha-Self, Alpha-World, or Ephemeral paths.
+66. `[x]` **Alpha-Self Evolution Pipeline**: Motion -> Aspiration -> Topology -> Workflow -> Build sequence.
+67. `[x]` **Alpha-World Evolution Protocol**: Workspace manipulation and experience distillation logic.
 68. `[x]` **Foundational Readiness**: continuous host audit and model selection optimization.
 69. `[x]` **Swarm Synthesis**: Genome interrogation and semantic fleet recruitment.
 70. `[x]` **Blackboard Execution**: High-density parallel coordination and Truth convergence.

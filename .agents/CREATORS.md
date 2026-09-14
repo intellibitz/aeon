@@ -1,6 +1,6 @@
 # AEON Creator Interface Protocols
 
-* **Current Engine Version**: `v0.1.2022842`
+* **Current Engine Version**: `v0.1.2022843`
 
 This document defines the three absolute fronts of interaction between Human Creators and the `aeon` substrate. It maps the intention of the Creator to the exact epistemic boundary within the engine.
 
@@ -11,9 +11,9 @@ This document defines the three absolute fronts of interaction between Human Cre
 4. **Protocol (`MOTIONS.md`)**: A Motion is an authorized Creator directive that exposes a capability gap or defines a new aspiration. It triggers the `Motion Rule` (Test-Driven Evolution). The engine will autonomously synthesize, compile, and deploy new Rust logic to heal the gap.
 5. **Command Syntax**: `aeon "<motion_intent>"` (or `aeon pulse "<motion_intent>"`)
 
-## 2. Missions (Alpha-User Mutation)
+## 2. Missions (Alpha-World Evolution)
 6. **Definition**: Dynamic task fulfillment and workspace state generation.
-7. **Blast Radius**: The mutable `alpha-user` environment and the active workspace (`.aeon/`, local files).
+7. **Blast Radius**: The mutable `alpha-world` environment and the active workspace (`.aeon/`, local files).
 8. **Protocol (`MISSIONS.md`)**: A Mission is an explosive swarm execution. The engine recruits specialists, converges on a Chain of Truth via the Mission Blackboard, generates artifacts, and ultimately stages the experience for Substrate Ingestion (training the Native Tier 2 model).
 9. **Command Syntax**: `aeon "<mission_intent>"` (or `aeon pulse "<mission_intent>"`)
 
